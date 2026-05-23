@@ -1,11 +1,9 @@
-// ...existing code...
 document.addEventListener("DOMContentLoaded", () => {
-    const useSyntaxHighlighting = document.getElementById("useSyntaxHighlighting");
-    const reloadOnChange = document.getElementById("reloadOnChange");
+    const useSyntaxHighlighting = document.getElementById("use-syntax-highlighting");
+    const reloadOnChange = document.getElementById("reload-on-change");
     const properties = document.getElementById("properties");
     const saveBtn = document.getElementById("save");
 
-    // Load saved options and set the controls (provide sensible defaults)
     chrome.storage.sync.get(
         { useSyntaxHighlighting: true, reloadOnChange: true },
         (items) => {
@@ -14,7 +12,6 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     );
 
-    // Save options
     saveBtn.addEventListener("click", () => {
         const toStore = {
             useSyntaxHighlighting: Boolean(useSyntaxHighlighting?.checked),
