@@ -11,7 +11,7 @@ const node = params.get("node");
 
 const url = `${origin}${restApiPath}/${version}/${node}/properties`;
 const el = document.getElementById("properties");
-const useSyntaxHighlighting = chrome.storage.sync.get({ useSyntaxHighlighting: true }, (items) => {
+let useSyntaxHighlighting = chrome.storage.sync.get({ useSyntaxHighlighting: true }, (items) => {
 	useSyntaxHighlighting = Boolean(items?.useSyntaxHighlighting);
 });
 
