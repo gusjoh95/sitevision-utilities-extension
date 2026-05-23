@@ -16,15 +16,15 @@ export async function setProfiling(bool) {
 	const url = new URL(tab.url);
 	const origin = url.origin;
 	// Possible issue if missing access to sitepage?
-	await fetch(`${origin}/?profiling=${bool}`, {
-		credentials: "include"
-	});
-
-	// TODO, add reload as an extension-option 
-	if (!url.toString().includes("/edit")) {
-		chrome.scripting.executeScript({
-			target: { tabId: tab.id },
-			func: () => window.location.reload()
+	try {
+		const res = await fetch(`${origin}/?profiling=${bool}`, {
+			credentials: "include"
 		});
+
+		const ok = res.ok; 
+
+		return ok;
+	} catch (e) {
+		return false;
 	}
 }

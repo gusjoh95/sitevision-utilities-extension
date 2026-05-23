@@ -22,7 +22,6 @@ form.addEventListener("submit", async (event) => {
     });
 
   } catch (error) {
-    console.error("Fetch failed:", error);
 
     document.getElementById("properties-error").textContent =
       `Error: ${error.message}`;
@@ -45,11 +44,20 @@ async function initProfilingButton() {
 
   toggleProfilingCheckbox.checked = result;
 
-  toggleProfilingCheckbox.addEventListener("change", (event) => {
-  const isChecked = event.target.checked;
-  setProfiling(isChecked);
-  // Maybe better to trigger reload here rather than in setProfiling
-});
+  toggleProfilingCheckbox.addEventListener("change", async (event) => {
+    const isChecked = event.target.checked;
+    const success = await setProfiling(isChecked);
+
+    if (success) {
+      // TODO, add reload as an extension-option 
+      if (tab.url && !tab.url.toString().includes("/edit")) {
+        chrome.scripting.executeScript({
+          target: { tabId: tab.id },
+          func: () => window.location.reload()
+        });
+      }
+    }
+  });
 }
 
 initProfilingButton();
