@@ -1,6 +1,6 @@
 {
-    "name": "SV-utilities",
-    "description": "Sitevision utility addon.",
+    "name": "Sitevision utilities",
+    "description": "Utilities for Sitevision development/debugging. Largely dependant on enabled REST-API in Sitevision.",
     "version": "1.0",
     "manifest_version": 3,
     "action": {
@@ -18,8 +18,4 @@
         "scripting",
         "storage"
     ]
-    // "background": {
-    //     "service_worker": "./service_worker/index.js", // Används ej
-    //     "type": "module"
-    // }
 }
