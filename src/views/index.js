@@ -4,9 +4,10 @@ let tab = null;
 
 function initProperties() {
   const form = document.getElementById("form");
+  const input = document.getElementById("input");
+  input.focus();
   form.addEventListener("submit", async (event) => {
     event.preventDefault();
-    const input = document.getElementById("input");
 
     const version = document.querySelector(
       'input[name="radio"]:checked'
