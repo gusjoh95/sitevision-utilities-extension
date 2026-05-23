@@ -14,48 +14,67 @@ let useSyntaxHighlighting = chrome.storage.sync.get({ useSyntaxHighlighting: tru
 	useSyntaxHighlighting = Boolean(items?.useSyntaxHighlighting);
 });
 
-
-let data = null;
-try {
-	async function getJson() {
-		const url = `${origin}${restApiPath}/${version}/${node}/properties`;
-		document.title = url;
-		// CORS ERROR in firefox when fetch is performed within extension context...
-		const response = await fetch(url, {
-			credentials: "include"
-		});
-
-		if (!response.ok) {
-			const errorJson = await response.json();
-			throw new Error(`HTTP error! status: ${response.status} \nMessage: ${JSON.stringify(errorJson) || "No error message provided"}`);
-		}
-		return await response.json();
-	}
-
-
-	data = await getJson();
-
-	async function render() {
-		if (!data) {
-			throw new Error("No data to render");
-		}
-		if (useSyntaxHighlighting) {
-			el.replaceChildren(renderJSON(data));
-			el.querySelectorAll(".json-id").forEach(el => {
-				el.addEventListener("click", async () => {
-					node = el.textContent.replace(/"/g, "");
-					data = await getJson();
-					render();
+async function init() {
+	let data = null;
+	try {
+		let url = `${origin}${restApiPath}/${version}/${node}/properties`;
+		async function getJson() {
+			try {
+				url = `${origin}${restApiPath}/${version}/${node}/properties`;
+				// CORS ERROR in firefox when fetch is performed within extension context...
+				const response = await fetch(url, {
+					credentials: "include"
 				});
-			});
-		} else {
-			el.textContent = JSON.stringify(data, null, 2);
+
+				if (!response.ok) {
+					const errorJson = await response.json();
+					throw new Error(JSON.stringify(errorJson));
+				}
+				data = await response.json();
+			} catch (error) {
+				data = { error: 'Failed to fetch data.', message: error.message || 'No error message provided' };
+			}
 		}
+		async function render(fromHistory = false) {
+			try {
+				document.title = url;
+
+				if (!data) {
+					throw new Error("No data to render");
+				}
+				if (useSyntaxHighlighting) {
+					el.replaceChildren(renderJSON(data));
+					el.querySelectorAll(".json-id").forEach(el => {
+						el.addEventListener("click", async () => {
+							node = el.textContent.replace(/"/g, "");
+							await getJson();
+							render();
+						});
+					});
+				} else {
+					el.textContent = JSON.stringify(data, null, 2);
+				}
+				if (!fromHistory) {
+					history.pushState({data, url}, "");
+				}
+			} catch (error) {
+				el.textContent = `Error during rendering: ${error.message}`;
+			}
+		}
+
+		window.addEventListener("popstate", (event) => {
+			if (event.state) {
+				data = event.state.data;
+				url = event.state.url;
+				render(true);
+			}
+		});
+		await getJson();
+		render();
 	}
-
-	render();
-
+	catch (e) {
+		document.getElementById("properties").textContent = `Error: ${e.message}`;
+	}
 }
-catch (e) {
-	document.getElementById("properties").textContent = `Error: ${e.message}`;
-}
+
+init();
