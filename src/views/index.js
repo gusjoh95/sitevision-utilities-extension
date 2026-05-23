@@ -1,39 +1,41 @@
 import { getActiveTab, setProfiling } from "./api.js";
 
-const form = document.getElementById("form");
-form.addEventListener("submit", async (event) => {
-  event.preventDefault();
-  const input = document.getElementById("input");
+let tab = null;
 
-  const version = document.querySelector(
-    'input[name="radio"]:checked'
-  )?.value;
+function initProperties() {
+  const form = document.getElementById("form");
+  form.addEventListener("submit", async (event) => {
+    event.preventDefault();
+    const input = document.getElementById("input");
 
-  const node = input.value;
+    const version = document.querySelector(
+      'input[name="radio"]:checked'
+    )?.value;
 
-  const tab = await getActiveTab();
-  const origin = new URL(tab?.url).origin;
-  try {
-    chrome.windows.create({
-      url: "views/properties/properties.html?origin=" + origin + "&version=" + version + "&node=" + node,
-      type: "popup",
-      width: 1000,
-      height: 600
-    });
+    const node = input.value;
 
-  } catch (error) {
+    const origin = new URL(tab?.url).origin;
+    try {
+      chrome.windows.create({
+        url: "views/properties/properties.html?origin=" + origin + "&version=" + version + "&node=" + node,
+        type: "popup",
+        width: 1000,
+        height: 600
+      });
 
-    document.getElementById("properties-error").textContent =
-      `Error: ${error.message}`;
-  }
+    } catch (error) {
 
-});
+      document.getElementById("properties-error").textContent =
+        `Error: ${error.message}`;
+    }
+
+  });
+};
 
 
 
 async function initProfilingButton() {
   const toggleProfilingCheckbox = document.getElementById("toggle-profiling");
-  const tab = await getActiveTab();
 
   const [{ result }] = await chrome.scripting.executeScript({
     target: { tabId: tab.id },
@@ -50,8 +52,8 @@ async function initProfilingButton() {
 
     if (success) {
       // TODO, add reload as an extension-option 
-      if (tab.url && !tab.url.toString().includes("/edit")) {
-        chrome.scripting.executeScript({
+      if (tab.url && !tab.url.includes("/edit")) {
+        await chrome.scripting.executeScript({
           target: { tabId: tab.id },
           func: () => window.location.reload()
         });
@@ -60,4 +62,13 @@ async function initProfilingButton() {
   });
 }
 
-initProfilingButton();
+try {
+  tab = await getActiveTab();
+  if (!tab?.url.startsWith("http") && !tab?.url.startsWith("https")) {
+    throw new Error("Wrong protocol on active tab. Please navigate to a page with http or https protocol and try again.");
+  }
+  initProperties();
+  initProfilingButton();
+} catch (e) {
+  document.getElementById("error").textContent = `Error: ${e.message}`;
+}

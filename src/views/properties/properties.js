@@ -63,13 +63,5 @@ try {
 
 }
 catch (e) {
-	console.error("Fetch failed:", e);
 	document.getElementById("properties").textContent = `Error: ${e.message}`;
-
 }
-
-
-
-
-
-// console.log(properties);
