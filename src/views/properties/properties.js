@@ -11,23 +11,16 @@ const node = params.get("node");
 
 const url = `${origin}${restApiPath}/${version}/${node}/properties`;
 const el = document.getElementById("properties");
-const useSyntaxHighlightingToggle = document.getElementById("useSyntaxHighlighting");
-const useDummyJsonToggle = document.getElementById("useDummyJson");
+let useSyntaxHighlighting = chrome.storage.sync.get({ useSyntaxHighlighting: true }, (items) => {
+	useSyntaxHighlighting = Boolean(items.useSyntaxHighlighting);
+});
 
 document.title = url;
 
 let data = null;
 
 try {
-	async function getJson({dummy = false}) {
-		if (dummy) {
-			const response = await fetch(chrome.runtime.getURL("views/properties/dummydata/dummy.json"));
-			if (!response.ok) {
-				throw new Error(`Failed to fetch dummy JSON: ${response.statusText}`);
-			}
-			return await response.json();
-		}
-
+	async function getJson() {
 		const response = await fetch(url);
 
 		if (!response.ok) {
@@ -38,28 +31,20 @@ try {
 	}
 
 
-	data = await getJson({useDummy: useDummyJsonToggle.checked});
-	
-	async function render() {
-		
+	data = await getJson();
 
-		if (useSyntaxHighlightingToggle.checked) {
+	async function render() {
+		if (!data) {
+			throw new Error("No data to render");
+		}
+		if (useSyntaxHighlighting) {
 			el.innerHTML = renderJSON(data);
 		} else {
 			el.textContent = JSON.stringify(data, null, 2);
 		}
 	}
 
-
-	if (!data) {
-		throw new Error("Empty response body");
-	}
 	render();
-	useSyntaxHighlightingToggle.addEventListener("change", render);
-	useDummyJsonToggle.addEventListener("change", async () => {
-		data = await getJson({dummy: useDummyJsonToggle.checked});
-		render();
-	});
 
 }
 catch (e) {
