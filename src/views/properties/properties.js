@@ -1,7 +1,5 @@
 import { renderJSON } from "./renderJson.js";
 
-
-
 export let restApiPath = '/rest-api/1';
 
 const params = new URLSearchParams(window.location.search);
