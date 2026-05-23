@@ -1,6 +1,4 @@
-// import tabUrl from "./scripts/globals";
-
-import { getActiveTab } from "./api/getActiveTab.js";
+import { getActiveTab, setProfiling } from "./api.js";
 
 const form = document.getElementById("form");
 form.addEventListener("submit", async (event) => {
@@ -26,19 +24,17 @@ form.addEventListener("submit", async (event) => {
   } catch (error) {
     console.error("Fetch failed:", error);
 
-    // valfritt: visa i UI
-    document.getElementById("error-message").textContent =
+    document.getElementById("properties-error").textContent =
       `Error: ${error.message}`;
   }
 
 });
 
-const checkbox = document.getElementById("toggle-jsdebug");
+const checkbox = document.getElementById("toggle-profiling");
 
 checkbox.addEventListener("change", (event) => {
   const isChecked = event.target.checked;
-
-  console.log("Checkbox state:", isChecked);
+  setProfiling(isChecked);
 });
 
 

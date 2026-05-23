@@ -4,7 +4,7 @@
     "version": "1.0",
     "manifest_version": 3,
     "action": {
-        "default_popup": "index.html",
+        "default_popup": "views/index.html",
         "default_icon": "resources/images/icons/icon-16.png"
     },
     "icons": {

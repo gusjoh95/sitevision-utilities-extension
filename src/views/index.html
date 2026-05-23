@@ -1,27 +1,31 @@
 <html>
-
+<head>
+  <link rel="stylesheet" type="text/css" href="base.css">
+</head>
 <body>
   <h1>SV-Utilities</h1>
-  <link rel="stylesheet" type="text/css" href="index.css">
   <form id="form">
     <input type="text" id="input" placeholder="Node-id">
     <fieldset>
       <legend>Version</legend>
       <input type="radio" id="radio1" name="radio" value="1" checked>
-        <label for="radio1">Online</label><br>
+      <label for="radio1">Online</label><br>
       <input type="radio" id="radio2" name="radio" value="0">
-        <label for="radio2">Offline</label><br>
+      <label for="radio2">Offline</label><br>
     </fieldset>
     <button type="submit">Get properties</button>
   </form>
-<div>
-  <h2>Toggle Jsdebug</h2>
+  <div id="properties-error"></div>
 
-  <label>
-    <input type="checkbox" id="toggle-jsdebug">
-    Disable profiling
-  </label>
-</div>
+  <div>
+    <h2>Toggle Jsdebug</h2>
+
+    <label>
+      <input type="checkbox" id="toggle-profiling">
+      Profiling
+    </label>
+  </div>
   <script type="module" src="index.js"></script>
 </body>
+
 </html>
