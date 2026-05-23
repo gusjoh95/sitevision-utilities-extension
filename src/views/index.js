@@ -30,11 +30,26 @@ form.addEventListener("submit", async (event) => {
 
 });
 
-const checkbox = document.getElementById("toggle-profiling");
 
-checkbox.addEventListener("change", (event) => {
+
+async function initProfilingButton() {
+  const toggleProfilingCheckbox = document.getElementById("toggle-profiling");
+  const tab = await getActiveTab();
+
+  const [{ result }] = await chrome.scripting.executeScript({
+    target: { tabId: tab.id },
+    func: () =>
+      [...document.querySelectorAll("body table th")]
+        .some(th => th.textContent.trim() === "Profiling results")
+  });
+
+  toggleProfilingCheckbox.checked = result;
+
+  toggleProfilingCheckbox.addEventListener("change", (event) => {
   const isChecked = event.target.checked;
   setProfiling(isChecked);
+  // Maybe better to trigger reload here rather than in setProfiling
 });
+}
 
-
+initProfilingButton();
