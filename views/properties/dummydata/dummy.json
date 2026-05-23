@@ -1,0 +1,54 @@
+{
+  "currentUser": "anonymous",
+  "session": {
+    "id": "2.2527e253cd4677ee29112312_root",
+    "active": true,
+    "expires": null,
+    "permissions": ["read", "write", "delete"]
+  },
+  "jcr:mixinTypes": [
+    "mix:referenceable",
+    "mix:lockable",
+    "mix:somethingElse"
+  ],
+  "jcr:primaryType": "sv:root",
+  "jcr:uuid": "2.2527e29417ee2918a501b0b1_root",
+  "currentPage": "2.2527e254677ee2918a501b0b1_root",
+  "metrics": {
+    "views": 123456,
+    "ratio": 0.9876,
+    "growth": -12.34e5,
+    "flags": {
+      "beta": false,
+      "deprecated": false,
+      "experimental": true
+    }
+  },
+  "items": [
+    {
+      "id": 1,
+      "name": "Item A",
+      "tags": ["a", "b", "c"],
+      "meta": {
+        "empty": "",
+        "nullValue": null,
+        "escapedJson": "{\"fake\": true, \"nested\": {\"x\": 1}}"
+      }
+    },
+    {
+      "id": 2,
+      "name": "Item B",
+      "price": 19.99,
+      "available": false
+    }
+  ],
+  "weirdKeys": {
+    "true": "this is a string key",
+    "null": "also a key",
+    "123numberKey": "edge case",
+    "hyphen-key": "works?",
+    "colon:key": "very weird but valid JSON key"
+  },
+  "log": "User said: \"{\"broken\": json inside string}\"",
+  "bigNumber": 1.7976931348623157e+308
+}
