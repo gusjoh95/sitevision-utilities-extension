@@ -17,7 +17,7 @@ function initProperties() {
     const origin = new URL(tab?.url).origin;
     try {
       chrome.windows.create({
-        url: "views/properties/properties.html?origin=" + origin + "&version=" + version + "&node=" + node,
+        url: "/views/properties/properties.html?origin=" + origin + "&version=" + version + "&node=" + node,
         type: "popup",
         width: 1000,
         height: 600
