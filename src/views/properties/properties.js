@@ -11,8 +11,8 @@ const node = params.get("node");
 
 const url = `${origin}${restApiPath}/${version}/${node}/properties`;
 const el = document.getElementById("properties");
-let useSyntaxHighlighting = chrome.storage.sync.get({ useSyntaxHighlighting: true }, (items) => {
-	useSyntaxHighlighting = Boolean(items.useSyntaxHighlighting);
+const useSyntaxHighlighting = chrome.storage.sync.get({ useSyntaxHighlighting: true }, (items) => {
+	useSyntaxHighlighting = Boolean(items?.useSyntaxHighlighting);
 });
 
 document.title = url;
@@ -21,7 +21,10 @@ let data = null;
 
 try {
 	async function getJson() {
-		const response = await fetch(url);
+		// CORS ERROR in firefox when fetch is performed within extension context...
+		const response = await fetch(url, {
+			credentials: "include"
+		});
 
 		if (!response.ok) {
 			const errorJson = await response.json();
