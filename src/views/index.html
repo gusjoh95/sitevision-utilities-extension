@@ -2,23 +2,31 @@
 <html lang="en">
 
 <head>
+  <title>SV-Utilities</title>
   <link rel="stylesheet" type="text/css" href="base.css">
+  <link rel="stylesheet" type="text/css" href="index.css">
 </head>
 
 <body>
   <h1>SV-Utilities</h1>
-  <div id="error" style="color: red;"></div>
+  <div id="error"></div>
   <h2>Node properties</h2>
   <form id="form">
-    <input type="text" id="input" placeholder="Node-id">
     <fieldset>
       <legend>Version</legend>
       <input type="radio" id="radio1" name="radio" value="1" checked>
-      <label for="radio1">Online</label><br>
+      <label for="radio1">Online</label>
       <input type="radio" id="radio2" name="radio" value="0">
       <label for="radio2">Offline</label><br>
     </fieldset>
-    <button type="submit">Get properties</button>
+    <div class="bordered-container">
+      <input type="text" id="node-id-input" placeholder="Node-id">
+      <button type="submit" value="getProperties">Get properties</button>
+    </div>
+    <input type="hidden" id="current-page-id" value="">
+    <button type="submit" disabled value="getCurrentPage">Get current page</button>
+    <input type="hidden" id="current-user-id" value="">
+    <button type="submit" disabled value="getCurrentUser">Get current user</button>
   </form>
 
   <div>

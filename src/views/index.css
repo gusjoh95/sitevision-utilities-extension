@@ -1,0 +1,101 @@
+h1 {
+	margin: 0 0 8px 0;
+	font-size: 1.6rem;
+}
+
+h2 {
+	margin: 20px 0 8px 0;
+}
+
+#error {
+	color: red;
+}
+
+form {
+	align-items: start;
+	display: flex;
+	flex-direction: column;
+	border-radius: 0;
+	border-top: 1px solid var(--fg-color);
+	border-bottom: 1px solid var(--fg-color);
+	padding: 8px 0;
+}
+
+form * {
+	border-radius: 10px;
+}
+
+.bordered-container {
+	border: 1px solid var(--fg-color);
+	border-radius: 8px;
+	padding: 8px;
+}
+
+input[type="text"] {
+	width: 100%;
+	padding: 10px 12px;
+	border: 1px solid var(--fg-color);
+	outline: none;
+}
+
+
+fieldset,
+input,
+button {
+	margin: 4px 0 4px;
+}
+
+
+
+fieldset {
+	border-radius: 0px;
+	display: flex;
+	gap: 0;
+	align-items: center;
+	border: 0;
+	border-top: 1px solid var(--fg-color);
+}
+
+fieldset label {
+	padding: 0 6px;
+}
+
+legend {
+	padding: 0 6px;
+	font-size: 0.85rem;
+	font-weight: 600;
+}
+
+form button[type="submit"] {
+	padding: 10px 14px;
+	border-radius: 8px;
+	border: 1px solid var(--fg-color);
+	cursor: pointer;
+	font-weight: 600;
+	font-size: 0.95rem;
+	transition: transform .08s ease, box-shadow .12s ease;
+	background-color: var(--fg-color);
+	color: var(--bg-color);
+}
+
+button[disabled] {
+	opacity: 0.5;
+	cursor: not-allowed !important;
+}
+
+label {
+	font-size: 0.95rem;
+	display: inline-flex;
+	gap: 8px;
+	align-items: center;
+	cursor: pointer;
+
+}
+
+input[type="checkbox"],
+input[type="radio"] {
+	width: 16px;
+	height: 16px;
+	margin: 0;
+	cursor: pointer;
+}

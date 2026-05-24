@@ -1,3 +1,6 @@
+html, body{
+  width: unset;
+}
 #properties {
   font-family: monospace;
   background: #0f1115;
@@ -5,12 +8,10 @@
   padding: 16px;
   border-radius: 8px;
   line-height: 1.25;
-  /* display: flexbox; */
   min-width: 100%;
   box-sizing: border-box;
   display: inline-block;
   font-size: 16px;
-
 }
 
 #properties>span {
