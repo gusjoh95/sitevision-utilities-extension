@@ -1,0 +1,14 @@
+node_modules/
+
+# Ignore OS and editor files
+.DS_Store
+.vscode/
+
+# Build / distribution artifacts
+dist/
+build/
+out/
+release/
+*.zip
+*.crx
+*.pem

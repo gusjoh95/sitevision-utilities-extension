@@ -1,0 +1,6 @@
+{
+  "devDependencies": {
+    "chrome-types": "^0.1.429"
+  },
+  "type":"module"
+}
