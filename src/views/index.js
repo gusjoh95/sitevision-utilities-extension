@@ -1,4 +1,4 @@
-import { getActiveTab, setProfiling } from "./api.js";
+import { getActiveTab, getOptions, setProfiling } from "./api.js";
 
 let tab = null;
 
@@ -10,39 +10,48 @@ async function getPageContext() {
   const [res] = await chrome.scripting.executeScript({
     target: { tabId: tab.id },
     world: "MAIN",
-    func: () => window.sv?.PageContext
+    func: () => window['sv']?.PageContext
   });
 
   return res?.result;
 }
 
 async function initProperties() {
-  const form = document.getElementById("form");
-  const nodeIdInput = document.getElementById("node-id-input");
+  const form = document.querySelector("#form");
+
+  /** @type {HTMLInputElement} */
+  const nodeIdInput = document.querySelector("#node-id-input");
   nodeIdInput.focus();
 
+  /** @type {HTMLInputElement} */
   const currentPageId = document.querySelector("#current-page-id");
+  /** @type {HTMLInputElement} */
   const currentUserId = document.querySelector("#current-user-id");
   const { pageId, userIdentityId } = await getPageContext();
-  if(pageId) {
+  if (pageId) {
     currentPageId.value = pageId;
     document.querySelector("button[type='submit'][value='getCurrentPage']").removeAttribute("disabled");
   }
 
-  if(userIdentityId) {
+  if (userIdentityId) {
     currentUserId.value = userIdentityId;
     document.querySelector("button[type='submit'][value='getCurrentUser']").removeAttribute("disabled");
   }
 
-  form.addEventListener("submit", async (event) => {
+  /** @param {SubmitEvent} event */
+  async function onPropertiesSubmit(event) {
     event.preventDefault();
 
-    const version = document.querySelector(
-      'input[name="radio"]:checked'
-    )?.value;
+
+    const version =
+      /** @type {HTMLInputElement | null} */ (
+        document.querySelector('input[name="radio"]:checked')
+      )?.value;
 
     let node = "";
-    const submitAction = event.submitter.value;
+
+    const submitter = /** @type {HTMLButtonElement | null} */ (event.submitter);
+    const submitAction = submitter?.value;
 
     switch (submitAction) {
       case "getProperties":
@@ -75,13 +84,15 @@ async function initProperties() {
         `Error: ${error.message}`;
     }
 
-  });
+  }
+  form.addEventListener("submit", onPropertiesSubmit);
 };
 
 
 
 async function initProfilingButton() {
-  const toggleProfilingCheckbox = document.getElementById("toggle-profiling");
+  /** @type {HTMLInputElement} */
+  const toggleProfilingCheckbox = document.querySelector("#toggle-profiling");
 
   const [{ result }] = await chrome.scripting.executeScript({
     target: { tabId: tab.id },
@@ -92,17 +103,19 @@ async function initProfilingButton() {
 
   toggleProfilingCheckbox.checked = result;
 
-  toggleProfilingCheckbox.addEventListener("change", async (event) => {
-    const isChecked = event.target.checked;
+  toggleProfilingCheckbox.addEventListener("change", async () => {
+    const isChecked = toggleProfilingCheckbox.checked;
     const success = await setProfiling(isChecked);
 
     if (success) {
-      // TODO, add reload as an extension-option 
       if (tab.url && !tab.url.includes("/edit")) {
-        await chrome.scripting.executeScript({
-          target: { tabId: tab.id },
-          func: () => window.location.reload()
-        });
+        const { reloadOnChange } = await getOptions();
+        if (reloadOnChange) {
+          await chrome.scripting.executeScript({
+            target: { tabId: tab.id },
+            func: () => window.location.reload()
+          });
+        }
       }
     }
   });

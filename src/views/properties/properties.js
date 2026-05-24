@@ -1,3 +1,4 @@
+import { getOptions } from "../api.js";
 import { renderJSON } from "./renderJson.js";
 
 export let restApiPath = '/rest-api/1';
@@ -10,9 +11,7 @@ let node = params.get("node");
 
 
 const el = document.getElementById("properties");
-let useSyntaxHighlighting = chrome.storage.sync.get({ useSyntaxHighlighting: true }, (items) => {
-	useSyntaxHighlighting = Boolean(items?.useSyntaxHighlighting);
-});
+const { useSyntaxHighlighting } = await getOptions();
 
 async function init() {
 	let data = null;
@@ -55,7 +54,7 @@ async function init() {
 					el.textContent = JSON.stringify(data, null, 2);
 				}
 				if (!fromHistory) {
-					history.pushState({data, url}, "");
+					history.pushState({ data, url }, "");
 				}
 			} catch (error) {
 				el.textContent = `Error during rendering: ${error.message}`;
