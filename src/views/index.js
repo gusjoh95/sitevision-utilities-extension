@@ -127,12 +127,16 @@ async function initParamButtons() {
     const [{ result }] = await chrome.scripting.executeScript({
       target: { tabId: tab.id },
       func: () => {
-        // sv-template-assets indicate no minification (jsdebug = false)
-        const selector = 'script[src$="/sv-template-asset.js"], link[href$="/sv-template-asset.css"]';
-        return document.querySelectorAll(selector)?.length === 0;
+        // TODO Improve
+        const minifiedTemplateAssetsSelector = 'script[src$="/sv-template-asset.js"], link[href$="/sv-template-asset.css"]';
+        const minifiedWebappAssetsSelector = 'script[src$="/webapp-assets.js"]';
+        const count1 = document.querySelectorAll(minifiedTemplateAssetsSelector)?.length;
+        const count2 = document.querySelectorAll(minifiedWebappAssetsSelector)?.length;
+        const minifiedAssetCount = count1 + count2;
+        // Jsdebug is considered on if no minified assets
+        return  minifiedAssetCount === 0;
       }
     });
-    console.log(result);
     return result;
   }
 
