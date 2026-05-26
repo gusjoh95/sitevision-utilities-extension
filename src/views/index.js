@@ -48,7 +48,7 @@ async function initProperties() {
         document.querySelector('input[name="radio"]:checked')
       )?.value;
 
-    let node = "";
+    let node;
 
     const submitter = /** @type {HTMLButtonElement | null} */ (event.submitter);
     const submitAction = submitter?.value;
