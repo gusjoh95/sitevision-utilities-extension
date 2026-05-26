@@ -5,5 +5,8 @@
     "eslint": "^10.4.0",
     "globals": "^17.6.0"
   },
-  "type": "module"
+  "type": "module",
+  "scripts": {
+    "lint": "eslint src"
+  }
 }
