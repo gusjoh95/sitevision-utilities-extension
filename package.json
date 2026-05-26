@@ -1,6 +1,9 @@
 {
   "devDependencies": {
-    "chrome-types": "^0.1.429"
+    "@eslint/js": "^10.0.1",
+    "chrome-types": "^0.1.429",
+    "eslint": "^10.4.0",
+    "globals": "^17.6.0"
   },
-  "type":"module"
+  "type": "module"
 }
