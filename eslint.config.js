@@ -8,7 +8,21 @@ export default defineConfig([
     plugins: { js },
     extends: ["js/recommended"],
     languageOptions: {
-      globals: globals.browser
+      globals: {
+        ...globals.browser,
+        chrome: "readonly"
+      }
+    },
+    rules: {
+      "no-unused-vars": "warn",
+      "no-undef": "error",
+      "no-restricted-syntax": [
+        "error",
+        {
+          "selector": "ImportDeclaration[source.value=/^\\.\\/.*(?<!\\.js)$/]",
+          "message": "Relative imports must include .js extension"
+        }
+      ]
     }
-  },
+  }
 ]);
