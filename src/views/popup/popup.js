@@ -1,4 +1,4 @@
-import { getActiveTab, getOptions, updateSessionWithParam } from "./api.js";
+import { getActiveTab, getOptions, updateSessionWithParam } from "../shared/api.js";
 
 let tab = null;
 

@@ -29,7 +29,7 @@ export async function updateSessionWithParam(param, value) {
 	try {
 		const results = await chrome.scripting.executeScript({
 			target: { tabId: tab.id },
-			func: async (urlToFetch) => {
+			func: async (/** @type {string} */ urlToFetch) => {
 				try {
 					const r = await fetch(urlToFetch, {
 						method: "GET",
@@ -44,7 +44,7 @@ export async function updateSessionWithParam(param, value) {
 		});
 
 		return Boolean(results?.[0]?.result);
-	} catch (e) {
+	} catch {
 		return false;
 	}
 }

@@ -1,4 +1,4 @@
-import { getOptions } from "../api.js";
+import { getOptions } from "../shared/api.js";
 import { renderJSON } from "./renderJson.js";
 
 export let restApiPath = '/rest-api/1';

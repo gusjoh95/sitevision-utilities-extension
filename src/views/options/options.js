@@ -1,4 +1,4 @@
-import { getOptions, setOptions } from "../api.js";
+import { getOptions, setOptions } from "../shared/api.js";
 
 document.addEventListener("DOMContentLoaded", async () => {
     /** @type {HTMLInputElement | null} */
