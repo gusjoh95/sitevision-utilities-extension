@@ -1,4 +1,4 @@
-import { getOptions, setOptions } from "../shared/api.js";
+import { getOptions, highlightJson, setOptions } from "../shared/api.js";
 
 document.addEventListener("DOMContentLoaded", async () => {
     /** @type {HTMLInputElement | null} */
@@ -38,4 +38,13 @@ document.addEventListener("DOMContentLoaded", async () => {
 
     };
     saveBtn.addEventListener("click", handleSave);
+
+    /** @type {HTMLDetailsElement} */
+    const expandable = document.querySelector("#expandable");
+    expandable.addEventListener("toggle", async () => {
+        if (expandable.open) {
+            const dummyJson = await fetch(chrome.runtime.getURL("views/options/dummydata/dummy.json"));
+            expandable.querySelector(".json-holder pre").replaceChildren(highlightJson(await dummyJson.json()));
+        }
+    });
 });

@@ -1,12 +1,12 @@
 import { getOptions } from "../shared/api.js";
-import { renderJSON } from "./renderJson.js";
+import { highlightJson } from "../shared/api.js";
 
 // Constants
 export const restApiPath = '/rest-api/1';
 
 // Global Configuration
 const { useSyntaxHighlighting } = await getOptions();
-const el = document.getElementById("properties");
+const el = document.querySelector(".json-holder pre");
 
 /**
  * 1. STATE & HISTORY MANAGEMENT
@@ -72,7 +72,7 @@ function renderUI(data, state) {
     return;
   }
 
-  el.replaceChildren(renderJSON(data));
+  el.replaceChildren(highlightJson(data));
 
   el.querySelectorAll(".json-id").forEach(item => {
     item.addEventListener("click", () => {

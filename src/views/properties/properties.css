@@ -1,10 +1,8 @@
 html, body{
   width: unset;
 }
-#properties {
+.json-holder pre {
   font-family: monospace;
-  background: #0f1115;
-  color: #d6deeb;
   padding: 16px;
   border-radius: 8px;
   line-height: 1.25;
@@ -12,42 +10,4 @@ html, body{
   box-sizing: border-box;
   display: inline-block;
   font-size: 16px;
-}
-
-#properties>span {
-  white-space: pre;
-}
-
-.json-key {
-  color: #82aaff;
-}
-
-.json-string {
-  color: #c3e88d;
-}
-
-.json-primitive {
-  color: #1f4581;
-}
-
-.json-boolean {
-  color: #ffcb6b;
-}
-
-.json-number {
-  color: #f78c6c;
-}
-
-.json-null {
-  color: #676e95;
-}
-
-/* ID highlight */
-.json-id {
-  background: rgba(255, 83, 112, 0.15);
-  color: #ff5370;
-
-  padding: 1px 4px;
-  border-radius: 4px;
-  cursor: pointer;
 }

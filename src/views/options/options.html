@@ -1,28 +1,39 @@
 <!DOCTYPE html>
 <html>
-  <head>
-    <title>Options</title>
-		<link rel="stylesheet" href="./../shared/base.css">
 
-  </head>
-  <body>
-		<h2>Properties</h2>
-    <label>
-      <input type="checkbox" id="use-syntax-highlighting">
-      Highlight JSON (also enables sitevision-node traversal in properties view)
-    </label>
-		<h2>Session parameters </h2>
-			<label>
-      <input type="checkbox" id="reload-on-change">
-      Reload page on change (unless URL contains <i>/edit</i>)
-    </label>
+<head>
+  <title>Options</title>
+  <link rel="stylesheet" href="./../shared/base.css">
+  <link rel="stylesheet" href="./../shared/jsonTheme.css">
 
-		<br>
-		<br>
-		<button id="save" disabled>Save</button>
-    <pre id="properties"></pre>
+</head>
+
+<body>
+  <h2>Properties</h2>
+  <label>
+    <input type="checkbox" id="use-syntax-highlighting">
+    Highlight JSON (also enables sitevision-node traversal in properties view)
+  </label>
+  <details id="expandable" name="Json test">
+    <summary>Theme settings</summary>
+    <div class="json-holder">
+      <pre>
+      </pre>
+    </div>
+  </details>
+  <h2>Session parameters</h2>
+  <label>
+    <input type="checkbox" id="reload-on-change">
+    Reload page on change (unless URL contains <i>/edit</i>)
+  </label>
+
+  <br>
+  <br>
+  <button id="save" disabled>Save</button>
+  <pre id="properties"></pre>
 
 
-    <script type="module" src="options.js"></script>
-  </body>
+  <script type="module" src="options.js"></script>
+</body>
+
 </html>

@@ -1,0 +1,37 @@
+.json-holder pre {
+  background: #0f1115;
+  color: #d6deeb;
+}
+
+.json-key {
+	color: #82aaff;
+}
+
+.json-string {
+	color: #c3e88d;
+}
+
+.json-primitive {
+	color: #1f4581;
+}
+
+.json-boolean {
+	color: #ffcb6b;
+}
+
+.json-number {
+	color: #f78c6c;
+}
+
+.json-null {
+	color: #676e95;
+}
+
+/* ID highlight */
+.json-id {
+	padding: 1px 4px;
+	border-radius: 4px;
+	cursor: pointer;
+	background: rgba(255, 83, 112, 0.15);
+	color: #ff5370;
+}
