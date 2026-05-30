@@ -1,13 +1,25 @@
+:root {
+    --black--dark: #0f1115;
+    --black: #333;
+    --white--light: #fff;
+    --white: #e6e6e6;
+    --border-radius: 8px;
+}
+
 @media (prefers-color-scheme: light) {
     :root {
-        --bg-color: #fff;
-        --fg-color: #333;
+        --bg-color--dark: var(--white--light);
+        --bg-color: var(--white);
+        --fg-color: var(--black);
+        --fg-color--light: var(--black--dark);
     }
 }
 @media (prefers-color-scheme: dark) {
     :root {
-        --bg-color: #333;
-        --fg-color: #fff;
+        --bg-color--dark: var(--black--dark);
+        --bg-color: var(--black);
+        --fg-color: var(--white);
+        --fg-color--light: var(--white--light);
     }
 }
 
@@ -31,4 +43,3 @@ body {
     background-color: var(--bg-color);
     color: var(--fg-color);
 }
-

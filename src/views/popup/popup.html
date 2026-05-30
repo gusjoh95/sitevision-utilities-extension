@@ -11,7 +11,7 @@
   <h1>SV-Utilities</h1>
   <div id="error"></div>
   <h2>Node properties</h2>
-  <form id="form">
+  <form id="properties-form">
     <fieldset>
       <legend>Version</legend>
       <input type="radio" id="radio1" name="radio" value="1" checked>
@@ -19,14 +19,16 @@
       <input type="radio" id="radio2" name="radio" value="0">
       <label for="radio2">Offline</label><br>
     </fieldset>
-    <div class="bordered-container">
+    <div class="properties-search">
       <input type="text" id="node-id-input" placeholder="Node-id">
-      <button type="submit" value="getProperties">Get properties</button>
+      <button type="submit" value="getProperties">&#x1F50E;&#xFE0E;</button>
     </div>
-    <input type="hidden" id="current-page-id" value="">
-    <button type="submit" disabled value="getCurrentPage">Get current page</button>
-    <input type="hidden" id="current-user-id" value="">
-    <button type="submit" disabled value="getCurrentUser">Get current user</button>
+    <div class="flex-row">
+      <input type="hidden" id="current-page-id" value="">
+      <button type="submit" disabled value="getCurrentPage">Current page</button>
+      <input type="hidden" id="current-user-id" value="">
+      <button type="submit" disabled value="getCurrentUser">Current user</button>
+    </div>
   </form>
 
   <div>
@@ -43,6 +45,9 @@
       <input type="checkbox" id="toggle-slimrender">
       ?slimRender=true
     </label>
+  </div>
+  <div id="cookie-consent-wrapper">
+    <h2>Consent cookie</h2>
   </div>
   <script type="module" src="popup.js"></script>
 </body>

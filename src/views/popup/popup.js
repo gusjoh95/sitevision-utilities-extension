@@ -1,4 +1,4 @@
-import { getActiveTab, getOptions, updateSessionWithParam } from "../shared/api.js";
+import { getActiveTab, registerCurrentTabChangeListener, reloadCurrentTab, updateSessionWithParam } from "../shared/api.js";
 
 let tab = null;
 
@@ -17,7 +17,7 @@ async function getPageContext() {
 }
 
 async function initProperties() {
-  const form = document.querySelector("#form");
+  const form = document.getElementById("properties-form");
 
   /** @type {HTMLInputElement} */
   const nodeIdInput = document.querySelector("#node-id-input");
@@ -102,18 +102,6 @@ async function initParamButtons() {
   /** @type {HTMLInputElement} */
   const toggleSlimrenderCheckbox = document.querySelector("#toggle-slimrender");
 
-  async function reloadCurrentTab(respectOption = true) {
-    if (tab.url && !tab.url.includes("/edit")) {
-      const { reloadOnChange } = respectOption ? await getOptions() : { reloadOnChange: true };
-      if (reloadOnChange) {
-        await chrome.scripting.executeScript({
-          target: { tabId: tab.id },
-          func: () => window.location.reload()
-        });
-      }
-    }
-  }
-
   async function getProfilingState() {
     const [{ result }] = await chrome.scripting.executeScript({
       target: { tabId: tab.id },
@@ -135,7 +123,7 @@ async function initParamButtons() {
         const count2 = document.querySelectorAll(minifiedWebappAssetsSelector)?.length;
         const minifiedAssetCount = count1 + count2;
         // Jsdebug is considered on if no minified assets
-        return  minifiedAssetCount === 0;
+        return minifiedAssetCount === 0;
       }
     });
     return result;
@@ -160,7 +148,7 @@ async function initParamButtons() {
     }
   });
 
-    toggleJsDebugCheckbox.addEventListener("change", async () => {
+  toggleJsDebugCheckbox.addEventListener("change", async () => {
     const success = await updateSessionWithParam(PARAMS.jsdebug, toggleJsDebugCheckbox.checked);
     if (success) {
       reloadCurrentTab()
@@ -175,13 +163,99 @@ async function initParamButtons() {
   });
 }
 
+async function initCookieConsent() {
+  const tab = await getActiveTab();
+  const url = new URL(tab.url);
+  const origin = `${url.protocol}//${url.hostname}/`;
+
+  const cookieName = 'sv-cookie-consent';
+
+  async function readSitevisionCookie() {
+    chrome.cookies.get({
+      url: tab.url,
+      name: cookieName
+    }, (cookie) => {
+      const wrapper = document.getElementById("cookie-consent-wrapper");
+      if (cookie) {
+        /* 
+        If I've understood correctly there are potentially two base64 encoded parts in the cookie, separated by a dot.
+        The dot separates consented cookie and denied. I.e "Accept all" ends with a dot. 
+        */
+        const parts = cookie.value.split('.');
+        const accepted = atob(parts[0] || '');
+        const denied = atob(parts[1] || '');
+
+        const acceptedCookieArr = accepted.split(',').filter(Boolean);
+        const deniedCookieArr = denied.split(',').filter(Boolean);
+        const acceptedPre = document.createElement("pre");
+        acceptedPre.textContent = acceptedCookieArr.join('\n');
+        const deniedPre = document.createElement("pre");
+        deniedPre.textContent = deniedCookieArr.join('\n');
+        wrapper.appendChild(document.createTextNode(`Accepted cookies (${acceptedCookieArr.length}):`));
+        wrapper.appendChild(acceptedPre);
+        wrapper.appendChild(document.createTextNode(`Denied cookies (${deniedCookieArr.length}):`));
+        wrapper.appendChild(deniedPre);
+
+        const deleteConsentCookieBtn = document.createElement("button");
+        deleteConsentCookieBtn.textContent = "Delete consent cookie";
+        wrapper.appendChild(deleteConsentCookieBtn);
+        deleteConsentCookieBtn.addEventListener("click", () => {
+          chrome.cookies.remove({
+            url: tab.url,
+            name: cookieName
+          }, async (details) => {
+            console.log(`Deleted cookie: ${details}`);
+            reloadCurrentTab(false);
+          });
+        });
+      } else {
+        wrapper.appendChild(document.createTextNode(`Cookie "${cookieName}" not found`));
+      }
+    });
+  }
+  async function requestCookiePermission() {
+    chrome.permissions.request({
+      permissions: ['cookies'],
+      origins: [origin]
+    }, (granted) => {
+      if (granted) {
+        readSitevisionCookie();
+      } else {
+        console.log("User denied cookie permission.");
+      }
+    });
+  }
+
+  chrome.permissions.contains({ permissions: ['cookies'], origins: [origin] }, (hasPermission) => {
+    if (hasPermission) {
+      readSitevisionCookie();
+    } else {
+      const consentWrapper = document.getElementById("cookie-consent-wrapper");
+      const promptBtn = document.createElement("button");
+      promptBtn.id = "cookie-consent-prompt";
+      promptBtn.textContent = `Host permission to read "${cookieName}" required`;
+      consentWrapper.appendChild(promptBtn);
+
+      promptBtn.addEventListener("click", async () => {
+        await requestCookiePermission().then(() => {
+          promptBtn.remove();
+        });
+      });
+    }
+  });
+}
+
 try {
   tab = await getActiveTab();
   if (!tab?.url.startsWith("http") && !tab?.url.startsWith("https")) {
     throw new Error("Wrong protocol on active tab. Please navigate to a page with http or https protocol and try again.");
   }
+  // Add check if sitevision site?
   initProperties();
   initParamButtons();
+  initCookieConsent();
+  registerCurrentTabChangeListener();
+
 } catch (e) {
   document.getElementById("error").textContent = `Error: ${e.message}`;
 }
