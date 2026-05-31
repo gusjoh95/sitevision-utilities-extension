@@ -1,0 +1,8 @@
+pre {
+	border-radius: var(--border-radius);
+	width: max-content;
+	padding: 8px;
+}
+summary:hover {
+	cursor: pointer;
+}

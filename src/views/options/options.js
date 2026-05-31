@@ -1,4 +1,4 @@
-import { getOptions, highlightJson, setOptions } from "../shared/api.js";
+import { getOptions, highlightJson, setOptions, assignJsonTheme } from "../shared/api.js";
 
 document.addEventListener("DOMContentLoaded", async () => {
     /** @type {HTMLInputElement | null} */
@@ -8,13 +8,42 @@ document.addEventListener("DOMContentLoaded", async () => {
     /** @type {HTMLPreElement} */
     const properties = document.querySelector("#properties");
 
+    /** @type {HTMLSelectElement} */
+    const dropdown = document.querySelector("#theme-dropdown");
+
     /** @type {HTMLButtonElement} */
     const saveBtn = document.querySelector("#save");
+
+    assignJsonTheme(document.querySelector("#json-theme"));
 
     try {
         const opts = await getOptions();
         useSyntaxHighlighting.checked = Boolean(opts.useSyntaxHighlighting);
         reloadOnChange.checked = Boolean(opts.reloadOnChange);
+        const jsonTheme = opts?.jsonTheme || "";
+        try {
+            const jsonUrl = chrome.runtime.getURL("views/shared/json-themes/themes.json");
+            const response = await fetch(jsonUrl);
+            const themes = await response.json();
+
+            themes.forEach(theme => {
+                const option = document.createElement("option");
+                option.value = theme.file;
+                option.selected = (theme.file === jsonTheme);
+                option.textContent = theme.name;
+                dropdown.appendChild(option);
+            });
+        } catch (error) {
+            console.error("Failed to load themes", error);
+        }
+        dropdown.addEventListener("change", () => {
+            const selectedTheme = dropdown.value || 'default.css';
+            /** @type {HTMLLinkElement} */
+            const themeLink = document.querySelector("#json-theme");
+            themeLink.href = chrome.runtime.getURL(`views/shared/json-themes/${selectedTheme}`);
+        });
+
+
         saveBtn.removeAttribute('disabled');
     } catch {
         properties.textContent = "Failed to load options";
@@ -24,7 +53,8 @@ document.addEventListener("DOMContentLoaded", async () => {
         try {
             const toStore = {
                 useSyntaxHighlighting: Boolean(useSyntaxHighlighting?.checked),
-                reloadOnChange: Boolean(reloadOnChange?.checked)
+                reloadOnChange: Boolean(reloadOnChange?.checked),
+                jsonTheme: String(dropdown.value),
             };
             saveBtn.setAttribute('disabled', '')
             await setOptions(toStore);
@@ -47,4 +77,6 @@ document.addEventListener("DOMContentLoaded", async () => {
             expandable.querySelector(".json-holder pre").replaceChildren(highlightJson(await dummyJson.json()));
         }
     });
+
+
 });

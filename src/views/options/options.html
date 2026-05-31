@@ -4,7 +4,8 @@
 <head>
   <title>Options</title>
   <link rel="stylesheet" href="./../shared/base.css">
-  <link rel="stylesheet" href="./../shared/jsonTheme.css">
+  <link rel="stylesheet" type="text/css" href="options.css">
+  <link id="json-theme" href="./../shared/json-themes/default.css" rel="stylesheet">
 
 </head>
 
@@ -14,8 +15,18 @@
     <input type="checkbox" id="use-syntax-highlighting">
     Highlight JSON (also enables sitevision-node traversal in properties view)
   </label>
-  <details id="expandable" name="Json test">
-    <summary>Theme settings</summary>
+  <br>
+  <br>
+  <div>
+    <label for="theme-dropdown">Choose a theme:</label>
+    <br>
+    <select name="Theme" id="theme-dropdown">
+      <option value="">Select overriding theme</option>
+    </select>
+    <br>
+  </div>
+  <details id="expandable">
+    <summary>Theme preview</summary>
     <div class="json-holder">
       <pre>
       </pre>

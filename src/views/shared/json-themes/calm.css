@@ -1,0 +1,35 @@
+.json-holder pre {
+  background: #fdf6e3;
+  color: #586e75;
+}
+
+.json-key {
+  color: #a37a00;
+  font-weight: bold;
+}
+
+.json-string {
+  color: #718300;
+}
+
+.json-primitive {
+  color: #6468bd;
+}
+
+.json-boolean {
+  color: #c24c1a;
+}
+
+.json-number {
+  color: #d33682;
+}
+
+.json-null {
+  color: #93a1a1;
+}
+
+.json-id {
+	text-decoration: underline;
+  cursor: pointer;
+  color: #dc322f;
+}

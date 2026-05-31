@@ -1,4 +1,4 @@
-import { getOptions } from "../shared/api.js";
+import { assignJsonTheme, getOptions } from "../shared/api.js";
 import { highlightJson } from "../shared/api.js";
 
 // Constants
@@ -141,6 +141,7 @@ window.addEventListener("popstate", (event) => {
 // Entrypoint
 async function init() {
   const state = getCurrentState();
+  assignJsonTheme(document.querySelector("#json-theme"));
 
   if (!state.origin || !state.node) {
     el.textContent = "Error: Missing required URL parameters (origin/node).";

@@ -51,7 +51,8 @@ export async function updateSessionWithParam(param, value) {
 
 const DEFAULT_OPTIONS = {
   useSyntaxHighlighting: true,
-  reloadOnChange: false
+  reloadOnChange: false,
+  jsonTheme: ""
 };
 
 export async function getOptions() {
@@ -59,7 +60,8 @@ export async function getOptions() {
     chrome.storage.sync.get(DEFAULT_OPTIONS, (items) => {
       resolve({
         useSyntaxHighlighting: Boolean(items?.useSyntaxHighlighting),
-        reloadOnChange: Boolean(items?.reloadOnChange)
+        reloadOnChange: Boolean(items?.reloadOnChange),
+        jsonTheme: String(items?.jsonTheme)
       });
     });
   });
@@ -88,9 +90,22 @@ export async function setOptions(options = {}) {
 }
 
 /**
+ * Asynchronously loads and applies the user-selected JSON theme to a given link element.
+ * @param {HTMLLinkElement} linkElement - The HTML link element whose href will be updated.
+ * @returns {void}
+ */
+export function assignJsonTheme(linkElement) {
+  getOptions().then(opts => {
+    const themeFile = opts?.jsonTheme;
+    if(!themeFile) return;
+    linkElement.href = chrome.runtime.getURL(`views/shared/json-themes/${themeFile}`);
+  });
+}
+
+/**
  * Reloads the currently active tab using chrome.scripting, provided it's not in edit mode.
  * Can optionally bypass the "reloadOnChange" user setting.
- * * @param {boolean} [respectOption=true] - Whether to respect the "reloadOnChange" user option.
+ * @param {boolean} [respectOption=true] - Whether to respect the "reloadOnChange" user option.
  * @returns {Promise<void>} Resolves when the script has been executed on the tab.
  */
 export async function reloadCurrentTab(respectOption = true) {
@@ -193,3 +208,4 @@ export function registerCurrentTabChangeListener() {
     }
   });
 }
+

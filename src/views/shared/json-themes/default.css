@@ -27,9 +27,8 @@
 	color: #676e95;
 }
 
-/* ID highlight */
 .json-id {
-	padding: 1px 4px;
+  padding: 1px 4px;
 	border-radius: 4px;
 	cursor: pointer;
 	background: rgba(255, 83, 112, 0.15);

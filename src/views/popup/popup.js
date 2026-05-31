@@ -1,4 +1,4 @@
-import { getActiveTab, registerCurrentTabChangeListener, reloadCurrentTab, updateSessionWithParam } from "../shared/api.js";
+import { getActiveTab, getOptions, registerCurrentTabChangeListener, reloadCurrentTab, updateSessionWithParam } from "../shared/api.js";
 
 let tab = null;
 
@@ -72,6 +72,8 @@ async function initProperties() {
     const origin = new URL(tab?.url).origin;
     const anchorTabId = tab.id;
     try {
+      // const {useSyntaxHighlighting} = await getOptions();
+      // const windowType = useSyntaxHighlighting ? "normal" : "popup";
       chrome.windows.create({
         url: "/views/properties/properties.html?origin=" + origin + "&version=" + version + "&node=" + node + '&anchorTabId=' + anchorTabId,
         type: "popup",
@@ -250,7 +252,14 @@ try {
   if (!tab?.url.startsWith("http") && !tab?.url.startsWith("https")) {
     throw new Error("Wrong protocol on active tab. Please navigate to a page with http or https protocol and try again.");
   }
-  // Add check if sitevision site?
+  const isSitevision = await chrome.scripting.executeScript({
+    target: { tabId: tab.id },
+    world: "MAIN",
+    func: () => !!window['sv']?.PageContext
+  }).then(res => res[0]?.result);
+  if (!isSitevision) {
+    throw new Error("Active tab is not a Sitevision site. Please navigate to a Sitevision page and try again.");
+  }
   initProperties();
   initParamButtons();
   initCookieConsent();
