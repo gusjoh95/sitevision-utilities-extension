@@ -8,16 +8,17 @@ h2 {
 }
 
 #error {
+	margin-bottom: 10px;
 	color: red;
+}
+#error:empty {
+	display: none;
 }
 
 form {
 	align-items: start;
 	display: flex;
 	flex-direction: column;
-	border-top: 1px solid var(--fg-color);
-	border-bottom: 1px solid var(--fg-color);
-	padding: 8px 0;
 }
 
 form * {
@@ -42,6 +43,7 @@ fieldset,
 input,
 button {
 	margin: 4px 0 4px;
+	padding: 0;
 }
 
 
@@ -52,7 +54,7 @@ form fieldset {
 	gap: 0;
 	align-items: center;
 	border: 0;
-	border-top: 1px solid var(--fg-color);
+
 }
 
 fieldset label {
@@ -60,7 +62,6 @@ fieldset label {
 }
 
 legend {
-	padding: 0 6px;
 	font-size: 0.85rem;
 	font-weight: 600;
 }
@@ -105,6 +106,7 @@ label {
 	gap: 8px;
 	align-items: center;
 	cursor: pointer;
+	width: max-content; 
 
 }
 
@@ -129,3 +131,12 @@ pre {
 	align-items: center;
 	gap: 8px;
 }
+
+[id$="-wrapper"] {
+	border-top: 1px solid var(--fg-color);
+	padding: 6px 0 12px;
+}
+[id$="-wrapper"] h2 {
+	margin: 6px 0 6px;
+}
+
