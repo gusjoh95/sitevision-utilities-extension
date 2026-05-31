@@ -19,7 +19,7 @@ export default defineConfig([
       "no-restricted-syntax": [
         "error",
         {
-          "selector": "ImportDeclaration[source.value=/^\\.\\/.*(?<!\\.js)$/]",
+          "selector": "ImportDeclaration[source.value=/^\\.+(\\/\\.\\.+)*\\/.*(?<!\\.js)$/]",
           "message": "Relative imports must include .js extension"
         }
       ]
