@@ -24,7 +24,7 @@ export async function updateSessionWithParam(param, value) {
   const origin = url.origin;
   const reqUrl = `${origin}?${param}=${encodeURIComponent(String(Boolean(value)))}`;
 
-  // Cant figure out a way to perform request within extension context without erroneous log-entries. 
+  // Cant figure out a way to perform request within extension context without erroneous log-entries.
   // Execute the fetch within the context of the active tab as solution.
   try {
     const results = await chrome.scripting.executeScript({
@@ -193,7 +193,7 @@ export function highlightJson(input) {
 }
 
 /**
- * Reload extension popup when active tab is updated, but only after the update is complete and only if the updated tab is the active one. 
+ * Reload extension popup when active tab is updated, but only after the update is complete and only if the updated tab is the active one.
  * @returns {void} Highlighted JSON as a DocumentFragment ready for DOM insertion.
  */
 export function registerCurrentTabChangeListener() {
@@ -211,7 +211,7 @@ export function registerCurrentTabChangeListener() {
 
 /**
  * Retrieves the Sitevision PageContext object from the active tab.
- * @description Executes a script in the page's MAIN world context to access the global 
+ * @description Executes a script in the page's MAIN world context to access the global
  * page metadata object, which is inaccessible from the standard ISOLATED world.
  * @note
  * - CSP: Running in the MAIN world means the script is subject to the page's Content Security Policy.
@@ -225,7 +225,10 @@ export async function getPageContext() {
   const [res] = await chrome.scripting.executeScript({
     target: { tabId: tab.id },
     world: "MAIN",
-    func: () => window['sv']?.PageContext
+    func: () => {
+      const editFrame = document.querySelector('#content-frame')?.contentWindow;
+      return window['sv']?.PageContext || editFrame['sv']?.PageContext
+    }
   });
 
   return res?.result;
