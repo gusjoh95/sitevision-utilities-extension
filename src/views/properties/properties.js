@@ -1,4 +1,4 @@
-import { assignJsonTheme, getOptions } from "../shared/api.js";
+import { assignJsonTheme, getErrorMessage, getOptions } from "../shared/api.js";
 import { highlightJson } from "../shared/api.js";
 
 // Constants
@@ -111,13 +111,14 @@ async function navigateToNode(nextNode, cachedData = null, historyAction = "push
     renderUI(data, state);
   } catch (error) {
     let errorData;
-    if (error.message.includes("No tab with id") || error.message.includes("is not a valid tab ID")) {
+    const msg = getErrorMessage(error);
+    if (msg.includes("No tab with id") || msg.includes("is not a valid tab ID")) {
       errorData = {
         error: "Tab Disconnected",
         message: "The original website tab was closed. Please open this view again from an active page."
       };
     } else {
-      errorData = { error: "Fetch failed", message: error.message };
+      errorData = { error: "Fetch failed", message: msg };
     }
     renderUI(errorData, state);
   }

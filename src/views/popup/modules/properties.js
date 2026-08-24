@@ -1,4 +1,4 @@
-import { getPageContext, getActiveTab } from "../../shared/api.js";
+import { getPageContext, getActiveTab, getErrorMessage } from "../../shared/api.js";
 
 export async function initProperties() {
 	const form = document.getElementById("properties-form");
@@ -66,10 +66,10 @@ export async function initProperties() {
 				height: 600
 			});
 
-		} catch (error) {
-
-			document.getElementById("properties-error").textContent =
-				`Error: ${error.message}`;
+		} catch (e) {
+			const msg = getErrorMessage(e);
+			const errEl = document.getElementById("error");
+			errEl ? errEl.textContent = `Error: ${msg}` : console.error(msg);
 		}
 
 	}

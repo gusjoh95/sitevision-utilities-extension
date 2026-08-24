@@ -1,4 +1,4 @@
-import { getOptions, highlightJson, setOptions, assignJsonTheme } from "../shared/api.js";
+import { getOptions, highlightJson, setOptions, assignJsonTheme, getErrorMessage } from "../shared/api.js";
 
 document.addEventListener("DOMContentLoaded", async () => {
     /** @type {HTMLInputElement | null} */
@@ -62,7 +62,8 @@ document.addEventListener("DOMContentLoaded", async () => {
             properties.textContent = JSON.stringify(toStore, null, 2);
 
         } catch (error) {
-            properties.textContent = error.message;
+            const msg = getErrorMessage(error);
+            properties.textContent = msg;
         }
         saveBtn.removeAttribute('disabled');
 

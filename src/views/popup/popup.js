@@ -1,4 +1,4 @@
-import { getActiveTab, getPageContext, registerCurrentTabChangeListener } from "../shared/api.js";
+import { getActiveTab, getErrorMessage, getPageContext, registerCurrentTabChangeListener } from "../shared/api.js";
 import { initProperties } from "./modules/properties.js";
 import { initParamButtons } from "./modules/params.js";
 import { initCookieConsent } from "./modules/cookie.js";
@@ -19,5 +19,7 @@ try {
   registerCurrentTabChangeListener();
 
 } catch (e) {
-  document.getElementById("error").textContent = `Error: ${e.message}`;
+  const msg = getErrorMessage(e);
+  const errEl = document.getElementById("error");
+  errEl ? errEl.textContent = `Error: ${msg}` : console.error(msg);
 }
