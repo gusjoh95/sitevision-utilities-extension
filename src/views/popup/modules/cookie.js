@@ -70,11 +70,15 @@ export async function initCookieConsent() {
       const consentWrapper = document.getElementById("cookie-consent-wrapper");
       const promptBtn = document.createElement("button");
       promptBtn.id = "cookie-consent-prompt";
-      promptBtn.textContent = `Host permission to read "${cookieName}" required`;
+      promptBtn.textContent = `Grant permissions`;
+      const p = document.createElement("p");
+      p.textContent = `Host permissions for ${origin}, is required to read cookies. Please grant permissions by clicking the button below.`;
+      consentWrapper.appendChild(p);
       consentWrapper.appendChild(promptBtn);
 
       promptBtn.addEventListener("click", async () => {
         await requestCookiePermission().then(() => {
+          p.remove();
           promptBtn.remove();
         });
       });
