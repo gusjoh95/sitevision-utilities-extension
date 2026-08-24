@@ -226,8 +226,10 @@ export async function getPageContext() {
     target: { tabId: tab.id },
     world: "MAIN",
     func: () => {
-      const editFrame = document.querySelector('#content-frame')?.contentWindow;
-      return window['sv']?.PageContext || editFrame['sv']?.PageContext
+      /** @type {HTMLIFrameElement} */
+      const editFrame = document.querySelector('#content-frame');
+      const editFrameWindow = editFrame?.contentWindow;
+      return window['sv']?.PageContext || editFrameWindow['sv']?.PageContext
     }
   });
 
