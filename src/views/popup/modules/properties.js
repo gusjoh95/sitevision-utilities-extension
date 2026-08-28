@@ -1,4 +1,4 @@
-import { getPageContext, getActiveTab, getErrorMessage } from "../../shared/api.js";
+import { getPageContext, getActiveTab, getErrorMessage } from "../../../api/api.js";
 
 export async function initProperties() {
 	const form = document.getElementById("properties-form");

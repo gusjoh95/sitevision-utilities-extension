@@ -1,5 +1,5 @@
-import { assignJsonTheme, getErrorMessage, getOptions } from "../shared/api.js";
-import { highlightJson } from "../shared/api.js";
+import { assignJsonTheme, getErrorMessage, getOptions } from "../../api/api.js";
+import { highlightJson } from "../../api/api.js";
 
 // Constants
 export const restApiPath = '/rest-api/1';

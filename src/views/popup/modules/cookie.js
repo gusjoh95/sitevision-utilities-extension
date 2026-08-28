@@ -1,4 +1,4 @@
-import { getActiveTab, reloadCurrentTab } from "../../shared/api.js";
+import { getActiveTab, reloadCurrentTab } from "../../../api/api.js";
 
 export async function initCookieConsent() {
   const tab = await getActiveTab();
