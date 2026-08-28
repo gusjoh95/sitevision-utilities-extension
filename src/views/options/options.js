@@ -22,7 +22,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         reloadOnChange.checked = Boolean(opts.reloadOnChange);
         const jsonTheme = opts?.jsonTheme || "";
         try {
-            const jsonUrl = chrome.runtime.getURL("views/shared/json-themes/themes.json");
+            const jsonUrl = chrome.runtime.getURL("resources/style/json-themes/themes.json");
             const response = await fetch(jsonUrl);
             const themes = await response.json();
 
@@ -40,7 +40,7 @@ document.addEventListener("DOMContentLoaded", async () => {
             const selectedTheme = dropdown.value || 'default.css';
             /** @type {HTMLLinkElement} */
             const themeLink = document.querySelector("#json-theme");
-            themeLink.href = chrome.runtime.getURL(`views/shared/json-themes/${selectedTheme}`);
+            themeLink.href = chrome.runtime.getURL(`resources/style/json-themes/${selectedTheme}`);
         });
 
 

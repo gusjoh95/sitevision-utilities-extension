@@ -9,6 +9,6 @@ export function assignJsonTheme(linkElement) {
   getOptions().then(opts => {
     const themeFile = opts?.jsonTheme;
     if (!themeFile) return;
-    linkElement.href = chrome.runtime.getURL(`views/shared/json-themes/${themeFile}`);
+    linkElement.href = chrome.runtime.getURL(`resources/style/json-themes/${themeFile}`);
   });
 }
