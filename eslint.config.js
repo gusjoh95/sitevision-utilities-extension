@@ -21,6 +21,10 @@ export default defineConfig([
         {
           "selector": "ImportDeclaration[source.value=/^\\.+(\\/\\.\\.+)*\\/.*(?<!\\.js)$/]",
           "message": "Relative imports must include .js extension"
+        },
+        {
+          "selector": "ImportDeclaration[source.value=/\\/shared\\/api\\//]",
+          "message": "Import shared API implementations through shared/api.js"
         }
       ]
     }
