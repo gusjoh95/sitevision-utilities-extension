@@ -1,4 +1,4 @@
-import { updateSessionWithParam, reloadCurrentTab, getActiveTab } from "../../../api/api.js";
+import { updateSessionWithParam, reloadCurrentTab, getActiveTab } from "../../../api/index.js";
 
 export async function initParamButtons() {
 

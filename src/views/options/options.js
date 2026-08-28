@@ -1,4 +1,4 @@
-import { getOptions, highlightJson, setOptions, assignJsonTheme, getErrorMessage } from "../../api/api.js";
+import { getOptions, highlightJson, setOptions, assignJsonTheme, getErrorMessage } from "../../api/index.js";
 
 document.addEventListener("DOMContentLoaded", async () => {
     /** @type {HTMLInputElement | null} */

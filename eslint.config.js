@@ -23,8 +23,8 @@ export default defineConfig([
           "message": "Relative imports must include .js extension"
         },
         {
-          "selector": "ImportDeclaration[source.value=/\\/api\\/(?!api\\.js$)/]",
-          "message": "Import API implementations through api/api.js"
+          "selector": "ImportDeclaration[source.value=/\\/api\\/(?!index\\.js$)/]",
+          "message": "Import API implementations through api/index.js"
         }
       ]
     }

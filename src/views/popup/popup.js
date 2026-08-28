@@ -1,4 +1,4 @@
-import { getActiveTab, getErrorMessage, getPageContext, registerCurrentTabChangeListener } from "../../api/api.js";
+import { getActiveTab, getErrorMessage, getPageContext, registerCurrentTabChangeListener } from "../../api/index.js";
 import { initProperties } from "./modules/properties.js";
 import { initParamButtons } from "./modules/params.js";
 import { initCookieConsent } from "./modules/cookie.js";
