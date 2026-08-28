@@ -24,13 +24,22 @@ export async function initCookieConsent() {
 
         const acceptedCookieArr = accepted.split(',').filter(Boolean);
         const deniedCookieArr = denied.split(',').filter(Boolean);
+
+        const acceptedHeading = document.createElement("p");
+        acceptedHeading.textContent = `Accepted cookies (${acceptedCookieArr.length}):`;
+
         const acceptedPre = document.createElement("pre");
         acceptedPre.textContent = acceptedCookieArr.join('\n');
+
+        const deniedHeading = document.createElement("p");
+        deniedHeading.textContent = `Denied cookies (${deniedCookieArr.length}):`;
+
         const deniedPre = document.createElement("pre");
         deniedPre.textContent = deniedCookieArr.join('\n');
-        wrapper.appendChild(document.createTextNode(`Accepted cookies (${acceptedCookieArr.length}):`));
+
+        wrapper.appendChild(acceptedHeading);
         wrapper.appendChild(acceptedPre);
-        wrapper.appendChild(document.createTextNode(`Denied cookies (${deniedCookieArr.length}):`));
+        wrapper.appendChild(deniedHeading);
         wrapper.appendChild(deniedPre);
 
         const deleteConsentCookieBtn = document.createElement("button");
