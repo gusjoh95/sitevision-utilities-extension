@@ -6,45 +6,43 @@
   <link rel="stylesheet" href="../../resources/style/base.css">
   <link rel="stylesheet" type="text/css" href="options.css">
   <link id="json-theme" href="../../resources/style/json-themes/default.css" rel="stylesheet">
-
 </head>
 
 <body>
-  <h2>Properties</h2>
-  <label>
-    <input type="checkbox" id="use-syntax-highlighting">
-    Highlight JSON (also enables sitevision-node traversal in properties view)
-  </label>
-  <br>
-  <br>
-  <div>
-    <label for="theme-dropdown">Choose a theme:</label>
-    <br>
-    <select name="Theme" id="theme-dropdown">
-      <option value="">Select overriding theme</option>
-    </select>
-    <br>
-  </div>
-  <details id="expandable">
-    <summary>Theme preview</summary>
-    <div class="json-holder">
-      <pre>
-      </pre>
+  <div id="error"></div>
+  <div id="properties-wrapper">
+    <h2>Properties</h2>
+    <label>
+      <input type="checkbox" id="use-syntax-highlighting">
+      Highlight JSON (also enables sitevision-node traversal in properties view)
+    </label>
+    <div>
+      <label for="theme-dropdown">JSON theme:</label>
+      <select name="Theme" id="theme-dropdown">
+        <option value="">Default</option>
+      </select>
     </div>
-  </details>
-  <h2>Session parameters</h2>
-  <label>
-    <input type="checkbox" id="reload-on-change">
-    Reload page on change (unless URL contains <i>/edit</i>)
-  </label>
-
-  <br>
-  <br>
-  <button id="save" disabled>Save</button>
-  <pre id="properties"></pre>
-
-
+    <div>
+      <details id="expandable">
+        <summary>Theme preview</summary>
+        <div class="json-holder">
+          <pre>
+        </pre>
+        </div>
+      </details>
+    </div>
+  </div>
+  <div id="session-params-wrapper">
+    <h2>Session parameters</h2>
+    <label>
+      <input type="checkbox" id="reload-on-change">
+      <span>Reload page when changing parameter (unless URL contains <i>/edit</i>)</span>
+    </label>
+  </div>
+  <div id="save-wrapper">
+    <button id="save" disabled>Save</button>
+    <pre id="properties"></pre>
+  </div>
   <script type="module" src="options.js"></script>
 </body>
-
 </html>
