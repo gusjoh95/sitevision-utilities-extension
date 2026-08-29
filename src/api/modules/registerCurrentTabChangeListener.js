@@ -1,18 +1,22 @@
 import { getActiveTab } from "./getActiveTab.js";
 
 /**
- * Reload extension popup when active tab is updated, but only after the update is complete and only if the updated tab is the active one.
- * @returns {void} Highlighted JSON as a DocumentFragment ready for DOM insertion.
+ * Register a callback for active-tab update completion.
+ * The callback is invoked once the updated tab is still the active tab and the load cycle is complete.
+ * @param {() => void | Promise<void>} [onTabComplete] Optional function to call after the tab has finished reloading.
+ * @returns {void}
  */
-export function registerCurrentTabChangeListener() {
+export function registerCurrentTabChangeListener(onTabComplete) {
   chrome.tabs.onUpdated.addListener(async (tabId, changeInfo) => {
     const activeTab = await getActiveTab();
+    // Unsure why this doesnt fail in firefox.
     if (!activeTab) return;
 
-    // Wait for the tab update to complete and check if the updated tab is the active one before reloading the popup
+    // Wait for the tab update to complete and check if the updated tab is the active one before executing the callback.
     if (tabId === activeTab.id && changeInfo.status === 'complete') {
-      console.log("Reloading popup due to active tab update...");
-      window.location.reload();
+      if (typeof onTabComplete === 'function') {
+        await onTabComplete();
+      }
     }
   });
 }

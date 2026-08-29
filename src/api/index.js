@@ -1,4 +1,5 @@
 export { getActiveTab } from "./modules/getActiveTab.js";
+export { isFirefox } from "./modules/isFirefox.js";
 export { updateSessionWithParam } from "./modules/updateSessionWithParam.js";
 export { reloadCurrentTab } from "./modules/reloadCurrentTab.js";
 export { registerCurrentTabChangeListener } from "./modules/registerCurrentTabChangeListener.js";
