@@ -1,6 +1,7 @@
 # Sitevision Utilities Extension
 
-A lightweight browser extension for Sitevision developers providing debugging and development utilities. Supports Chromium (Chrome, Edge, Brave) and Firefox using Manifest V3 with no build step required.
+A lightweight browser extension for [Sitevision](https://sitevision.net/) developers providing debugging and development utilities.  
+Supports Chromium (Chrome, Edge, Brave) and Firefox using Manifest V3 with no build step required.
 
 ## Contributing
 
@@ -8,11 +9,11 @@ For contribution guidelines and project direction, see [CONTRIBUTING.md](CONTRIB
 
 ## What the extension does
 
-The add-on is centered around the views in `src/views` and a small shared API layer in `src/api`. The main purpose is to make Sitevision debugging and inspection easier without leaving the browser.
+The extension is centered around the views in `src/views` and a small shared API layer in `src/api`.
 
-- **Node properties:** From the popup, the user can inspect the current page, the current user (when available), or a manually supplied node id. The add-on opens a dedicated properties view, fetches the Sitevision JSON for that node, and lets the user navigate between referenced node ids directly in the result.
+- **Node properties:** From the popup, the user can inspect the current page, the current user (when available), or a manually supplied node id. The extension opens a dedicated properties view, fetches node properties from the Sitevision REST API, and lets the user navigate between referenced node ids directly in the result. For more information about the Sitevision API used here, see the [REST API documentation](https://developer.sitevision.se/docs/rest-api/model-rest-api).
 - **Session parameters:** The popup can toggle Sitevision session flags such as `profiling`, `jsdebug`, and `slimRender`. Changing either flag triggers a background request, and the active page is reloaded afterward when that behavior is enabled in settings.
-- **Consent cookie inspection:** The add-on can read the Sitevision consent cookie, decode the accepted and denied cookie categories, and display them in a readable format. This function requires additional permissions.
+- **Consent cookie inspection:** The extension can read the Sitevision consent cookie, decode the accepted and denied cookie categories, and display them in a readable format. This function requires additional permissions.
 
 The extension is split into a few focused views:
 
