@@ -1,10 +1,10 @@
-export { getActiveTab } from "./modules/getActiveTab.js";
-export { isFirefox } from "./modules/isFirefox.js";
-export { updateSessionWithParam } from "./modules/updateSessionWithParam.js";
-export { reloadCurrentTab } from "./modules/reloadCurrentTab.js";
-export { registerCurrentTabChangeListener } from "./modules/registerCurrentTabChangeListener.js";
-export { getOptions, setOptions } from "./modules/options.js";
 export { assignJsonTheme } from "./modules/assignJsonTheme.js";
+export { getActiveTab } from "./modules/getActiveTab.js";
+export { getErrorMessage } from "./modules/getErrorMessage.js";
 export { getPageContext } from "./modules/getPageContext.js";
 export { highlightJson } from "./modules/highlightJson.js";
-export { getErrorMessage } from "./modules/getErrorMessage.js";
+export { isFirefox } from "./modules/isFirefox.js";
+export { getOptions, setOptions } from "./modules/options.js";
+export { registerCurrentTabChangeListener } from "./modules/registerCurrentTabChangeListener.js";
+export { reloadCurrentTab } from "./modules/reloadCurrentTab.js";
+export { updateSessionWithParam } from "./modules/updateSessionWithParam.js";

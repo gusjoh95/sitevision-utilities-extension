@@ -1,7 +1,7 @@
-import { getActiveTab, getErrorMessage, getPageContext, registerCurrentTabChangeListener, isFirefox } from "../../api/index.js";
-import { initProperties } from "./modules/properties.js";
-import { initParamButtons } from "./modules/params.js";
+import { getActiveTab, getErrorMessage, getPageContext, isFirefox, registerCurrentTabChangeListener } from "../../api/index.js";
 import { initCookieConsent } from "./modules/cookie.js";
+import { initParamButtons } from "./modules/params.js";
+import { initProperties } from "./modules/properties.js";
 
 const appEl = document.getElementById("app");
 const initialHTML = appEl ? appEl.innerHTML : "";

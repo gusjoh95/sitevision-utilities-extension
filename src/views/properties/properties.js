@@ -1,5 +1,4 @@
-import { assignJsonTheme, getErrorMessage, getOptions } from "../../api/index.js";
-import { highlightJson } from "../../api/index.js";
+import { assignJsonTheme, getErrorMessage, getOptions, highlightJson } from "../../api/index.js";
 
 // Constants
 export const restApiPath = '/rest-api/1';
