@@ -29,26 +29,33 @@ export function renderUI(data, state) {
   }
 
   el.replaceChildren(highlightJson(data));
+}
 
-  el.querySelectorAll(".json-id").forEach(item => {
-    item.addEventListener("click", () => {
-      const nextNode = item.textContent.replace(/"/g, "");
-      navigateToNode(nextNode, null, "push");
+if (useSyntaxHighlighting) {
+  // Event Delegation: Set up click listener once on the parent container
+  const jsonHolder = document.querySelector(".json-holder pre");
+  if (jsonHolder) {
+    jsonHolder.addEventListener("click", (event) => {
+      const target = event.target.closest(".json-id");
+      if (target) {
+        const nextNode = target.textContent.replace(/"/g, "");
+        navigateToNode(nextNode, null, "push");
+      }
     });
-  });
+  }
 }
 
 export async function navigateToNode(nextNode, cachedData = null, historyAction = "push") {
+  const el = document.querySelector(".json-holder pre");
+  if (!el) {
+    return;
+  }
+
   const state = getCurrentState();
   state.node = nextNode;
 
   const params = new URLSearchParams(state);
   const newUrlString = `${window.location.pathname}?${params.toString()}`;
-
-  const el = document.querySelector(".json-holder pre");
-  if (!el) {
-    return;
-  }
 
   if (cachedData) {
     renderUI(cachedData, state);
@@ -56,27 +63,35 @@ export async function navigateToNode(nextNode, cachedData = null, historyAction 
   }
 
   el.textContent = "Loading...";
+  let data;
   try {
-    const data = await fetchFromTab(state);
+    data = await fetchFromTab(state);
 
-    if (historyAction === "push") {
-      window.history.pushState({ node: nextNode, cachedData: data }, "", newUrlString);
-    } else if (historyAction === "replace") {
-      window.history.replaceState({ node: nextNode, cachedData: data }, "", newUrlString);
-    }
-
-    renderUI(data, state);
   } catch (error) {
-    let errorData;
     const msg = getErrorMessage(error);
+    let errorData;
+
     if (msg.includes("No tab with id") || msg.includes("is not a valid tab ID")) {
       errorData = {
         error: "Tab Disconnected",
         message: "The original website tab was closed. Please open this view again from an active page."
       };
     } else {
-      errorData = { error: "Fetch failed", message: msg };
+      // Safely check if the thrown error message is a JSON payload from the API
+      try {
+        const parsed = JSON.parse(msg);
+        errorData = { error: "API Error", message: JSON.stringify(parsed, null, 2) };
+      } catch {
+        errorData = { error: "Fetch failed", message: msg };
+      }
     }
-    renderUI(errorData, state);
+    data = errorData;
+  } finally {
+    renderUI(data, state);
+    if (historyAction === "push") {
+      window.history.pushState({ node: nextNode, cachedData: data }, "", newUrlString);
+    } else if (historyAction === "replace") {
+      window.history.replaceState({ node: nextNode, cachedData: data }, "", newUrlString);
+    }
   }
 }

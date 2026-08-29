@@ -1,13 +1,16 @@
 import { restApiPath } from "../properties.js";
 
 /**
- * Fetches Sitevision property data for the selected node through the originating tab.
+ * Fetches Sitevision property data for a given node by executing a scoped fetch script 
+ * within the context of the originating browser tab.
  *
- * @param {{ origin: string, version: string, node: string, anchorTabId: string|number }} state
- *   The current page state containing the origin URL, version, node ID, and the anchored source tab ID.
- *   It is passed as a query string from the popup and converted here with Number() before use as a Chrome tab ID.
- * @returns {Promise<Object>} The JSON response returned by the Sitevision properties endpoint.
- * @throws {Error} If the anchored tab ID is missing or the injected fetch fails.
+ * @param {Object} state - The view state parameters.
+ * @param {string} state.origin - The base URL/origin of the originating browser tab.
+ * @param {string} state.version - The Sitevision REST API version identifier (e.g., "1" or "0").
+ * @param {string} state.node - The target Sitevision node ID.
+ * @param {string|number} state.anchorTabId - The ID of the tab through which the fetch request is executed.
+ * @returns {Promise<Record<string, unknown>>} Resolves with the parsed JSON properties object returned by the Sitevision API.
+ * @throws {Error} Throws if `anchorTabId` is missing/invalid, if script injection fails, or if the HTTP fetch inside the target tab returns an error.
  */
 export async function fetchFromTab(state) {
   const targetTabId = Number(state.anchorTabId);
@@ -20,16 +23,35 @@ export async function fetchFromTab(state) {
     target: { tabId: targetTabId },
     args: [state.origin, restApiPath, state.version, state.node],
     func: async (origin, restApiPath, version, node) => {
-      const url = `${origin}${restApiPath}/${version}/${node}/properties`;
-      const response = await fetch(url, { credentials: "include" });
+      try {
+        const url = `${origin}${restApiPath}/${version}/${node}/properties`;
+        const response = await fetch(url, { credentials: "include" });
 
-      if (!response.ok) {
-        const errorJson = await response.json().catch(() => ({}));
-        throw new Error(JSON.stringify(errorJson) || `HTTP ${response.status}`);
+        if (!response.ok) {
+          const errorJson = await response.json().catch(() => null);
+          const errorPayload = errorJson
+            ? JSON.stringify(errorJson)
+            : `HTTP ${response.status} ${response.statusText}`;
+
+          return { __isError: true, payload: errorPayload };
+        }
+        
+        return await response.json();
+      } catch (err) {
+        return { __isError: true, payload: err.message };
       }
-      return await response.json();
     }
   });
 
-  return injectionResults[0].result;
+  const res = injectionResults?.[0]?.result;
+
+  if (res?.__isError) {
+    throw new Error(res.payload);
+  }
+  
+  if (!res) {
+    throw new Error("Unexpected empty response from tab.");
+  }
+
+  return res;
 }
