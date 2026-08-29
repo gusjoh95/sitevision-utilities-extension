@@ -2,6 +2,10 @@
 
 A lightweight browser extension for Sitevision developers providing debugging and development utilities. Supports Chromium (Chrome, Edge, Brave) and Firefox using Manifest V3 with no build step required.
 
+## Contributing
+
+For contribution guidelines and project direction, see [CONTRIBUTING.md](CONTRIBUTING.md).
+
 ## What the extension does
 
 The add-on is centered around the views in `src/views` and a small shared API layer in `src/api`. The main purpose is to make Sitevision debugging and inspection easier without leaving the browser.
