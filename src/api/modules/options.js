@@ -1,6 +1,6 @@
 const DEFAULT_OPTIONS = {
   useSyntaxHighlighting: true,
-  reloadOnChange: false,
+  reloadOnChange: true,
   jsonTheme: ""
 };
 
