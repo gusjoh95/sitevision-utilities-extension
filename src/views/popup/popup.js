@@ -1,10 +1,11 @@
-import { getActiveTab, getErrorMessage, getPageContext, isFirefox, registerCurrentTabChangeListener } from "../../api/index.js";
+import { getActiveTab, getErrorMessage, getPageContext, getRequiredElement, isFirefox, registerCurrentTabChangeListener } from "../../api/index.js";
 import { initCookieConsent } from "./modules/cookie.js";
 import { initParamButtons } from "./modules/params.js";
 import { initProperties } from "./modules/properties.js";
 
-const appEl = document.getElementById("app");
-const initialHTML = appEl ? appEl.innerHTML : "";
+/** @type {HTMLDivElement} */
+const appEl = getRequiredElement("#app");
+const initialHTML = appEl.innerHTML;
 let tabReloadListenerRegistered = false;
 
 
@@ -30,8 +31,9 @@ async function init() {
     }
   } catch (error) {
     const msg = getErrorMessage(error);
-    const errEl = document.getElementById("error");
-    errEl ? errEl.textContent = `Error: ${msg}` : console.error(msg);
+    /** @type {HTMLDivElement} */
+    const errEl = getRequiredElement("#error");
+    errEl.textContent = `Error: ${msg}`;
   }
 }
 
@@ -44,10 +46,6 @@ async function handleTabReload() {
   if (firefox) {
     window.close();
     return;
-  }
-
-  if (!appEl) {
-    throw new Error("App element not found");
   }
 
   appEl.innerHTML = initialHTML;

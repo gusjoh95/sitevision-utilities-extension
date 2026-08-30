@@ -2,6 +2,7 @@ export { assignJsonTheme } from "./modules/assignJsonTheme.js";
 export { getActiveTab } from "./modules/getActiveTab.js";
 export { getErrorMessage } from "./modules/getErrorMessage.js";
 export { getPageContext } from "./modules/getPageContext.js";
+export { getRequiredElement } from "./modules/getRequiredElement.js";
 export { highlightJson } from "./modules/highlightJson.js";
 export { isFirefox } from "./modules/isFirefox.js";
 export { getOptions, setOptions } from "./modules/options.js";

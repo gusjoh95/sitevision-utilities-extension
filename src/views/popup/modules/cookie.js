@@ -1,4 +1,4 @@
-import { getActiveTab, reloadCurrentTab } from "../../../api/index.js";
+import { getActiveTab, getRequiredElement, reloadCurrentTab } from "../../../api/index.js";
 
 export async function initCookieConsent() {
   const tab = await getActiveTab();
@@ -12,7 +12,8 @@ export async function initCookieConsent() {
       url: tab.url,
       name: cookieName
     }, (cookie) => {
-      const wrapper = document.getElementById("cookie-consent-wrapper");
+      /** @type {HTMLDivElement} */
+      const wrapper = getRequiredElement("#cookie-consent-wrapper");
       if (cookie) {
         /* 
         If I've understood correctly there are potentially two base64 encoded parts in the cookie, separated by a dot.
@@ -76,7 +77,8 @@ export async function initCookieConsent() {
     if (hasPermission) {
       readSitevisionCookie();
     } else {
-      const consentWrapper = document.getElementById("cookie-consent-wrapper");
+      /** @type {HTMLDivElement} */
+      const consentWrapper = getRequiredElement("#cookie-consent-wrapper");
       const promptBtn = document.createElement("button");
       promptBtn.id = "cookie-consent-prompt";
       promptBtn.textContent = `Grant permissions`;

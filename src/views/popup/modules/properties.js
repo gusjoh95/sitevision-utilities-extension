@@ -1,25 +1,24 @@
-import { getActiveTab, getErrorMessage, getPageContext } from "../../../api/index.js";
+import { getActiveTab, getErrorMessage, getPageContext, getRequiredElement } from "../../../api/index.js";
 
 export async function initProperties() {
-	const form = document.getElementById("properties-form");
-
+	/** @type {HTMLFormElement} */
+	const form = getRequiredElement("#properties-form");
 	/** @type {HTMLInputElement} */
-	const nodeIdInput = document.querySelector("#node-id-input");
+	const nodeIdInput = getRequiredElement("#node-id-input");
 	nodeIdInput.focus();
-
 	/** @type {HTMLInputElement} */
-	const currentPageId = document.querySelector("#current-page-id");
+	const currentPageId = getRequiredElement("#current-page-id");
 	/** @type {HTMLInputElement} */
-	const currentUserId = document.querySelector("#current-user-id");
+	const currentUserId = getRequiredElement("#current-user-id");
 	const { pageId, userIdentityId } = await getPageContext();
 	if (pageId) {
 		currentPageId.value = pageId;
-		document.querySelector("button[type='submit'][value='getCurrentPage']").removeAttribute("disabled");
+		getRequiredElement("button[type='submit'][value='getCurrentPage']").removeAttribute("disabled");
 	}
 
 	if (userIdentityId) {
 		currentUserId.value = userIdentityId;
-		document.querySelector("button[type='submit'][value='getCurrentUser']").removeAttribute("disabled");
+		getRequiredElement("button[type='submit'][value='getCurrentUser']").removeAttribute("disabled");
 	}
 
 	/** @param {SubmitEvent} event */
@@ -27,10 +26,9 @@ export async function initProperties() {
 		event.preventDefault();
 
 
-		const version =
-			/** @type {HTMLInputElement | null} */ (
-				document.querySelector('input[name="radio"]:checked')
-			)?.value;
+		/** @type {HTMLInputElement} */
+		const checkedRadio = getRequiredElement('input[name="radio"]:checked');
+		const version = checkedRadio.value;
 
 		let node;
 
@@ -68,8 +66,9 @@ export async function initProperties() {
 
 		} catch (e) {
 			const msg = getErrorMessage(e);
-			const errEl = document.getElementById("error");
-			errEl ? errEl.textContent = `Error: ${msg}` : console.error(msg);
+			/** @type {HTMLDivElement} */
+			const errEl = getRequiredElement("#error");
+			errEl.textContent = `Error: ${msg}`;
 		}
 
 	}

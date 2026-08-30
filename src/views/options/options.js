@@ -1,20 +1,20 @@
-import { assignJsonTheme, getErrorMessage, getOptions, highlightJson, setOptions } from "../../api/index.js";
+import { assignJsonTheme, getErrorMessage, getOptions, getRequiredElement, highlightJson, setOptions } from "../../api/index.js";
 
 document.addEventListener("DOMContentLoaded", async () => {
-    /** @type {HTMLInputElement | null} */
-    const useSyntaxHighlighting = document.querySelector("#use-syntax-highlighting");
     /** @type {HTMLInputElement} */
-    const reloadOnChange = document.querySelector("#reload-on-change");
+    const useSyntaxHighlighting = getRequiredElement("#use-syntax-highlighting");
+    /** @type {HTMLInputElement} */
+    const reloadOnChange = getRequiredElement("#reload-on-change");
     /** @type {HTMLPreElement} */
-    const properties = document.querySelector("#properties");
-
+    const properties = getRequiredElement("#properties");
     /** @type {HTMLSelectElement} */
-    const dropdown = document.querySelector("#theme-dropdown");
-
+    const dropdown = getRequiredElement("#theme-dropdown");
     /** @type {HTMLButtonElement} */
-    const saveBtn = document.querySelector("#save");
+    const saveBtn = getRequiredElement("#save");
 
-    assignJsonTheme(document.querySelector("#json-theme"));
+    /** @type {HTMLLinkElement} */
+    const themeLink = getRequiredElement("#json-theme");
+    assignJsonTheme(themeLink);
 
     try {
         const opts = await getOptions();
@@ -38,8 +38,6 @@ document.addEventListener("DOMContentLoaded", async () => {
         }
         dropdown.addEventListener("change", () => {
             const selectedTheme = dropdown.value || 'default.css';
-            /** @type {HTMLLinkElement} */
-            const themeLink = document.querySelector("#json-theme");
             themeLink.href = chrome.runtime.getURL(`resources/style/json-themes/${selectedTheme}`);
         });
 
@@ -71,11 +69,13 @@ document.addEventListener("DOMContentLoaded", async () => {
     saveBtn.addEventListener("click", handleSave);
 
     /** @type {HTMLDetailsElement} */
-    const expandable = document.querySelector("#expandable");
+    const expandable = getRequiredElement("#expandable");
     expandable.addEventListener("toggle", async () => {
         if (expandable.open) {
             const dummyJson = await fetch(chrome.runtime.getURL("views/options/dummydata/dummy.json"));
-            expandable.querySelector(".json-holder pre").replaceChildren(highlightJson(await dummyJson.json()));
+            /** @type {HTMLPreElement} */
+            const preview = getRequiredElement(".json-holder pre");
+            preview.replaceChildren(highlightJson(await dummyJson.json()));
         }
     });
 

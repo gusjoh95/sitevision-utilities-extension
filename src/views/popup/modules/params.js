@@ -1,15 +1,15 @@
-import { getActiveTab, reloadCurrentTab, updateSessionWithParam } from "../../../api/index.js";
+import { getActiveTab, getRequiredElement, reloadCurrentTab, updateSessionWithParam } from "../../../api/index.js";
 
 export async function initParamButtons() {
 
 	const PARAMS = { profiling: 'profiling', jsdebug: 'jsdebug', slimrender: 'slimRender' };
 
 	/** @type {HTMLInputElement} */
-	const toggleProfilingCheckbox = document.querySelector("#toggle-profiling");
+	const toggleProfilingCheckbox = getRequiredElement("#toggle-profiling");
 	/** @type {HTMLInputElement} */
-	const toggleJsDebugCheckbox = document.querySelector("#toggle-jsdebug");
+	const toggleJsDebugCheckbox = getRequiredElement("#toggle-jsdebug");
 	/** @type {HTMLInputElement} */
-	const toggleSlimrenderCheckbox = document.querySelector("#toggle-slimrender");
+	const toggleSlimrenderCheckbox = getRequiredElement("#toggle-slimrender");
 
 	const tab = await getActiveTab();
 
