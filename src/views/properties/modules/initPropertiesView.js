@@ -1,14 +1,14 @@
-import { assignJsonTheme } from "../../../api/index.js";
+import { assignJsonTheme, getRequiredElement } from "../../../api/index.js";
 import { getCurrentState } from "./getCurrentState.js";
 import { navigateToNode, renderUI } from "./renderUI.js";
 
 // Handle Browser Back / Forward buttons instantly using the history payload
 window.addEventListener("popstate", (event) => {
-  const state = getCurrentState();
-
+  
   if (event.state && event.state.cachedData) {
     navigateToNode(event.state.node, event.state.cachedData, "none");
   } else {
+    const state = getCurrentState();
     navigateToNode(state.node, null, "replace");
   }
 });
@@ -16,7 +16,9 @@ window.addEventListener("popstate", (event) => {
 // Entrypoint
 export async function initPropertiesView() {
   const state = getCurrentState();
-  assignJsonTheme(document.querySelector("#json-theme"));
+  /** @type {HTMLLinkElement} */
+  const jsonLinkElement = getRequiredElement("#json-theme");
+  assignJsonTheme(jsonLinkElement);
 
   const el = document.querySelector(".json-holder pre");
   if (!state.origin || !state.node) {

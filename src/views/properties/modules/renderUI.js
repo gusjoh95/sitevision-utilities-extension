@@ -55,7 +55,7 @@ if (useSyntaxHighlighting) {
 /**
  * @param {string} nextNode
  * @param {any} [cachedData=null]
- * @param {"push" | "replace"} [historyAction="push"]
+ * @param {"push" | "replace" | "none"} [historyAction="push"]
  */
 export async function navigateToNode(nextNode, cachedData = null, historyAction = "push") {
   const el = document.querySelector(".json-holder pre");

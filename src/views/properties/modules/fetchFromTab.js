@@ -18,29 +18,40 @@ export async function fetchFromTab(state) {
     throw new Error("Missing originating Tab ID.");
   }
 
-  // Inject the fetch execution directly into opening background tab
+  // Overriding TS signature with `@type {any}` due to chrome.scripting API limitation with `args`.
+  /** @type {any} */
+  const fetchPropertiesTask = async (
+    /** @type {string} */ origin,
+    /** @type {string} */ apiPath,
+    /** @type {string} */ version,
+    /** @type {string} */ node
+  ) => {
+    try {
+      const url = `${origin}${apiPath}/${version}/${node}/properties`;
+      const response = await fetch(url, { credentials: "include" });
+
+      if (!response.ok) {
+        const errorJson = await response.json().catch(() => null);
+        const errorPayload = errorJson
+          ? JSON.stringify(errorJson)
+          : `HTTP ${response.status} ${response.statusText}`;
+
+        return { __isError: true, payload: errorPayload };
+      }
+
+      return await response.json();
+    } catch (err) {
+      return {
+        __isError: true,
+        payload: err instanceof Error ? err.message : String(err)
+      };
+    }
+  };
+
   const injectionResults = await chrome.scripting.executeScript({
     target: { tabId: targetTabId },
-    args: [state.origin, restApiPath, state.version, state.node],
-    func: async (origin, restApiPath, version, node) => {
-      try {
-        const url = `${origin}${restApiPath}/${version}/${node}/properties`;
-        const response = await fetch(url, { credentials: "include" });
-
-        if (!response.ok) {
-          const errorJson = await response.json().catch(() => null);
-          const errorPayload = errorJson
-            ? JSON.stringify(errorJson)
-            : `HTTP ${response.status} ${response.statusText}`;
-
-          return { __isError: true, payload: errorPayload };
-        }
-        
-        return await response.json();
-      } catch (err) {
-        return { __isError: true, payload: err.message };
-      }
-    }
+    func: fetchPropertiesTask,
+    args: [state.origin, restApiPath, state.version, state.node]
   });
 
   const res = injectionResults?.[0]?.result;
@@ -48,7 +59,7 @@ export async function fetchFromTab(state) {
   if (res?.__isError) {
     throw new Error(res.payload);
   }
-  
+
   if (!res) {
     throw new Error("Unexpected empty response from tab.");
   }

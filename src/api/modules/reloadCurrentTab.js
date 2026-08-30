@@ -12,6 +12,9 @@ export async function reloadCurrentTab(respectOption = true) {
   if (tab.url && !tab.url.includes("/edit")) {
     const { reloadOnChange } = respectOption ? await getOptions() : { reloadOnChange: true };
     if (reloadOnChange) {
+      if (typeof tab?.id !== "number") {
+        throw new Error("No active tab available for reload.");
+      }
       await chrome.scripting.executeScript({
         target: { tabId: tab.id },
         func: () => window.location.reload()
