@@ -5,7 +5,7 @@ export { getPageContext } from "./modules/getPageContext.js";
 export { getRequiredElement } from "./modules/getRequiredElement.js";
 export { highlightJson } from "./modules/highlightJson.js";
 export { isFirefox } from "./modules/isFirefox.js";
-export { getOptions, setOptions } from "./modules/options.js";
+export { getOption, getOptions, setOptions } from "./modules/options.js";
 export { registerCurrentTabChangeListener } from "./modules/registerCurrentTabChangeListener.js";
 export { reloadCurrentTab } from "./modules/reloadCurrentTab.js";
 export { updateSessionWithParam } from "./modules/updateSessionWithParam.js";

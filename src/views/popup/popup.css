@@ -15,3 +15,7 @@ form .properties-search {
 	}
 }
 
+pre {
+	min-width: 100%;
+	overflow-x: auto;
+}

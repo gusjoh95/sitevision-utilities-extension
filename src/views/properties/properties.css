@@ -4,10 +4,31 @@ html, body{
 pre {
   font-family: monospace;
   padding: 16px;
-  border-radius: var(--border-radius);
   line-height: 1.25;
   min-width: 100%;
-  box-sizing: border-box;
-  display: inline-block;
   font-size: 16px;
+  overflow-x: auto;
+
+  &.wrap {
+    white-space: pre-wrap;
+    word-break: break-word;
+  }
+}
+
+#wrap {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
+
+  /* Aktivt tillstånd (.active) -> Invertera färgerna mot din standardknapp */
+  &.active {
+    background-color: var(--bg-color-dark);
+    color: var(--fg-color-light);
+    border-color: var(--fg-color-light);
+  }
+
+  &:active:not(:disabled) {
+    transform: scale(0.96);
+  }
 }

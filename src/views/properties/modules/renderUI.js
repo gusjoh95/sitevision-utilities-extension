@@ -1,45 +1,18 @@
-import { getErrorMessage, getOptions, highlightJson } from "../../../api/index.js";
+import { getErrorMessage, getOptions, setOptions, getRequiredElement, highlightJson } from "../../../api/index.js";
 import { restApiPath } from "../properties.js";
 import { fetchFromTab } from "./fetchFromTab.js";
 import { getCurrentState } from "./getCurrentState.js";
 
-const { useSyntaxHighlighting } = await getOptions();
+const { useSyntaxHighlighting, propertiesWordWrap } = await getOptions();
 
-/**
- * @param {any} data
- * @param {{ origin: string, version: string, node: string }} state
- */
-export function renderUI(data, state) {
-  const el = document.querySelector(".json-holder pre");
-  if (!el) {
-    return;
-  }
+/** @type {HTMLPreElement} */
+const preElem = getRequiredElement(".json-holder pre");
 
-  document.title = `${state.origin}${restApiPath}/${state.version}/${state.node}/properties`;
-
-  if (!data) {
-    el.textContent = "Error: No data available to render";
-    return;
-  }
-
-  if (data.error) {
-    el.textContent = `Error: ${data.message}`;
-    return;
-  }
-
-  if (!useSyntaxHighlighting) {
-    el.textContent = JSON.stringify(data, null, 2);
-    return;
-  }
-
-  el.replaceChildren(highlightJson(data));
-}
 
 if (useSyntaxHighlighting) {
   // Event Delegation: Set up click listener once on the parent container
-  const jsonHolder = document.querySelector(".json-holder pre");
-  if (jsonHolder) {
-    jsonHolder.addEventListener("click", (event) => {
+  if (preElem) {
+    preElem.addEventListener("click", (event) => {
       if (!(event.target instanceof Element)) {
         return;
       }
@@ -52,17 +25,55 @@ if (useSyntaxHighlighting) {
   }
 }
 
+/** @type {HTMLButtonElement} */
+const wrapBtn = getRequiredElement("#wrap");
+if (propertiesWordWrap) {
+  wrapBtn.classList.add("active");
+  wrapBtn.setAttribute("aria-pressed", "true");
+  preElem.classList.add("wrap");
+}
+wrapBtn.addEventListener("click", () => {
+  const isActive = wrapBtn.classList.toggle("active");
+  wrapBtn.setAttribute("aria-pressed", String(isActive));
+  preElem.classList.toggle("wrap", isActive);
+  setOptions({ propertiesWordWrap: isActive }).catch((error) => {
+    const msg = getErrorMessage(error);
+    console.error("Failed to save propertiesWordWrap option:", msg);
+  });
+});
+
+/**
+ * @param {any} data
+ * @param {{ origin: string, version: string, node: string }} state
+ */
+export function renderUI(data, state) {
+
+  document.title = `${state.origin}${restApiPath}/${state.version}/${state.node}/properties`;
+
+  if (!data) {
+    preElem.textContent = "Error: No data available to render";
+    return;
+  }
+
+  if (data.error) {
+    preElem.textContent = `Error: ${data.message}`;
+    return;
+  }
+
+  if (!useSyntaxHighlighting) {
+    preElem.textContent = JSON.stringify(data, null, 2);
+    return;
+  }
+
+  preElem.replaceChildren(highlightJson(data));
+}
+
 /**
  * @param {string} nextNode
  * @param {any} [cachedData=null]
  * @param {"push" | "replace" | "none"} [historyAction="push"]
  */
 export async function navigateToNode(nextNode, cachedData = null, historyAction = "push") {
-  const el = document.querySelector(".json-holder pre");
-  if (!el) {
-    return;
-  }
-
   const state = getCurrentState();
   state.node = nextNode;
 
@@ -74,7 +85,7 @@ export async function navigateToNode(nextNode, cachedData = null, historyAction 
     return;
   }
 
-  el.textContent = "Loading...";
+  preElem.textContent = "Loading...";
   let data;
   try {
     data = await fetchFromTab(state);

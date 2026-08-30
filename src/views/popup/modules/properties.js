@@ -58,8 +58,6 @@ export async function initProperties() {
 		const origin = new URL(tab.url).origin;
 		const anchorTabId = tab.id;
 		try {
-			// const {useSyntaxHighlighting} = await getOptions();
-			// const windowType = useSyntaxHighlighting ? "normal" : "popup";
 			chrome.windows.create({
 				url: "/views/properties/properties.html?origin=" + origin + "&version=" + version + "&node=" + node + '&anchorTabId=' + anchorTabId,
 				type: "popup",
