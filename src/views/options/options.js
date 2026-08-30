@@ -24,15 +24,21 @@ document.addEventListener("DOMContentLoaded", async () => {
         try {
             const jsonUrl = chrome.runtime.getURL("resources/style/json-themes/themes.json");
             const response = await fetch(jsonUrl);
+            /** @type {{ file: string, name: string }[]} */
             const themes = await response.json();
 
-            themes.forEach(theme => {
+            /**
+             * @param {{ file: string, name: string }} theme
+             */
+            const renderTheme = (theme) => {
                 const option = document.createElement("option");
                 option.value = theme.file;
                 option.selected = (theme.file === jsonTheme);
                 option.textContent = theme.name;
                 dropdown.appendChild(option);
-            });
+            };
+
+            themes.forEach(renderTheme);
         } catch (error) {
             console.error("Failed to load themes", error);
         }

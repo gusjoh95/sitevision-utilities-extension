@@ -12,20 +12,28 @@ export async function initParamButtons() {
 	const toggleSlimrenderCheckbox = getRequiredElement("#toggle-slimrender");
 
 	const tab = await getActiveTab();
+	const activeTabId = tab?.id;
+	if (typeof activeTabId !== "number") {
+		throw new Error("No active tab available for session parameter checks.");
+	}
+	/** @type {number} */
+	const safeTabId = activeTabId;
 
 	async function getProfilingState() {
-		const [{ result }] = await chrome.scripting.executeScript({
-			target: { tabId: tab.id },
+		const results = await /** @type {Promise<chrome.scripting.InjectionResult[]>} */ (chrome.scripting.executeScript({
+			target: { tabId: safeTabId },
 			func: () =>
 				[...document.querySelectorAll("body table th")]
 					.some(th => th.textContent.trim() === "Profiling results")
-		});
-		return result;
+		}));
+		/** @type {{ result?: boolean } | undefined} */
+		const result = results?.[0];
+		return Boolean(result?.result);
 	}
 
 	async function getJsdebugState() {
-		const [{ result }] = await chrome.scripting.executeScript({
-			target: { tabId: tab.id },
+		const results = await /** @type {Promise<chrome.scripting.InjectionResult[]>} */ (chrome.scripting.executeScript({
+			target: { tabId: safeTabId },
 			func: () => {
 				// TODO Improve
 				const minifiedTemplateAssetsSelector = 'script[src$="/sv-template-asset.js"], link[href$="/sv-template-asset.css"]';
@@ -36,16 +44,20 @@ export async function initParamButtons() {
 				// Jsdebug is considered on if no minified assets
 				return minifiedAssetCount === 0;
 			}
-		});
-		return result;
+		}));
+		/** @type {{ result?: boolean } | undefined} */
+		const result = results?.[0];
+		return Boolean(result?.result);
 	}
 
 	async function getSlimrenderState() {
-		const [{ result }] = await chrome.scripting.executeScript({
-			target: { tabId: tab.id },
+		const results = await /** @type {Promise<chrome.scripting.InjectionResult[]>} */ (chrome.scripting.executeScript({
+			target: { tabId: safeTabId },
 			func: () => document.querySelectorAll('head link[as="script"][href$="slim.js"]')?.length > 0
-		});
-		return result;
+		}));
+		/** @type {{ result?: boolean } | undefined} */
+		const result = results?.[0];
+		return Boolean(result?.result);
 	}
 	toggleProfilingCheckbox.checked = await getProfilingState();
 	toggleJsDebugCheckbox.checked = await getJsdebugState();

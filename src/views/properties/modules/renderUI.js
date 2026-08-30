@@ -5,6 +5,10 @@ import { getCurrentState } from "./getCurrentState.js";
 
 const { useSyntaxHighlighting } = await getOptions();
 
+/**
+ * @param {any} data
+ * @param {{ origin: string, version: string, node: string }} state
+ */
 export function renderUI(data, state) {
   const el = document.querySelector(".json-holder pre");
   if (!el) {
@@ -36,6 +40,9 @@ if (useSyntaxHighlighting) {
   const jsonHolder = document.querySelector(".json-holder pre");
   if (jsonHolder) {
     jsonHolder.addEventListener("click", (event) => {
+      if (!(event.target instanceof Element)) {
+        return;
+      }
       const target = event.target.closest(".json-id");
       if (target) {
         const nextNode = target.textContent.replace(/"/g, "");
@@ -45,6 +52,11 @@ if (useSyntaxHighlighting) {
   }
 }
 
+/**
+ * @param {string} nextNode
+ * @param {any} [cachedData=null]
+ * @param {"push" | "replace"} [historyAction="push"]
+ */
 export async function navigateToNode(nextNode, cachedData = null, historyAction = "push") {
   const el = document.querySelector(".json-holder pre");
   if (!el) {

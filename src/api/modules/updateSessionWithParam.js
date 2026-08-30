@@ -1,38 +1,49 @@
 import { getActiveTab } from "./getActiveTab.js";
 
 /**
- * Update the current page session by adding a query parameter.
- * @param {string} param - The query parameter name to set (e.g. "jsdebug").
- * @param {boolean} value - The boolean value to set for the parameter.
- * @returns {Promise<boolean>} Resolves true when the injected fetch returned OK, otherwise false.
+ * Updates a session state on the active page by making a background HTTP GET request
+ * with the specified query parameter set.
+ *
+ * To avoid cookie/CORS mismatches and erroneous log entries when fetching within
+ * the extension context, this function executes the fetch request inside the target
+ * tab's content script context (via `chrome.scripting.executeScript`).
+ *
+ * @param {string} param - The query parameter name to set (e.g., "jsdebug" or "profiling").
+ * @param {boolean} value - The boolean state value for the parameter.
+ * @returns {Promise<boolean>} Resolves to `true` if the injected fetch returns an HTTP 200 OK status, otherwise `false`.
+ * @throws {Error} If `param` is empty or `value` is not a boolean.
  */
 export async function updateSessionWithParam(param, value) {
   if (!param || typeof value !== 'boolean') {
     throw new Error('Missing param or value when trying to update session');
   }
+
   const tab = await getActiveTab();
-  if (!tab.id || !tab.url) return false;
+  if (!tab?.id || !tab?.url) return false;
 
-  const url = new URL(tab.url);
-  const origin = url.origin;
-  const reqUrl = `${origin}?${param}=${encodeURIComponent(String(Boolean(value)))}`;
+  const pageUrl = new URL(tab.url);
+  pageUrl.searchParams.set(param, String(value));
+  const reqUrl = pageUrl.toString();
 
-  // Cant figure out a way to perform request within extension context without erroneous log-entries.
-  // Execute the fetch within the context of the active tab as solution.
   try {
+    // Injected task executed in the target tab's context.
+    // Overriding TS signature with `@type {any}` due to chrome.scripting API limitation with `args`.
+    /** @type {any} */
+    const checkUrlTask = async (/** @type {string} */ urlToFetch) => {
+      try {
+        const response = await fetch(urlToFetch, {
+          method: "GET",
+          headers: { Accept: "text/plain" }
+        });
+        return response.ok;
+      } catch {
+        return false;
+      }
+    };
+
     const results = await chrome.scripting.executeScript({
       target: { tabId: tab.id },
-      func: async (/** @type {string} */ urlToFetch) => {
-        try {
-          const r = await fetch(urlToFetch, {
-            method: "GET",
-            headers: { "Accept": "text/plain" }
-          });
-          return Boolean(r.ok);
-        } catch {
-          return false;
-        }
-      },
+      func: checkUrlTask,
       args: [reqUrl]
     });
 

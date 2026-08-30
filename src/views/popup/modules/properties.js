@@ -52,7 +52,10 @@ export async function initProperties() {
 
 
 		const tab = await getActiveTab();
-		const origin = new URL(tab?.url).origin;
+		if (!tab?.url) {
+			throw new Error("No active tab URL available for properties lookup.");
+		}
+		const origin = new URL(tab.url).origin;
 		const anchorTabId = tab.id;
 		try {
 			// const {useSyntaxHighlighting} = await getOptions();

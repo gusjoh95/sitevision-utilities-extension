@@ -12,7 +12,8 @@ let tabReloadListenerRegistered = false;
 async function init() {
   try {
     const tab = await getActiveTab();
-    if (!tab?.url.startsWith("http") && !tab?.url.startsWith("https")) {
+    const activeUrl = tab?.url;
+    if (!activeUrl || (!activeUrl.startsWith("http") && !activeUrl.startsWith("https"))) {
       throw new Error("Wrong protocol on active tab. Please navigate to a page with http or https protocol and try again.");
     }
 

@@ -2,14 +2,20 @@ import { getActiveTab, getRequiredElement, reloadCurrentTab } from "../../../api
 
 export async function initCookieConsent() {
   const tab = await getActiveTab();
-  const url = new URL(tab.url);
+  const activeTabUrl = tab?.url;
+  if (!activeTabUrl) {
+    throw new Error("No active tab URL available for cookie consent checks.");
+  }
+  /** @type {string} */
+  const safeTabUrl = activeTabUrl;
+  const url = new URL(safeTabUrl);
   const origin = `${url.protocol}//${url.hostname}/`;
 
   const cookieName = 'sv-cookie-consent';
 
   async function readSitevisionCookie() {
     chrome.cookies.get({
-      url: tab.url,
+      url: safeTabUrl,
       name: cookieName
     }, (cookie) => {
       /** @type {HTMLDivElement} */
@@ -48,7 +54,7 @@ export async function initCookieConsent() {
         wrapper.appendChild(deleteConsentCookieBtn);
         deleteConsentCookieBtn.addEventListener("click", () => {
           chrome.cookies.remove({
-            url: tab.url,
+            url: safeTabUrl,
             name: cookieName
           }, async (details) => {
             console.log(`Deleted cookie: ${details}`);

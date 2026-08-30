@@ -10,6 +10,11 @@ export function highlightJson(input) {
   const tokenRe = /("(?:\\u[0-9a-fA-F]{4}|\\[^u]|[^\\"])*")(\s*:)?|\b(?:true|false|null)\b|-?(?:0|[1-9]\d*)(?:\.\d+)?(?:[eE][+-]?\d+)?/gu;
   const frag = document.createDocumentFragment();
 
+  /**
+   * @param {string} className
+   * @param {string} text
+   * @returns {HTMLSpanElement}
+   */
   const createSpan = (className, text) => {
     const el = document.createElement("span");
     el.className = className;

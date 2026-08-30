@@ -13,16 +13,24 @@ export async function getPageContext() {
   // Reminder: CSP applies in main world, might break or not work on certain sites.
 
   const tab = await getActiveTab();
-  const [res] = await chrome.scripting.executeScript({
+  if (typeof tab?.id !== "number") {
+    return undefined;
+  }
+
+  const results = await /** @type {Promise<chrome.scripting.InjectionResult[]>} */ (chrome.scripting.executeScript({
     target: { tabId: tab.id },
     world: "MAIN",
     func: () => {
-      /** @type {HTMLIFrameElement} */
+      /** @type {HTMLIFrameElement | null} */
       const editFrame = document.querySelector('#content-frame');
       const editFrameWindow = editFrame?.contentWindow;
-      return window['sv']?.PageContext || editFrameWindow['sv']?.PageContext
+      const win = /** @type {{ sv?: { PageContext?: unknown } }} */ (window);
+      const frameWin = /** @type {{ sv?: { PageContext?: unknown } } | null} */ (editFrameWindow);
+      return win.sv?.PageContext ?? frameWin?.sv?.PageContext;
     }
-  });
+  }));
 
+  /** @type {{ result?: unknown } | undefined} */
+  const res = results?.[0];
   return res?.result;
 }
