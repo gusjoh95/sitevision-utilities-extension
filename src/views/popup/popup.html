@@ -15,14 +15,18 @@
       <form id="properties-form">
         <fieldset>
           <legend>Version</legend>
-          <input type="radio" id="radio1" name="radio" value="1" checked>
-          <label for="radio1">Online</label>
-          <input type="radio" id="radio2" name="radio" value="0">
-          <label for="radio2">Offline</label>
+          <label>
+            <input type="radio" id="properties-online-mode" disabled name="radio" value="1" checked>
+            Online
+          </label>
+          <label>
+            <input type="radio" id="properties-offline-mode" disabled name="radio" value="0">
+            Offline
+          </label>
         </fieldset>
         <div class="properties-search">
-          <input type="text" id="node-id-input" placeholder="Node-id">
-          <button type="submit" value="getProperties">&#x1F50E;&#xFE0E;</button>
+          <input type="text" id="properties-id-input" disabled placeholder="Node-id">
+          <button type="submit" disabled value="getProperties">&#x1F50E;&#xFE0E;</button>
         </div>
         <div class="flex-row">
           <input type="hidden" id="current-page-id" value="">
@@ -35,15 +39,15 @@
     <div id="session-params-wrapper">
       <h2>Session parameters</h2>
       <label>
-        <input type="checkbox" id="toggle-profiling">
+        <input type="checkbox" disabled id="toggle-profiling">
         ?profiling=true
       </label>
       <label>
-        <input type="checkbox" id="toggle-jsdebug">
+        <input type="checkbox" disabled id="toggle-jsdebug">
         ?jsdebug=true
       </label>
       <label>
-        <input type="checkbox" id="toggle-slimrender">
+        <input type="checkbox" disabled id="toggle-slimrender">
         ?slimRender=true
       </label>
     </div>

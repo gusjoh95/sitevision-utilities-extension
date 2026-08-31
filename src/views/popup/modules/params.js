@@ -16,6 +16,11 @@ export async function initParamButtons() {
 	if (typeof activeTabId !== "number") {
 		throw new Error("No active tab available for session parameter checks.");
 	}
+  
+  toggleProfilingCheckbox.disabled = false;
+  toggleJsDebugCheckbox.disabled = false;
+  toggleSlimrenderCheckbox.disabled = false;
+
 	/** @type {number} */
 	const safeTabId = activeTabId;
 
