@@ -27,8 +27,8 @@ export async function fetchFromTab(state) {
     /** @type {string} */ node
   ) => {
     try {
-      const url = `${origin}${apiPath}/${version}/${node}/properties`;
-      const response = await fetch(url, { credentials: 'include' });
+      const url = new URL(`${apiPath}/${version}/${node}/properties`, origin).toString();
+      const response = await fetch(url);
 
       if (!response.ok) {
         const errorJson = await response.json().catch(() => null);
