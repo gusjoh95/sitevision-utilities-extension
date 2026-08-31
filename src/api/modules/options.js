@@ -2,7 +2,7 @@ const DEFAULT_OPTIONS = {
   useSyntaxHighlighting: true,
   reloadOnChange: true,
   propertiesWordWrap: false, // TODO: Easily accessed/changed through GUI, should be stored in unsynced settings
-  jsonTheme: ""
+  jsonTheme: '',
 };
 
 /**
@@ -16,7 +16,7 @@ const DEFAULT_OPTIONS = {
 export async function getOption(key) {
   if (!(key in DEFAULT_OPTIONS)) {
     throw new TypeError(
-      `Invalid option key "${String(key)}". Allowed keys: ${Object.keys(DEFAULT_OPTIONS).join(", ")}`
+      `Invalid option key "${String(key)}". Allowed keys: ${Object.keys(DEFAULT_OPTIONS).join(', ')}`
     );
   }
 
@@ -46,7 +46,7 @@ export async function getOptions() {
         useSyntaxHighlighting: Boolean(items?.useSyntaxHighlighting),
         reloadOnChange: Boolean(items?.reloadOnChange),
         propertiesWordWrap: Boolean(items?.propertiesWordWrap),
-        jsonTheme: String(items?.jsonTheme)
+        jsonTheme: String(items?.jsonTheme),
       });
     });
   });
@@ -61,8 +61,8 @@ export async function getOptions() {
  */
 export async function setOptions(options = {}) {
   return new Promise((resolve, reject) => {
-    if (typeof options !== "object" || options === null) {
-      reject(new Error("options must be an object"));
+    if (typeof options !== 'object' || options === null) {
+      reject(new Error('options must be an object'));
       return;
     }
 
@@ -70,7 +70,7 @@ export async function setOptions(options = {}) {
     const allowedKeys = Object.keys(DEFAULT_OPTIONS);
     const invalid = providedKeys.filter((k) => !allowedKeys.includes(k));
     if (invalid.length) {
-      reject(new Error("Invalid option key(s): " + invalid.join(", ")));
+      reject(new Error('Invalid option key(s): ' + invalid.join(', ')));
       return;
     }
 

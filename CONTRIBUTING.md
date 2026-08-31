@@ -18,10 +18,10 @@ For the project overview, see [README.md](README.md).
 
 ### Code Expectations
 
-* Prefer small, readable changes over broad rewrites.
-* Keep naming and structure consistent with the existing codebase.
-* Respect browser extension constraints and maintain compatibility across supported browsers.
-* Avoid adding unnecessary third-party dependencies or unrelated refactors.
+- Prefer small, readable changes over broad rewrites.
+- Keep naming and structure consistent with the existing codebase.
+- Respect browser extension constraints and maintain compatibility across supported browsers.
+- Avoid adding unnecessary third-party dependencies or unrelated refactors.
 
 ### Validation
 

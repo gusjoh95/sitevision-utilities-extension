@@ -1,4 +1,4 @@
-import { getActiveTab } from "./getActiveTab.js";
+import { getActiveTab } from './getActiveTab.js';
 
 /**
  * Updates a session state on the active page by making a background HTTP GET request
@@ -32,8 +32,8 @@ export async function updateSessionWithParam(param, value) {
     const checkUrlTask = async (/** @type {string} */ urlToFetch) => {
       try {
         const response = await fetch(urlToFetch, {
-          method: "GET",
-          headers: { Accept: "text/plain" }
+          method: 'GET',
+          headers: { Accept: 'text/plain' },
         });
         return response.ok;
       } catch {
@@ -44,7 +44,7 @@ export async function updateSessionWithParam(param, value) {
     const results = await chrome.scripting.executeScript({
       target: { tabId: tab.id },
       func: checkUrlTask,
-      args: [reqUrl]
+      args: [reqUrl],
     });
 
     return Boolean(results?.[0]?.result);

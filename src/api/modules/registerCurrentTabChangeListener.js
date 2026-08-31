@@ -1,4 +1,4 @@
-import { getActiveTab } from "./getActiveTab.js";
+import { getActiveTab } from './getActiveTab.js';
 
 /**
  * Register a callback for active-tab update completion.

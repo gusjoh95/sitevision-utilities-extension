@@ -1,21 +1,21 @@
 form .properties-search {
-	display: flex;
-	align-items: stretch;
-	flex-direction: row;
-	width: 100%;
+  display: flex;
+  align-items: stretch;
+  flex-direction: row;
+  width: 100%;
 
-	& input {
-		border: 0;
-		border-radius: var(--border-radius) 0 0 var(--border-radius);
-	}
+  & input {
+    border: 0;
+    border-radius: var(--border-radius) 0 0 var(--border-radius);
+  }
 
-	& button {
-		border: 0;
-		border-radius: 0 var(--border-radius) var(--border-radius) 0;
-	}
+  & button {
+    border: 0;
+    border-radius: 0 var(--border-radius) var(--border-radius) 0;
+  }
 }
 
 pre {
-	min-width: 100%;
-	overflow-x: auto;
+  min-width: 100%;
+  overflow-x: auto;
 }

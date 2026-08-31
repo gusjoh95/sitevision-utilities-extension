@@ -1,4 +1,4 @@
-import { getOptions } from "./options.js";
+import { getOptions } from './options.js';
 
 /**
  * Asynchronously loads and applies the user-selected JSON theme to a given link element.
@@ -6,7 +6,7 @@ import { getOptions } from "./options.js";
  * @returns {void}
  */
 export function assignJsonTheme(linkElement) {
-  getOptions().then(opts => {
+  getOptions().then((opts) => {
     const themeFile = opts?.jsonTheme;
     if (!themeFile) return;
     linkElement.href = chrome.runtime.getURL(`resources/style/json-themes/${themeFile}`);

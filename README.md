@@ -52,21 +52,23 @@ src/
 
 - **Public API Layer:** `src/api/index.js` is the only public entry point for extension features.
 - **Buildless:** ES modules are loaded natively by the browser at runtime. No transpilation or bundling is required.
+
 ## Cross-Browser Compatibility
 
-* **Unified API Namespace:** Uses a runtime check to normalize the API entry point across environments without external polyfill libraries:
+- **Unified API Namespace:** Uses a runtime check to normalize the API entry point across environments without external polyfill libraries:
 
   export const ext = globalThis.browser || globalThis.chrome;
 
-* **Single Manifest (`manifest.json`):** Contains Firefox settings (`browser_specific_settings`) alongside standard Manifest V3 properties. Chromium ignores Firefox-specific fields without throwing errors.
+- **Single Manifest (`manifest.json`):** Contains Firefox settings (`browser_specific_settings`) alongside standard Manifest V3 properties. Chromium ignores Firefox-specific fields without throwing errors.
 
 ## Versioning Scheme
 
 The project uses a standard 4-digit versioning strategy (`MAJOR.MINOR.PATCH.HOTFIX`) in `manifest.json` to handle browser-specific store updates cleanly:
-````
+
+```
 X . X . X . X
 │   │   │   └── Platform Hotfix (Chrome or Firefox specific fix)
 │   │   └────── Patch (Cross-platform bug fixes)
 │   └────────── Minor (New features)
 └────────────── Major (Breaking changes / complete overhaul)
-````
+```

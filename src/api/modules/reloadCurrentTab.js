@@ -1,5 +1,5 @@
-import { getActiveTab } from "./getActiveTab.js";
-import { getOptions } from "./options.js";
+import { getActiveTab } from './getActiveTab.js';
+import { getOptions } from './options.js';
 
 /**
  * Reloads the currently active tab using chrome.scripting, provided it's not in edit mode.
@@ -9,15 +9,15 @@ import { getOptions } from "./options.js";
  */
 export async function reloadCurrentTab(respectOption = true) {
   const tab = await getActiveTab();
-  if (tab.url && !tab.url.includes("/edit")) {
+  if (tab.url && !tab.url.includes('/edit')) {
     const { reloadOnChange } = respectOption ? await getOptions() : { reloadOnChange: true };
     if (reloadOnChange) {
-      if (typeof tab?.id !== "number") {
-        throw new Error("No active tab available for reload.");
+      if (typeof tab?.id !== 'number') {
+        throw new Error('No active tab available for reload.');
       }
       await chrome.scripting.executeScript({
         target: { tabId: tab.id },
-        func: () => window.location.reload()
+        func: () => window.location.reload(),
       });
     }
   }

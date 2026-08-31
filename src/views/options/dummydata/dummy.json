@@ -6,11 +6,7 @@
     "expires": null,
     "permissions": ["read", "write", "delete"]
   },
-  "jcr:mixinTypes": [
-    "mix:referenceable",
-    "mix:lockable",
-    "mix:somethingElse"
-  ],
+  "jcr:mixinTypes": ["mix:referenceable", "mix:lockable", "mix:somethingElse"],
   "jcr:primaryType": "sv:root",
   "jcr:uuid": "2.2527e29417ee2918a501b0b1_root",
   "currentPage": "2.2527e254677ee2918a501b0b1_root",
@@ -50,5 +46,5 @@
     "colon:key": "very weird but valid JSON key"
   },
   "log": "User said: \"{\"broken\": json inside string}\"",
-  "bigNumber": 1.7976931348623157e+308
+  "bigNumber": 1.7976931348623157e308
 }

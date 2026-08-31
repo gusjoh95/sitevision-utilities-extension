@@ -1,61 +1,66 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
+  <head>
+    <title>SV-Utilities</title>
+    <link rel="stylesheet" type="text/css" href="../../resources/style/base.css" />
+    <link rel="stylesheet" type="text/css" href="popup.css" />
+  </head>
 
-<head>
-  <title>SV-Utilities</title>
-  <link rel="stylesheet" type="text/css" href="../../resources/style/base.css">
-  <link rel="stylesheet" type="text/css" href="popup.css">
-</head>
-
-<body>
-  <div id="app">
-    <div id="error"></div>
-    <div id="properties-wrapper">
-      <h2>Node properties</h2>
-      <form id="properties-form">
-        <fieldset>
-          <legend>Version</legend>
-          <label>
-            <input type="radio" id="properties-online-mode" disabled name="radio" value="1" checked>
-            Online
-          </label>
-          <label>
-            <input type="radio" id="properties-offline-mode" disabled name="radio" value="0">
-            Offline
-          </label>
-        </fieldset>
-        <div class="properties-search">
-          <input type="text" id="properties-id-input" disabled placeholder="Node-id">
-          <button type="submit" disabled value="getProperties">&#x1F50E;&#xFE0E;</button>
-        </div>
-        <div class="flex-row">
-          <input type="hidden" id="current-page-id" value="">
-          <button type="submit" disabled value="getCurrentPage">Current page</button>
-          <input type="hidden" id="current-user-id" value="">
-          <button type="submit" disabled value="getCurrentUser">Current user</button>
-        </div>
-      </form>
+  <body>
+    <div id="app">
+      <div id="error"></div>
+      <div id="properties-wrapper">
+        <h2>Node properties</h2>
+        <form id="properties-form">
+          <fieldset>
+            <legend>Version</legend>
+            <label>
+              <input
+                type="radio"
+                id="properties-online-mode"
+                disabled
+                name="radio"
+                value="1"
+                checked
+              />
+              Online
+            </label>
+            <label>
+              <input type="radio" id="properties-offline-mode" disabled name="radio" value="0" />
+              Offline
+            </label>
+          </fieldset>
+          <div class="properties-search">
+            <input type="text" id="properties-id-input" disabled placeholder="Node-id" />
+            <button type="submit" disabled value="getProperties">&#x1F50E;&#xFE0E;</button>
+          </div>
+          <div class="flex-row">
+            <input type="hidden" id="current-page-id" value="" />
+            <button type="submit" disabled value="getCurrentPage">Current page</button>
+            <input type="hidden" id="current-user-id" value="" />
+            <button type="submit" disabled value="getCurrentUser">Current user</button>
+          </div>
+        </form>
+      </div>
+      <div id="session-params-wrapper">
+        <h2>Session parameters</h2>
+        <label>
+          <input type="checkbox" disabled id="toggle-profiling" />
+          ?profiling=true
+        </label>
+        <label>
+          <input type="checkbox" disabled id="toggle-jsdebug" />
+          ?jsdebug=true
+        </label>
+        <label>
+          <input type="checkbox" disabled id="toggle-slimrender" />
+          ?slimRender=true
+        </label>
+      </div>
+      <div id="cookie-consent-wrapper">
+        <h2>Consent cookie</h2>
+      </div>
     </div>
-    <div id="session-params-wrapper">
-      <h2>Session parameters</h2>
-      <label>
-        <input type="checkbox" disabled id="toggle-profiling">
-        ?profiling=true
-      </label>
-      <label>
-        <input type="checkbox" disabled id="toggle-jsdebug">
-        ?jsdebug=true
-      </label>
-      <label>
-        <input type="checkbox" disabled id="toggle-slimrender">
-        ?slimRender=true
-      </label>
-    </div>
-    <div id="cookie-consent-wrapper">
-      <h2>Consent cookie</h2>
-    </div>
-  </div>
-  <script type="module" src="popup.js"></script>
-</body>
-
+    <script type="module" src="popup.js"></script>
+  </body>
 </html>

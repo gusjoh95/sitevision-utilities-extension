@@ -1,13 +1,13 @@
 :root {
-	--view-width: 600px;
+  --view-width: 600px;
 }
 
 pre {
-	border-radius: var(--border-radius);
-	width: max-content;
-	padding: 8px;
+  border-radius: var(--border-radius);
+  width: max-content;
+  padding: 8px;
 }
 
 summary:hover {
-	cursor: pointer;
+  cursor: pointer;
 }

@@ -1,4 +1,3 @@
-
 # Feature suggestions — Sitevision Utilities
 
 Prioritized ideas with one-line implementation hints and file references.
@@ -25,5 +24,6 @@ Prioritized ideas with one-line implementation hints and file references.
   Surface HTTP status and JSON error body from in-page fetch (show in UI) instead of a generic message; implement in properties.js getJson/render flow.
 
 Notes:
+
 - Prefer in-page fetch to avoid CORS in Firefox (use chrome.scripting.executeScript or tabs.executeScript fallback).
 - Keep UI neutral (grayscale) and accessible; reuse existing CSS and add small helpers where needed.

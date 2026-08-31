@@ -1,7 +1,7 @@
-import { restApiPath } from "../properties.js";
+import { restApiPath } from '../properties.js';
 
 /**
- * Fetches Sitevision property data for a given node by executing a scoped fetch script 
+ * Fetches Sitevision property data for a given node by executing a scoped fetch script
  * within the context of the originating browser tab.
  *
  * @param {Object} state - The view state parameters.
@@ -15,7 +15,7 @@ import { restApiPath } from "../properties.js";
 export async function fetchFromTab(state) {
   const targetTabId = Number(state.anchorTabId);
   if (!targetTabId) {
-    throw new Error("Missing originating Tab ID.");
+    throw new Error('Missing originating Tab ID.');
   }
 
   // Overriding TS signature with `@type {any}` due to chrome.scripting API limitation with `args`.
@@ -28,7 +28,7 @@ export async function fetchFromTab(state) {
   ) => {
     try {
       const url = `${origin}${apiPath}/${version}/${node}/properties`;
-      const response = await fetch(url, { credentials: "include" });
+      const response = await fetch(url, { credentials: 'include' });
 
       if (!response.ok) {
         const errorJson = await response.json().catch(() => null);
@@ -43,7 +43,7 @@ export async function fetchFromTab(state) {
     } catch (err) {
       return {
         __isError: true,
-        payload: err instanceof Error ? err.message : String(err)
+        payload: err instanceof Error ? err.message : String(err),
       };
     }
   };
@@ -51,7 +51,7 @@ export async function fetchFromTab(state) {
   const injectionResults = await chrome.scripting.executeScript({
     target: { tabId: targetTabId },
     func: fetchPropertiesTask,
-    args: [state.origin, restApiPath, state.version, state.node]
+    args: [state.origin, restApiPath, state.version, state.node],
   });
 
   const res = injectionResults?.[0]?.result;
@@ -61,7 +61,7 @@ export async function fetchFromTab(state) {
   }
 
   if (!res) {
-    throw new Error("Unexpected empty response from tab.");
+    throw new Error('Unexpected empty response from tab.');
   }
 
   return res;
