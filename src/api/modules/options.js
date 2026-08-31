@@ -6,6 +6,11 @@ const DEFAULT_OPTIONS = {
 };
 
 /**
+ * @typedef {typeof DEFAULT_OPTIONS} Options
+ * @typedef {keyof Options} OptionKey
+ */
+
+/**
  * Retrieves a single option value by key.
  *
  * @template {OptionKey} K
@@ -21,18 +26,9 @@ export async function getOption(key) {
   }
 
   const defaultValue = DEFAULT_OPTIONS[key];
-
-  return new Promise((resolve) => {
-    chrome.storage.sync.get({ [key]: defaultValue }, (items) => {
-      resolve(items[key]);
-    });
-  });
+  const items = await chrome.storage.sync.get({ [key]: defaultValue });
+  return items[key];
 }
-
-/**
- * @typedef {typeof DEFAULT_OPTIONS} Options
- * @typedef {keyof Options} OptionKey
- */
 
 /**
  * Retrieves all stored options merged with defaults.
@@ -40,16 +36,14 @@ export async function getOption(key) {
  * @returns {Promise<Options>} A promise that resolves to the full options object.
  */
 export async function getOptions() {
-  return new Promise((resolve) => {
-    chrome.storage.sync.get(DEFAULT_OPTIONS, (items) => {
-      resolve({
-        useSyntaxHighlighting: Boolean(items?.useSyntaxHighlighting),
-        reloadOnChange: Boolean(items?.reloadOnChange),
-        propertiesWordWrap: Boolean(items?.propertiesWordWrap),
-        jsonTheme: String(items?.jsonTheme),
-      });
-    });
-  });
+  const items = await chrome.storage.sync.get(DEFAULT_OPTIONS);
+
+  return {
+    useSyntaxHighlighting: Boolean(items?.useSyntaxHighlighting),
+    reloadOnChange: Boolean(items?.reloadOnChange),
+    propertiesWordWrap: Boolean(items?.propertiesWordWrap),
+    jsonTheme: String(items?.jsonTheme ?? DEFAULT_OPTIONS.jsonTheme),
+  };
 }
 
 /**
@@ -60,23 +54,19 @@ export async function getOptions() {
  * @throws {Error} Throws if options argument is invalid or contains unrecognized keys.
  */
 export async function setOptions(options = {}) {
-  return new Promise((resolve, reject) => {
-    if (typeof options !== 'object' || options === null) {
-      reject(new Error('options must be an object'));
-      return;
-    }
+  if (typeof options !== 'object' || options === null) {
+    throw new Error('options must be an object');
+  }
 
-    const providedKeys = Object.keys(options);
-    const allowedKeys = Object.keys(DEFAULT_OPTIONS);
-    const invalid = providedKeys.filter((k) => !allowedKeys.includes(k));
-    if (invalid.length) {
-      reject(new Error('Invalid option key(s): ' + invalid.join(', ')));
-      return;
-    }
+  const providedKeys = Object.keys(options);
+  const allowedKeys = Object.keys(DEFAULT_OPTIONS);
+  const invalid = providedKeys.filter((k) => !allowedKeys.includes(k));
 
-    // Only store the provided keys (do not write defaults)
-    chrome.storage.sync.set(options, () => {
-      resolve(true);
-    });
-  });
+  if (invalid.length) {
+    throw new Error('Invalid option key(s): ' + invalid.join(', '));
+  }
+
+  // Only store the provided keys (do not write defaults)
+  await chrome.storage.sync.set(options);
+  return true;
 }
