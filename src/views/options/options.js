@@ -73,8 +73,9 @@ document.addEventListener('DOMContentLoaded', async () => {
     } catch (error) {
       const msg = getErrorMessage(error);
       properties.textContent = msg;
+    } finally {
+      saveBtn.removeAttribute('disabled');
     }
-    saveBtn.removeAttribute('disabled');
   }
   saveBtn.addEventListener('click', handleSave);
 
@@ -82,10 +83,12 @@ document.addEventListener('DOMContentLoaded', async () => {
   const expandable = getRequiredElement('#expandable');
   expandable.addEventListener('toggle', async () => {
     if (expandable.open) {
-      const dummyJson = await fetch(chrome.runtime.getURL('views/options/dummydata/dummy.json'));
       /** @type {HTMLPreElement} */
       const preview = getRequiredElement('.json-holder pre');
-      preview.replaceChildren(highlightJson(await dummyJson.json()));
+      if (!preview.hasChildNodes()) {
+        const dummyJson = await fetch(chrome.runtime.getURL('views/options/dummydata/dummy.json'));
+        preview.replaceChildren(highlightJson(await dummyJson.json()));
+      }
     }
   });
 });
