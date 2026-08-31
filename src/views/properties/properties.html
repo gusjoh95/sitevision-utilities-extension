@@ -2,21 +2,50 @@
 <html lang="en">
 
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="../../resources/style/base.css">
-    <link id="json-theme" href="../../resources/style/json-themes/default.css" rel="stylesheet">
-    <link rel="stylesheet" href="properties.css">
-    <title>Properties</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="../../resources/style/base.css">
+  <link id="json-theme" href="../../resources/style/json-themes/default.css" rel="stylesheet">
+  <link rel="stylesheet" href="properties.css">
+  <title>Properties</title>
 </head>
 
 <body>
+  <div class="properties-header">
     <h1>Properties</h1>
-    <button type="button" id="wrap" aria-pressed="false" title="Toggle Word Wrap">
-        <span class="icon">↩</span>
-    </button>
+    <div class="properties-buttons">
+      <button class="tooltipped" type="button" id="back" aria-label="Previous node">
+        <svg class="icon" aria-hidden="true" focusable="false" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+          stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M19 12H5M12 19l-7-7 7-7" />
+        </svg>
+      </button>
+
+      <button class="tooltipped" type="button" id="forward" aria-label="Next node">
+        <svg class="icon" aria-hidden="true" focusable="false" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+          stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M5 12h14M12 5l7 7-7 7" />
+        </svg>
+      </button>
+
+      <button class="tooltipped" type="button" id="copy" aria-label="Copy properties to clipboard">
+        <svg class="icon" aria-hidden="true" focusable="false" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+          stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <rect x="9" y="9" width="13" height="13" rx="2" ry="2" />
+          <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" />
+        </svg>
+      </button>
+
+      <button class="tooltipped" type="button" id="wrap" aria-pressed="false" aria-label="Toggle word wrap">
+        <svg class="icon" aria-hidden="true" focusable="false" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+          stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <polyline points="9 10 4 15 9 20" />
+          <path d="M20 4v7a4 4 0 0 1-4 4H4" />
+        </svg>
+      </button>
+    </div>
     <div class="json-holder">
-        <pre></pre>
+      <pre></pre>
     </div>
     <script type="module" src="properties.js"></script>
 </body>

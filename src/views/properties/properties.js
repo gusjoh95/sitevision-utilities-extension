@@ -1,12 +1,12 @@
+import { getRequiredElement } from "../../api/index.js";
 import { initPropertiesView } from "./modules/initPropertiesView.js";
 
 export const restApiPath = "/rest-api/1";
 
 async function init() {
-  const jsonHolder = document.querySelector(".json-holder pre");
-  if (!jsonHolder) {
-    throw new Error("Missing required element: .json-holder pre");
-  }
+  /** @type {HTMLPreElement} */
+  const jsonHolder = getRequiredElement(".json-holder pre");
+  void jsonHolder;
 
   await initPropertiesView();
 }

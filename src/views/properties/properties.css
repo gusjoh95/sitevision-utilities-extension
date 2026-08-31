@@ -1,6 +1,8 @@
-html, body{
+html,
+body {
   width: unset;
 }
+
 pre {
   font-family: monospace;
   padding: 16px;
@@ -15,20 +17,31 @@ pre {
   }
 }
 
-#wrap {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  line-height: 1;
 
-  /* Aktivt tillstånd (.active) -> Invertera färgerna mot din standardknapp */
-  &.active {
-    background-color: var(--bg-color-dark);
-    color: var(--fg-color-light);
-    border-color: var(--fg-color-light);
-  }
+.properties-buttons {
+  display: flex;
+  gap: 8px;
+  flex-direction: row;
 
-  &:active:not(:disabled) {
-    transform: scale(0.96);
+  button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+
+    .icon {
+      width: 16px;
+      height: 16px;
+      display: block;
+    }
+
+    &.active {
+      background-color: var(--bg-color-dark);
+      color: var(--fg-color-light);
+      border-color: var(--fg-color-light);
+    }
+
+    &:active:not(:disabled) {
+      box-shadow: inset 0 2px 4px 0 rgba(0, 0, 0, 0.2);
+    }
   }
 }

@@ -1,5 +1,13 @@
 {
-	"files.eol": "\n",
-	"files.insertFinalNewline": true,
-  "js/ts.tsserver.experimental.enableProjectDiagnostics": true
+  "files.eol": "\n",
+  "files.insertFinalNewline": true,
+  "js/ts.tsserver.experimental.enableProjectDiagnostics": true,
+  "editor.detectIndentation": false,
+  "editor.tabSize": 2,
+  "editor.insertSpaces": true,
+  "eslint.enable": true,
+  "eslint.validate": [
+    "javascript",
+    "html"
+  ]
 }

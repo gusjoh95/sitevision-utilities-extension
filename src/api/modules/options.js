@@ -20,8 +20,13 @@ export async function getOption(key) {
     );
   }
 
-  const options = await getOptions();
-  return options[key];
+  const defaultValue = DEFAULT_OPTIONS[key];
+
+  return new Promise((resolve) => {
+    chrome.storage.sync.get({ [key]: defaultValue }, (items) => {
+      resolve(items[key]);
+    });
+  });
 }
 
 /**

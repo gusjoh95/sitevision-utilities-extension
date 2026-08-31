@@ -1,10 +1,10 @@
 import { assignJsonTheme, getRequiredElement } from "../../../api/index.js";
+import { initButtons } from "./initButtons.js";
 import { getCurrentState } from "./getCurrentState.js";
 import { navigateToNode, renderUI } from "./renderUI.js";
 
 // Handle Browser Back / Forward buttons instantly using the history payload
 window.addEventListener("popstate", (event) => {
-  
   if (event.state && event.state.cachedData) {
     navigateToNode(event.state.node, event.state.cachedData, "none");
   } else {
@@ -20,13 +20,22 @@ export async function initPropertiesView() {
   const jsonLinkElement = getRequiredElement("#json-theme");
   assignJsonTheme(jsonLinkElement);
 
-  const el = document.querySelector(".json-holder pre");
+  /** @type {HTMLPreElement} */
+  const preElement = getRequiredElement(".json-holder pre");
+
   if (!state.origin || !state.node) {
-    if (el) {
-      el.textContent = "Error: Missing required URL parameters (origin/node).";
-    }
+    preElement.textContent = "Error: Missing required URL parameters (origin/node).";
     return;
   }
+
+  // Ensure initial history state has an index tracker
+  if (!window.history.state || typeof window.history.state.index !== "number") {
+    const initialState = window.history.state ?? {};
+    window.history.replaceState({ ...initialState, index: 0 }, "");
+    sessionStorage.setItem("maxHistoryIndex", "0");
+  }
+
+  await initButtons();
 
   const useCacheOnReload = false;
 

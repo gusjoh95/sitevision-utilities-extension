@@ -196,3 +196,53 @@ pre {
         border-top: 1px solid var(--fg-color);
     }
 }
+
+
+/* Custom tooltips */
+.tooltipped {
+  display: inline-flex;
+  
+  /* 1. Define anchor on parent */
+  anchor-name: --tooltip-anchor;
+  /* Scope, multiple tooltips should not interfere */
+  anchor-scope: --tooltip-anchor;
+
+  &::after {
+    content: attr(aria-label, attr(data-tooltip));
+    
+    /* 2. Position fixed relative to viewport anchor */
+    position: fixed;
+    position-anchor: --tooltip-anchor;
+    position-area: top;
+    
+    /* 3. Automatic viewport collision handling (Y-axis: flip-block, X-axis: flip-inline) */
+    position-try-fallbacks: flip-block, flip-inline;
+    margin-bottom: 6px;
+
+    background-color: var(--fg-color-light);
+    color: var(--bg-color-dark);
+    font-size: 0.75rem;
+    padding: 0.25rem 0.5rem;
+    border-radius: calc(var(--border-radius) / 2);
+    white-space: nowrap;
+    pointer-events: none;
+    z-index: 1000;
+
+    opacity: 0;
+    visibility: hidden;
+
+    /* Reset delay on hide */
+    transition-delay: 0.15s;
+  }
+
+  &:hover::after,
+  &:focus-visible::after {
+    opacity: 1;
+    visibility: visible;
+    transition-delay: 0.4s;
+  }
+
+  &:not([aria-label]):not([data-tooltip]) {
+    outline: 2px dashed red;
+  }
+}
