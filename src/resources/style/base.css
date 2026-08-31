@@ -227,8 +227,8 @@ pre {
     position-try-fallbacks: flip-block, flip-inline;
     margin-bottom: 6px;
 
-    background-color: var(--fg-color-light);
-    color: var(--bg-color-dark);
+    background-color: var(--bg-color-dark);
+    color: var(--fg-color-light);
     font-size: 0.75rem;
     padding: 0.25rem 0.5rem;
     border-radius: calc(var(--border-radius) / 2);
