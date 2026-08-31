@@ -4,10 +4,12 @@
     "@html-eslint/eslint-plugin": "^0.65.0",
     "chrome-types": "^0.1.429",
     "eslint": "^10.4.0",
-    "globals": "^17.6.0"
+    "globals": "^17.6.0",
+    "prettier": "^3.3.0"
   },
   "type": "module",
   "scripts": {
-    "lint": "eslint src"
+    "lint": "eslint src",
+    "format": "prettier --write ."
   }
 }
