@@ -74,33 +74,51 @@ export async function initParamButtons() {
     return res?.result ?? { profiling: false, jsdebug: false, slimrender: false };
   }
 
-  const { profiling, jsdebug, slimrender } = await getSessionParamStates();
+  /**
+   * Binds a session parameter checkbox with UI loading states,
+   * error rollback, and tab reloading.
+   *
+   * @param {HTMLInputElement} checkbox
+   * @param {string} paramKey
+   */
+  function bindSessionToggle(checkbox, paramKey) {
+    checkbox.addEventListener('click', async () => {
+      checkbox.disabled = true;
+      checkbox.indeterminate = true; // Note: This is purely a visual change.
 
-  toggleProfilingCheckbox.checked = profiling;
-  toggleJsDebugCheckbox.checked = jsdebug;
-  toggleSlimrenderCheckbox.checked = slimrender;
+      const targetState = checkbox.checked;
+      const success = await updateSessionWithParam(paramKey, targetState);
 
-  toggleProfilingCheckbox.addEventListener('change', async () => {
-    const success = await updateSessionWithParam(PARAMS.profiling, toggleProfilingCheckbox.checked);
-    if (success) {
-      reloadCurrentTab();
-    }
-  });
+      checkbox.indeterminate = false; // Note: This is purely a visual change.
+      checkbox.disabled = false;
 
-  toggleJsDebugCheckbox.addEventListener('change', async () => {
-    const success = await updateSessionWithParam(PARAMS.jsdebug, toggleJsDebugCheckbox.checked);
-    if (success) {
-      reloadCurrentTab();
-    }
-  });
+      if (success) {
+        reloadCurrentTab();
+      } else {
+        // Revert GUI state if the network request failed
+        checkbox.checked = !targetState;
+      }
+    });
+  }
 
-  toggleSlimrenderCheckbox.addEventListener('change', async () => {
-    const success = await updateSessionWithParam(
-      PARAMS.slimrender,
-      toggleSlimrenderCheckbox.checked
-    );
-    if (success) {
-      reloadCurrentTab();
-    }
-  });
+  const sessionStates = await getSessionParamStates();
+  /**
+   * @typedef {Object} ToggleConfig
+   * @property {HTMLInputElement | null} element
+   * @property {string} param
+   * @property {keyof typeof sessionStates} key
+   */
+
+  /** @type {ToggleConfig[]} */
+  const toggles = [
+    { element: toggleProfilingCheckbox, param: PARAMS.profiling, key: 'profiling' },
+    { element: toggleJsDebugCheckbox, param: PARAMS.jsdebug, key: 'jsdebug' },
+    { element: toggleSlimrenderCheckbox, param: PARAMS.slimrender, key: 'slimrender' },
+  ];
+
+  for (const { element, param, key } of toggles) {
+    if (!element) continue;
+    element.checked = Boolean(sessionStates[key]);
+    bindSessionToggle(element, param);
+  }
 }

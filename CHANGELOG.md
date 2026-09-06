@@ -11,13 +11,18 @@ For details on the 4-digit versioning strategy (`MAJOR.MINOR.PATCH.HOTFIX`), see
 
 ### Changed
 
+- UI feedback and state rollback for session parameter toggles ([#1](https://github.com/gusjoh95/sitevision-utilities-extension/issues/1)):
+  - Disable checkbox and set indeterminate state while processing network request.
+  - Revert checkbox state if the background request fails.
+
 ### Deprecated
 
 ### Removed
 
 ### Fixed
 
-- Remove fixed width in options layout and adjust input element styling ([#3](https://github.com/gusjoh95/sitevision-utilities-extension/issues/3)).
+- Fix tab reload after parameter updates on 404 pages ([#1](https://github.com/gusjoh95/sitevision-utilities-extension/issues/1)).
+- Remove fixed layout width in options page and refine input element styling ([#3](https://github.com/gusjoh95/sitevision-utilities-extension/issues/3)).
 
 ### Security
 

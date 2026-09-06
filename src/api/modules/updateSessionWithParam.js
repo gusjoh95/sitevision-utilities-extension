@@ -1,4 +1,5 @@
 import { getActiveTab } from './getActiveTab.js';
+import { getErrorMessage } from './getErrorMessage.js';
 
 /**
  * Updates a session state on the active page by making a background HTTP GET request
@@ -10,7 +11,7 @@ import { getActiveTab } from './getActiveTab.js';
  *
  * @param {string} param - The query parameter name to set (e.g., "jsdebug" or "profiling").
  * @param {boolean} value - The boolean state value for the parameter.
- * @returns {Promise<boolean>} Resolves to `true` if the injected fetch returns an HTTP 200 OK status, otherwise `false`.
+ * @returns {Promise<boolean>} Resolves to `true` if the request succeeds or lands on a valid Sitevision view (statuscode < 500), otherwise `false`.
  * @throws {Error} If `param` is empty or `value` is not a boolean.
  */
 export async function updateSessionWithParam(param, value) {
@@ -35,9 +36,22 @@ export async function updateSessionWithParam(param, value) {
           method: 'GET',
           headers: { Accept: 'text/plain' },
         });
-        return response.ok;
-      } catch {
-        return false;
+
+        // Sitevision updates session flags on valid page views (including 401, 403, 404).
+        // Treat 5xx server errors as actual execution failures.
+        if (response.status >= 500) {
+          return {
+            ok: false,
+            error: `Server error HTTP ${response.status} ${response.statusText}`.trim(),
+          };
+        }
+
+        return { ok: true };
+      } catch (e) {
+        return {
+          ok: false,
+          error: e instanceof Error ? e.message : String(e),
+        };
       }
     };
 
@@ -47,8 +61,19 @@ export async function updateSessionWithParam(param, value) {
       args: [reqUrl],
     });
 
-    return Boolean(results?.[0]?.result);
-  } catch {
+    const executionResult = results?.[0]?.result;
+
+    if (!executionResult?.ok) {
+      const errorMsg = executionResult?.error || 'Unknown script execution error';
+      console.error(`Error updating session with param "${param}" in tab ${tab.id}: ${errorMsg}`);
+      return false;
+    }
+
+    return true;
+  } catch (e) {
+    console.error(
+      `Error updating session with param "${param}" in tab ${tab.id}: ${getErrorMessage(e)}`
+    );
     return false;
   }
 }
