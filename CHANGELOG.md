@@ -17,6 +17,8 @@ For details on the 4-digit versioning strategy (`MAJOR.MINOR.PATCH.HOTFIX`), see
 
 ### Fixed
 
+- Remove fixed width in options layout and adjust input element styling ([#3](https://github.com/gusjoh95/sitevision-utilities-extension/issues/3)).
+
 ### Security
 
 ## [1.0.0.0] - 2026-09-02
