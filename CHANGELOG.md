@@ -3,7 +3,7 @@
 All notable changes to the **Sitevision Utilities Extension** project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).  
-For details on the 4-digit versioning strategy (`MAJOR.MINOR.PATCH.HOTFIX`), see the [Versioning Scheme in README.md](README.md#versioning-scheme).
+For details on the 4-digit versioning strategy (`MAJOR.MINOR.PATCH.HOTFIX`), see the [Versioning section in README.md](README.md#versioning).
 
 ## [Unreleased]
 
