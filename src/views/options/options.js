@@ -12,6 +12,8 @@ document.addEventListener('DOMContentLoaded', async () => {
   const useSyntaxHighlighting = getRequiredElement('#use-syntax-highlighting');
   /** @type {HTMLInputElement} */
   const reloadOnChange = getRequiredElement('#reload-on-change');
+  /** @type {HTMLTextAreaElement} */
+  const customLoginPaths = getRequiredElement('#custom-login-paths');
   /** @type {HTMLPreElement} */
   const properties = getRequiredElement('#properties');
   /** @type {HTMLSelectElement} */
@@ -27,6 +29,8 @@ document.addEventListener('DOMContentLoaded', async () => {
     const opts = await getOptions();
     useSyntaxHighlighting.checked = Boolean(opts.useSyntaxHighlighting);
     reloadOnChange.checked = Boolean(opts.reloadOnChange);
+    customLoginPaths.value = opts.customLoginPaths.join('\n');
+
     const jsonTheme = opts?.jsonTheme || '';
     try {
       const jsonUrl = chrome.runtime.getURL('resources/style/json-themes/themes.json');
@@ -61,7 +65,14 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   async function handleSave() {
     try {
+      const parsedPaths = customLoginPaths.value
+        .split(/[\n,]+/)
+        .map((p) => p.trim())
+        .filter(Boolean)
+        .map((p) => (p.startsWith('/') ? p : `/${p}`));
+
       const toStore = {
+        customLoginPaths: parsedPaths,
         useSyntaxHighlighting: Boolean(useSyntaxHighlighting?.checked),
         reloadOnChange: Boolean(reloadOnChange?.checked),
         jsonTheme: String(dropdown.value),

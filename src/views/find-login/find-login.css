@@ -1,0 +1,9 @@
+html,
+body {
+  width: unset;
+}
+
+pre.log-container {
+  width: 100%;
+  overflow-x: auto;
+}

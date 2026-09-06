@@ -3,6 +3,8 @@ const DEFAULT_OPTIONS = {
   reloadOnChange: true,
   propertiesWordWrap: false, // TODO: Easily accessed/changed through GUI, should be stored in unsynced settings
   jsonTheme: '',
+  /** @type {string[]} */
+  customLoginPaths: [],
 };
 
 /**
@@ -14,7 +16,7 @@ const DEFAULT_OPTIONS = {
  * Retrieves a single option value by key.
  *
  * @template {OptionKey} K
- * @param {K} key - The option key to retrieve ('useSyntaxHighlighting' | 'reloadOnChange' | 'propertiesWordWrap' | 'jsonTheme').
+ * @param {K} key - The option key to retrieve ('useSyntaxHighlighting' | 'reloadOnChange' | 'propertiesWordWrap' | 'jsonTheme' | 'customLoginPaths').
  * @returns {Promise<Options[K]>} A promise that resolves to the value of the specified option key.
  * @throws {TypeError} Throws synchronously if an invalid key is provided.
  */
@@ -43,6 +45,7 @@ export async function getOptions() {
     reloadOnChange: Boolean(items?.reloadOnChange),
     propertiesWordWrap: Boolean(items?.propertiesWordWrap),
     jsonTheme: String(items?.jsonTheme ?? DEFAULT_OPTIONS.jsonTheme),
+    customLoginPaths: Array.isArray(items?.customLoginPaths) ? items.customLoginPaths : [],
   };
 }
 

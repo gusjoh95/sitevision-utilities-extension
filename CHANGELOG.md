@@ -9,8 +9,15 @@ For details on the 4-digit versioning strategy (`MAJOR.MINOR.PATCH.HOTFIX`), see
 
 ### Added
 
+- New function: `find-login` where supplied endpoints are traversed in order to find an instance of [`sv-login-portlet`](https://help.sitevision.se/en/loginHelp.html)
+- Add configurable custom login paths and a dedicated discovery view for detecting local login forms and external identity-provider redirects.
+- Add browser-specific Chrome and Firefox manifests, background discovery fetching, and popup controls for launching login discovery.
+
 ### Changed
 
+- Development and release workflows now select a browser manifest before loading or packaging the extension (`npm run dev:ch` or `npm run dev:ff`).
+- Add Firefox host-permission handling from the popup click gesture and update the UI when discovery requires permission.
+- Update release packaging to create browser-specific archives and validate manifest differences.
 - UI feedback and state rollback for session parameter toggles ([#1](https://github.com/gusjoh95/sitevision-utilities-extension/issues/1)):
   - Disable checkbox and set indeterminate state while processing network request.
   - Revert checkbox state if the background request fails.
