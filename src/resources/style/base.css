@@ -111,7 +111,7 @@ button {
   border: 1px solid var(--fg-color);
   cursor: pointer;
   font-weight: 600;
-  font-size: 0.95rem;
+  font-size: 1rem;
   transition:
     transform 0.08s ease,
     box-shadow 0.12s ease;
@@ -120,11 +120,11 @@ button {
 }
 
 label {
-  font-size: 0.95rem;
+  font-size: 1rem;
   display: flex;
   flex-direction: row;
   gap: 8px;
-  align-items: center;
+  align-items: flex-start;
   cursor: pointer;
   max-width: fit-content;
 }
@@ -147,14 +147,6 @@ summary {
     outline: 2px solid var(--fg-color);
     outline-offset: 2px;
   }
-}
-
-input[type='checkbox'],
-input[type='radio'] {
-  width: 16px;
-  height: 16px;
-  margin: 0;
-  cursor: pointer;
 }
 
 .bordered-container {
