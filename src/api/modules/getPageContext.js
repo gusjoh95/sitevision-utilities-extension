@@ -1,38 +1,61 @@
 import { getActiveTab } from './getActiveTab.js';
 
 /**
- * Retrieves the Sitevision PageContext object from the active tab.
- * @description Executes a script in the page's MAIN world context to access the global
- * page metadata object, which is inaccessible from the standard ISOLATED world.
- * @note
- * - CSP: Running in the MAIN world means the script is subject to the page's Content Security Policy.
- * @returns {Promise<any>} Resolves to the PageContext object, or undefined if unavailable.
+ * @typedef {Object} PageContext
+ * @property {string} pageId
+ * @property {string} siteId
+ * @property {string} userIdentityId
+ * @property {number} userIdentityReadTimeout
+ * @property {string} userLocale
+ * @property {boolean} dev
+ * @property {string} csrfToken
+ * @property {boolean} html5
+ * @property {boolean} useServerSideEvents
+ * @property {boolean} nodeIsReadOnly
  */
+
+/**
+ * Retrieves the Sitevision PageContext object from the active tab.
+ *
+ * Executes a script in the page's MAIN world context to access the global
+ * page metadata object. It first attempts to read directly from the main window,
+ * falling back to the editing iframe (#content-frame) if needed.
+ *
+ * @remarks CSP: Running in the MAIN world means the script is subject to the page's Content Security Policy.
+ *
+ * @throws {Error} Throws if no active tab or valid tab ID is found.
+ * @returns {Promise<PageContext | null>} Resolves to the PageContext object, or null if unavailable on the page.
+ */
+
 export async function getPageContext() {
-  // https://developer.chrome.com/docs/extensions/develop/concepts/content-scripts#isolated_world
-  // Reminder: CSP applies in main world, might break or not work on certain sites.
+  /**
+   * @typedef {Window & { sv?: { PageContext?: PageContext } }} CustomWindow
+   */
 
   const tab = await getActiveTab();
   if (typeof tab?.id !== 'number') {
-    return undefined;
+    throw new Error('Could not retrieve PageContext: No valid active tab found.');
   }
 
-  const results = await /** @type {Promise<chrome.scripting.InjectionResult[]>} */ (
-    chrome.scripting.executeScript({
-      target: { tabId: tab.id },
-      world: 'MAIN',
-      func: () => {
-        /** @type {HTMLIFrameElement | null} */
-        const editFrame = document.querySelector('#content-frame');
-        const editFrameWindow = editFrame?.contentWindow;
-        const win = /** @type {{ sv?: { PageContext?: unknown } }} */ (window);
-        const frameWin = /** @type {{ sv?: { PageContext?: unknown } } | null} */ (editFrameWindow);
-        return win.sv?.PageContext ?? frameWin?.sv?.PageContext;
-      },
-    })
-  );
+  const [{ result: pageContext }] = await chrome.scripting.executeScript({
+    target: { tabId: tab.id },
+    world: 'MAIN',
+    func: () => {
+      /** @type {CustomWindow} */
+      const win = window;
 
-  /** @type {{ result?: unknown } | undefined} */
-  const res = results?.[0];
-  return res?.result;
+      if (win.sv?.PageContext) {
+        return win.sv.PageContext;
+      }
+
+      /** @type {HTMLIFrameElement | null} */
+      const editFrame = document.querySelector('#content-frame');
+      /** @type {CustomWindow | null} */
+      const frameWin = editFrame?.contentWindow ?? null;
+
+      return frameWin?.sv?.PageContext ?? null;
+    },
+  });
+
+  return pageContext;
 }

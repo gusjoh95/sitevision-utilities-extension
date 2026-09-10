@@ -1,11 +1,9 @@
-import {
-  getActiveTab,
-  getErrorMessage,
-  getPageContext,
-  getRequiredElement,
-} from '../../../api/index.js';
+import { getActiveTab, getErrorMessage, getRequiredElement } from '../../../api/index.js';
 
-export async function initProperties() {
+/**
+ * @param {import('../../../api/types.js').PageContext} pageContext
+ */
+export async function initProperties(pageContext) {
   /** @type {HTMLFormElement} */
   const form = getRequiredElement('#properties-form');
   /** @type {HTMLInputElement} */
@@ -15,7 +13,7 @@ export async function initProperties() {
   /** @type {HTMLInputElement} */
   const currentUserId = getRequiredElement('#current-user-id');
 
-  const { pageId, userIdentityId } = await getPageContext();
+  const { pageId, userIdentityId } = pageContext;
 
   propertiesIdInput.disabled = false;
   propertiesIdInput.focus();
@@ -100,5 +98,6 @@ export async function initProperties() {
       errEl.textContent = `Error: ${msg}`;
     }
   }
+
   form.addEventListener('submit', onPropertiesSubmit);
 }

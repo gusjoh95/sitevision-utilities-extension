@@ -14,7 +14,7 @@ const DEFAULT_OPTIONS = {
  * Retrieves a single option value by key.
  *
  * @template {OptionKey} K
- * @param {K} key - The option key to retrieve ('useSyntaxHighlighting' | 'reloadOnChange' | 'propertiesWordWrap' | 'jsonTheme').
+ * @param {K} key - The option key to retrieve.
  * @returns {Promise<Options[K]>} A promise that resolves to the value of the specified option key.
  * @throws {TypeError} Throws synchronously if an invalid key is provided.
  */
@@ -27,7 +27,7 @@ export async function getOption(key) {
 
   const defaultValue = DEFAULT_OPTIONS[key];
   const items = await chrome.storage.sync.get({ [key]: defaultValue });
-  return items[key];
+  return /** @type {Options[K]} */ (items[key]);
 }
 
 /**
@@ -66,7 +66,6 @@ export async function setOptions(options = {}) {
     throw new Error('Invalid option key(s): ' + invalid.join(', '));
   }
 
-  // Only store the provided keys (do not write defaults)
   await chrome.storage.sync.set(options);
   return true;
 }

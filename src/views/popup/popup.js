@@ -21,18 +21,18 @@ async function init() {
     const activeUrl = tab?.url;
     if (!activeUrl || (!activeUrl.startsWith('http') && !activeUrl.startsWith('https'))) {
       throw new Error(
-        'Wrong protocol on active tab. Please navigate to a page with http or https protocol and try again.'
+        'Wrong protocol on current tab. Please navigate to a page with http or https protocol and try again.'
       );
     }
 
-    const isSitevision = await getPageContext();
-    if (!isSitevision) {
+    const pageContext = await getPageContext();
+    if (!pageContext) {
       throw new Error(
-        'Active tab is not a Sitevision site. Please navigate to a Sitevision page and try again.'
+        'Current tab is not a Sitevision site. Please navigate to a Sitevision site/page where window.sv is available and try again.'
       );
     }
 
-    await initProperties();
+    await initProperties(pageContext);
     await initParamButtons();
     await initCookieConsent();
 
