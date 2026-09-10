@@ -1,3 +1,4 @@
+export * as SiteVerification from './modules/siteVerification.js';
 export { assignJsonTheme } from './modules/assignJsonTheme.js';
 export { getActiveTab } from './modules/getActiveTab.js';
 export { getErrorMessage } from './modules/getErrorMessage.js';

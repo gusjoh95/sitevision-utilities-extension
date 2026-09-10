@@ -5,6 +5,7 @@ import {
   getRequiredElement,
   isFirefox,
   registerCurrentTabChangeListener,
+  SiteVerification,
 } from '../../api/index.js';
 import { initCookieConsent } from './modules/cookie.js';
 import { initParamButtons } from './modules/params.js';
@@ -26,14 +27,22 @@ async function init() {
     }
 
     const pageContext = await getPageContext();
-    if (!pageContext) {
-      throw new Error(
-        'Current tab is not a Sitevision site. Please navigate to a Sitevision site/page where window.sv is available and try again.'
-      );
+    if (pageContext) {
+      SiteVerification.set(tab, true);
+    } else {
+      const status = await SiteVerification.get(tab);
+      if (status === SiteVerification.Status.UNKNOWN) {
+        //TODO retry by fetching /edit in scripting-context
+        throw new Error(
+          'Current tab is not a Sitevision site. Please navigate to a Sitevision site/page where window.sv is available and try again.'
+        );
+      }
     }
 
     await initProperties(pageContext);
-    await initParamButtons();
+    if (pageContext) {
+      await initParamButtons();
+    }
     await initCookieConsent();
 
     if (!tabReloadListenerRegistered) {

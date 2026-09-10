@@ -1,7 +1,7 @@
 import { getActiveTab, getErrorMessage, getRequiredElement } from '../../../api/index.js';
 
 /**
- * @param {import('../../../api/types.js').PageContext} pageContext
+ * @param {import('../../../api/types.js').PageContext | null} pageContext
  */
 export async function initProperties(pageContext) {
   /** @type {HTMLFormElement} */
@@ -13,8 +13,6 @@ export async function initProperties(pageContext) {
   /** @type {HTMLInputElement} */
   const currentUserId = getRequiredElement('#current-user-id');
 
-  const { pageId, userIdentityId } = pageContext;
-
   propertiesIdInput.disabled = false;
   propertiesIdInput.focus();
 
@@ -24,15 +22,15 @@ export async function initProperties(pageContext) {
   /** @type {HTMLInputElement} */ (getRequiredElement('#properties-online-mode')).disabled = false;
   /** @type {HTMLInputElement} */ (getRequiredElement('#properties-offline-mode')).disabled = false;
 
-  if (pageId) {
-    currentPageId.value = pageId;
+  if (pageContext?.pageId) {
+    currentPageId.value = pageContext.pageId;
     /** @type {HTMLButtonElement} */ (
       getRequiredElement("button[type='submit'][value='getCurrentPage']")
     ).disabled = false;
   }
 
-  if (userIdentityId) {
-    currentUserId.value = userIdentityId;
+  if (pageContext?.userIdentityId) {
+    currentUserId.value = pageContext.userIdentityId;
     /** @type {HTMLButtonElement} */ (
       getRequiredElement("button[type='submit'][value='getCurrentUser']")
     ).disabled = false;
