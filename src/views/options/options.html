@@ -24,12 +24,12 @@
     </div>
     <div id="properties-wrapper">
       <h2>Node properties</h2>
-      <label
-        class="tooltipped"
-        data-tooltip="This option also enables clickable node traversal in the properties view"
-      >
-        <input type="checkbox" id="use-syntax-highlighting" />
-        <span>Highlight JSON syntax</span>
+      <label data-tooltip="Enables colors and clickable nodes">
+        <input type="checkbox" id="use-syntax-highlighting" aria-describedby="syntax-desc" />
+        <span>Rich JSON view</span>
+        <span id="syntax-desc" class="sr-only">
+          Enables syntax highlighting and clickable node traversal in the properties view.
+        </span>
       </label>
       <div>
         <label for="theme-dropdown">JSON theme:</label>
@@ -48,9 +48,9 @@
     </div>
     <div id="session-params-wrapper">
       <h2>Session parameters</h2>
-      <label class="tooltipped" data-tooltip='*(unless URL contains "/edit")'>
+      <label data-tooltip aria-label="test">
         <input type="checkbox" id="reload-on-change" />
-        <span>Reload page when changing parameter (online mode*)</span>
+        <span>Reload page on parameter change</span>
       </label>
     </div>
     <div id="save-wrapper">

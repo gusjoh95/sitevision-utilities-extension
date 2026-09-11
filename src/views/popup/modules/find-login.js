@@ -25,27 +25,26 @@ export async function initFindLogin() {
     // Enable button once origin is resolved
     findLoginBtn.disabled = false;
 
-    // Check permissions on load for Firefox to update UI accordingly
-    if (firefox) {
-      hasHostPerm = await chrome.permissions.contains({ origins: [`${origin}/*`] });
+    // Check permissions on load
+    hasHostPerm = await chrome.permissions.contains({ origins: [`${origin}/*`] });
 
-      if (!hasHostPerm) {
-        findLoginBtn.setAttribute('data-tooltip', 'Find login page (requires host permission)');
-        findLoginBtn.setAttribute(
-          'aria-label',
-          'Find login page. Requires host permission, popup will close to show prompt.'
-        );
-      }
+    if (!hasHostPerm) {
+      findLoginBtn.setAttribute('data-tooltip', 'Find login page (requires host permission)');
+      findLoginBtn.setAttribute(
+        'aria-label',
+        'Find login page. Requires host permission, popup will close to show prompt.'
+      );
     }
 
     findLoginBtn.addEventListener('click', async () => {
       try {
-        if (firefox && !hasHostPerm) {
-          // Trigger the prompt and close the popup immediately so it doesn't hide the doorhanger.
-          // Note: We cannot await this. Closing the window destroys the script context,
-          // so the user will need to grant permission and then click the button again.
+        if (!hasHostPerm) {
+          // Note: We cannot await this.
           chrome.permissions.request({ origins: [`${origin}/*`] });
-          window.close();
+          if (firefox) {
+            // Manual close on Firefox since popup covers the permission prompt.
+            window.close();
+          }
           return;
         }
 
