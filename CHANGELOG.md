@@ -17,6 +17,7 @@ For details on the 4-digit versioning strategy (`MAJOR.MINOR.PATCH.HOTFIX`), see
 
 - Development and release workflows now select a browser manifest before loading or packaging the extension (`npm run dev:ch` or `npm run dev:ff`).
 - Add Firefox host-permission handling from the popup click gesture and update the UI when discovery requires permission.
+- Improve tooltip accessibility across the UI by switching to `data-tooltip` and `sr-only` descriptions, while updating the HTML lint rules to enforce the new pattern.
 - Update release packaging to create browser-specific archives and validate manifest differences.
 - UI feedback and state rollback for session parameter toggles ([#1](https://github.com/gusjoh95/sitevision-utilities-extension/issues/1)):
   - Disable checkbox and set indeterminate state while processing network request.
