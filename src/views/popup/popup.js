@@ -45,18 +45,16 @@ async function init() {
 
       if (status === SiteVerification.Status.UNKNOWN) {
         const origin = new URL(activeUrl).origin;
-        const pageContextRegex =
-          /<script[\s\S]*?>[\s\S]*?\bsv\.PageContext\s*=\s*\{[\s\S]*?\}[\s\S]*?<\/script>/i;
-
-        const isSitevision = await matchDOM(tab, origin, pageContextRegex);
+        const isSitevision = await matchDOM(tab, origin, {
+          selector: 'script',
+          pattern: /\bsv\.PageContext\s*=\s*\{/i,
+        });
         await SiteVerification.set(tab, isSitevision);
         status = isSitevision ? SiteVerification.Status.VERIFIED : SiteVerification.Status.REJECTED;
       }
 
       if (status === SiteVerification.Status.REJECTED) {
-        throw new Error(
-          'Current tab is not a Sitevision site. Please navigate to a Sitevision site/page where window.sv is available and try again.'
-        );
+        throw new Error('Current tab is not a Sitevision site.');
       }
     }
 

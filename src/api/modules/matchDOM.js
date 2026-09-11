@@ -1,48 +1,55 @@
 import { getErrorMessage } from './getErrorMessage.js';
 
 /**
- * Executes a scoped fetch script inside a browser tab to test fetched HTML
- * against a provided regular expression pattern.
+ * @typedef {Object} MatchOptions
+ * @property {string} [selector='*'] - CSS selector to target specific elements (e.g., 'script', 'meta').
+ * @property {RegExp | string} [pattern] - The regex pattern to match against element content.
+ */
+
+/**
+ * Executes a scoped fetch script inside a browser tab to test elements matching
+ * a CSS selector against a provided regular expression pattern.
  *
  * @param {chrome.tabs.Tab} tab - The target tab where the script should be executed.
- * @param {string | string[]} urls - Full URL or array of URLs to fetch and test.
- * @param {RegExp | string} pattern - The regex pattern to match against the fetched HTML.
- * @returns {Promise<boolean>} Resolves with true if any URL yields HTML matching the pattern, otherwise false.
+ * @param {string} url - Full URL to fetch and test.
+ * @param {MatchOptions} [options={}] - Matching configuration options.
+ * @returns {Promise<boolean>} Resolves with true if the URL yields matching content, otherwise false.
  * @throws {Error} Throws if tab/tab ID is missing or if script injection fails.
  */
-export default async function matchDOM(tab, urls, pattern) {
+export default async function matchDOM(tab, url, { selector = '*', pattern = '' } = {}) {
   const targetTabId = Number(tab?.id);
   if (!targetTabId) {
     throw new Error('Missing originating Tab ID.');
   }
 
-  /** @type {string[]} */
-  const urlsToCheck = Array.isArray(urls) ? urls : [urls];
   const patternSource = pattern instanceof RegExp ? pattern.source : pattern;
   const patternFlags = pattern instanceof RegExp ? pattern.flags : 'i';
 
   // Overriding TS signature with `@type {any}` due to chrome.scripting API limitation with `args`.
   /** @type {any} */
-  const checkUrlsTask = async (
-    /** @type {string[]} */ targetUrls,
+  const checkUrlTask = async (
+    /** @type {string} */ targetUrl,
+    /** @type {string} */ sel,
     /** @type {string} */ source,
     /** @type {string} */ flags
   ) => {
     try {
+      const response = await fetch(targetUrl);
+
+      if (!response.ok) {
+        throw new Error(
+          `Fetch failed for ${targetUrl}: HTTP ${response.status}${response.statusText ? ` ${response.statusText}` : ''}`
+        );
+      }
+
+      const html = await response.text();
+      const doc = new DOMParser().parseFromString(html, 'text/html');
+      const elements = doc.querySelectorAll(sel);
       const regex = new RegExp(source, flags);
 
-      for (const url of targetUrls) {
-        const response = await fetch(url);
-
-        if (!response.ok) {
-          throw new Error(
-            `Fetch failed for ${url}: HTTP ${response.status}${response.statusText ? ` ${response.statusText}` : ''}`
-          );
-        }
-
-        const html = await response.text();
-
-        if (regex.test(html)) {
+      for (const el of elements) {
+        const targetText = el.textContent || el.getAttribute('content') || '';
+        if (regex.test(targetText)) {
           return true;
         }
       }
@@ -61,8 +68,8 @@ export default async function matchDOM(tab, urls, pattern) {
   try {
     injectionResults = await chrome.scripting.executeScript({
       target: { tabId: targetTabId },
-      func: checkUrlsTask,
-      args: [urlsToCheck, patternSource, patternFlags],
+      func: checkUrlTask,
+      args: [url, selector, patternSource, patternFlags],
     });
   } catch (error) {
     throw new Error(getErrorMessage(error), { cause: error });
