@@ -1,5 +1,6 @@
 import {
   getActiveTab,
+  getErrorMessage,
   getRequiredElement,
   reloadCurrentTab,
   updateSessionWithParam,
@@ -71,7 +72,10 @@ export async function initParamButtons() {
 
     /** @type {{ result?: { profiling: boolean, jsdebug: boolean, slimrender: boolean } } | undefined} */
     const res = results?.[0];
-    return res?.result ?? { profiling: false, jsdebug: false, slimrender: false };
+    if (!res?.result) {
+      throw new Error('Session parameter check returned no result.');
+    }
+    return res.result;
   }
 
   /**
@@ -87,16 +91,21 @@ export async function initParamButtons() {
       checkbox.indeterminate = true; // Note: This is purely a visual change.
 
       const targetState = checkbox.checked;
-      const success = await updateSessionWithParam(paramKey, targetState);
+      try {
+        const success = await updateSessionWithParam(paramKey, targetState);
 
-      checkbox.indeterminate = false; // Note: This is purely a visual change.
-      checkbox.disabled = false;
-
-      if (success) {
-        reloadCurrentTab();
-      } else {
-        // Revert GUI state if the network request failed
+        if (success) {
+          await reloadCurrentTab();
+        } else {
+          // Revert GUI state if the network request failed
+          checkbox.checked = !targetState;
+        }
+      } catch (error) {
         checkbox.checked = !targetState;
+        getRequiredElement('#error').textContent = `Error: ${getErrorMessage(error)}`;
+      } finally {
+        checkbox.indeterminate = false; // Note: This is purely a visual change.
+        checkbox.disabled = false;
       }
     });
   }

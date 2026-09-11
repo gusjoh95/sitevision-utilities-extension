@@ -6,9 +6,11 @@ import { getOptions } from './options.js';
  * @returns {void}
  */
 export function assignJsonTheme(linkElement) {
-  getOptions().then((opts) => {
-    const themeFile = opts?.jsonTheme;
-    if (!themeFile) return;
-    linkElement.href = chrome.runtime.getURL(`resources/style/json-themes/${themeFile}`);
-  });
+  getOptions()
+    .then((opts) => {
+      const themeFile = opts?.jsonTheme;
+      if (!themeFile) return;
+      linkElement.href = chrome.runtime.getURL(`resources/style/json-themes/${themeFile}`);
+    })
+    .catch((error) => console.error('Failed to apply JSON theme:', error));
 }

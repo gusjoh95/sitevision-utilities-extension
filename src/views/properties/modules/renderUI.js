@@ -22,7 +22,9 @@ if (useSyntaxHighlighting) {
     const target = event.target.closest('.json-id');
     if (target) {
       const nextNode = target.textContent.replace(/"/g, '');
-      navigateToNode(nextNode, null, 'push');
+      void navigateToNode(nextNode, null, 'push').catch((error) => {
+        preElem.textContent = `Error: ${getErrorMessage(error)}`;
+      });
     }
   });
 }

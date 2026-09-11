@@ -37,7 +37,7 @@ export async function getPageContext() {
     throw new Error('Could not retrieve PageContext: No valid active tab found.');
   }
 
-  const [{ result: pageContext }] = await chrome.scripting.executeScript({
+  const results = await chrome.scripting.executeScript({
     target: { tabId: tab.id },
     world: 'MAIN',
     func: () => {
@@ -57,5 +57,9 @@ export async function getPageContext() {
     },
   });
 
-  return pageContext;
+  if (!results?.[0]) {
+    throw new Error('Could not retrieve PageContext: Script returned no result.');
+  }
+
+  return results[0].result;
 }

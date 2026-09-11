@@ -1,16 +1,17 @@
-import { assignJsonTheme, getRequiredElement } from '../../../api/index.js';
+import { assignJsonTheme, getErrorMessage, getRequiredElement } from '../../../api/index.js';
 import { initButtons } from './initButtons.js';
 import { getCurrentState } from './getCurrentState.js';
 import { navigateToNode, renderUI } from './renderUI.js';
 
 // Handle Browser Back / Forward buttons instantly using the history payload
 window.addEventListener('popstate', (event) => {
-  if (event.state && event.state.cachedData) {
-    navigateToNode(event.state.node, event.state.cachedData, 'none');
-  } else {
-    const state = getCurrentState();
-    navigateToNode(state.node, null, 'replace');
-  }
+  void (
+    event.state && event.state.cachedData
+      ? navigateToNode(event.state.node, event.state.cachedData, 'none')
+      : navigateToNode(getCurrentState().node, null, 'replace')
+  ).catch((error) => {
+    getRequiredElement('.json-holder pre').textContent = `Error: ${getErrorMessage(error)}`;
+  });
 });
 
 // Entrypoint
@@ -42,6 +43,6 @@ export async function initPropertiesView() {
   if (useCacheOnReload && window.history.state && window.history.state.cachedData) {
     renderUI(window.history.state.cachedData, state);
   } else {
-    navigateToNode(state.node, null, 'replace');
+    await navigateToNode(state.node, null, 'replace');
   }
 }

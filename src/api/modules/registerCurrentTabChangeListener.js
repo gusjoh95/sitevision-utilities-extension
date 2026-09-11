@@ -8,15 +8,19 @@ import { getActiveTab } from './getActiveTab.js';
  */
 export function registerCurrentTabChangeListener(onTabComplete) {
   chrome.tabs.onUpdated.addListener(async (tabId, changeInfo) => {
-    const activeTab = await getActiveTab();
-    // Unsure why this doesnt fail in firefox.
-    if (!activeTab) return;
+    try {
+      const activeTab = await getActiveTab();
+      // Unsure why this doesnt fail in firefox.
+      if (!activeTab) return;
 
-    // Wait for the tab update to complete and check if the updated tab is the active one before executing the callback.
-    if (tabId === activeTab.id && changeInfo.status === 'complete') {
-      if (typeof onTabComplete === 'function') {
-        await onTabComplete();
+      // Wait for the tab update to complete and check if the updated tab is the active one before executing the callback.
+      if (tabId === activeTab.id && changeInfo.status === 'complete') {
+        if (typeof onTabComplete === 'function') {
+          await onTabComplete();
+        }
       }
+    } catch (error) {
+      console.error('Failed to handle active tab update:', error);
     }
   });
 }

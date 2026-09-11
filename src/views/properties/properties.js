@@ -1,4 +1,4 @@
-import { getRequiredElement } from '../../api/index.js';
+import { getErrorMessage, getRequiredElement } from '../../api/index.js';
 import { initPropertiesView } from './modules/initPropertiesView.js';
 
 export const restApiPath = '/rest-api/1';
@@ -11,4 +11,6 @@ async function init() {
   await initPropertiesView();
 }
 
-init();
+init().catch((error) => {
+  getRequiredElement('.json-holder pre').textContent = `Error: ${getErrorMessage(error)}`;
+});

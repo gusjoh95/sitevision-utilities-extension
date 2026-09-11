@@ -31,6 +31,9 @@ document.addEventListener('DOMContentLoaded', async () => {
     try {
       const jsonUrl = chrome.runtime.getURL('resources/style/json-themes/themes.json');
       const response = await fetch(jsonUrl);
+      if (!response.ok) {
+        throw new Error(`Failed to load themes: HTTP ${response.status} ${response.statusText}`);
+      }
       /** @type {{ file: string, name: string }[]} */
       const themes = await response.json();
 
@@ -48,6 +51,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       themes.forEach(renderTheme);
     } catch (error) {
       console.error('Failed to load themes', error);
+      properties.textContent = getErrorMessage(error);
     }
     dropdown.addEventListener('change', () => {
       const selectedTheme = dropdown.value || 'default.css';
@@ -55,8 +59,8 @@ document.addEventListener('DOMContentLoaded', async () => {
     });
 
     saveBtn.removeAttribute('disabled');
-  } catch {
-    properties.textContent = 'Failed to load options';
+  } catch (error) {
+    properties.textContent = getErrorMessage(error);
   }
 
   async function handleSave() {
@@ -82,13 +86,24 @@ document.addEventListener('DOMContentLoaded', async () => {
   /** @type {HTMLDetailsElement} */
   const expandable = getRequiredElement('#expandable');
   expandable.addEventListener('toggle', async () => {
-    if (expandable.open) {
-      /** @type {HTMLPreElement} */
-      const preview = getRequiredElement('.json-holder pre');
-      if (!preview.hasChildNodes()) {
-        const dummyJson = await fetch(chrome.runtime.getURL('views/options/dummydata/dummy.json'));
-        preview.replaceChildren(highlightJson(await dummyJson.json()));
+    try {
+      if (expandable.open) {
+        /** @type {HTMLPreElement} */
+        const preview = getRequiredElement('.json-holder pre');
+        if (!preview.hasChildNodes()) {
+          const dummyJson = await fetch(
+            chrome.runtime.getURL('views/options/dummydata/dummy.json')
+          );
+          if (!dummyJson.ok) {
+            throw new Error(
+              `Failed to load preview: HTTP ${dummyJson.status} ${dummyJson.statusText}`
+            );
+          }
+          preview.replaceChildren(highlightJson(await dummyJson.json()));
+        }
       }
+    } catch (error) {
+      properties.textContent = getErrorMessage(error);
     }
   });
 });
