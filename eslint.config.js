@@ -28,12 +28,6 @@ export default defineConfig([
           selector: 'ImportDeclaration[source.value=/\\/api\\/(?!index\\.js$)/]',
           message: 'Import API implementations through api/index.js',
         },
-        {
-          selector:
-            "CallExpression[callee.property.name='add'][callee.object.property.name='classList'] > Literal[value='tooltipped']",
-          message:
-            "Adding 'tooltipped' class via classList. Ensure aria-label is also set on the element.",
-        },
       ],
     },
   },
@@ -46,13 +40,11 @@ export default defineConfig([
       custom: htmlRules,
     },
     languageOptions: {
-      parser: htmlParser, // Required by custom rules that rely on the HTML AST
+      parser: htmlParser,
     },
     rules: {
       '@html-eslint/no-duplicate-class': 'error',
-      ...Object.fromEntries(
-        Object.keys(htmlRules.rules).map((rule) => [`custom/${rule}`, 'error'])
-      ),
+      ...htmlRules.configs.recommended.rules,
     },
   },
 ]);

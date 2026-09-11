@@ -15,7 +15,12 @@ form .properties-search {
   }
 }
 
-pre {
-  min-width: 100%;
-  overflow-x: auto;
+div.button-collection {
+  --icon-size: 1.5rem;
+  button {
+    padding: 4px;
+  }
+  #open-options {
+    margin-left: auto;
+  }
 }

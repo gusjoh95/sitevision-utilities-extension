@@ -9,11 +9,27 @@
 
   <body>
     <div id="error"></div>
+    <div id="login-paths-wrapper">
+      <h2>Find login page</h2>
+      <div>
+        <label for="custom-login-paths">
+          Custom candidate paths (one per line or comma-separated):
+        </label>
+        <textarea
+          id="custom-login-paths"
+          rows="4"
+          placeholder="/login&#10;/system/login"
+        ></textarea>
+      </div>
+    </div>
     <div id="properties-wrapper">
       <h2>Node properties</h2>
-      <label>
-        <input type="checkbox" id="use-syntax-highlighting" />
-        Highlight JSON (also enables sitevision-node traversal in properties view)
+      <label data-tooltip="Enables colors and clickable nodes">
+        <input type="checkbox" id="use-syntax-highlighting" aria-describedby="syntax-desc" />
+        <span>Rich JSON view</span>
+        <span id="syntax-desc" class="sr-only">
+          Enables syntax highlighting and clickable node traversal in the properties view.
+        </span>
       </label>
       <div>
         <label for="theme-dropdown">JSON theme:</label>
@@ -32,9 +48,9 @@
     </div>
     <div id="session-params-wrapper">
       <h2>Session parameters</h2>
-      <label>
+      <label data-tooltip aria-label="test">
         <input type="checkbox" id="reload-on-change" />
-        <span>Reload page when changing parameter (unless URL contains <i>/edit</i>)</span>
+        <span>Reload page on parameter change</span>
       </label>
     </div>
     <div id="save-wrapper">

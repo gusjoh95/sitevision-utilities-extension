@@ -1,11 +1,9 @@
 :root {
-  --view-width: 100%;
+  --view-width: unset;
 }
 
-pre {
-  border-radius: var(--border-radius);
-  width: max-content;
-  padding: 8px;
+textarea {
+  width: 100%;
 }
 
 summary:hover {

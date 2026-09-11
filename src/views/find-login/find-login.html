@@ -1,0 +1,30 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="stylesheet" href="../../resources/style/base.css" />
+    <link rel="stylesheet" href="find-login.css" />
+    <title>Find login page</title>
+  </head>
+
+  <body>
+    <div class="find-login-header">
+      <h1>Find login page</h1>
+      <div class="actions">
+        <button type="button" id="start-discovery" class="button">Run Discovery</button>
+      </div>
+    </div>
+
+    <div class="status-summary" id="status-summary">
+      <span class="badge badge-idle">Idle</span>
+      <span id="summary-text">Ready to probe target origin...</span>
+    </div>
+
+    <div class="log-holder">
+      <pre id="log-container" class="log-container" role="log" aria-live="polite"></pre>
+    </div>
+
+    <script type="module" src="find-login.js"></script>
+  </body>
+</html>

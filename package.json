@@ -12,6 +12,8 @@
   "scripts": {
     "lint": "eslint src",
     "format": "prettier --write .",
-    "create-release": "node ./scripts/create-release.js"
+    "create-release": "node ./scripts/create-release.js",
+    "dev:ch": "node scripts/switch-manifest.js chrome",
+    "dev:ff": "node scripts/switch-manifest.js firefox"
   }
 }

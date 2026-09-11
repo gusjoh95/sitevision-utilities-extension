@@ -3,6 +3,8 @@ const DEFAULT_OPTIONS = {
   reloadOnChange: true,
   propertiesWordWrap: false, // TODO: Easily accessed/changed through GUI, should be stored in unsynced settings
   jsonTheme: '',
+  /** @type {string[]} */
+  customLoginPaths: [],
 };
 
 /**
@@ -43,6 +45,7 @@ export async function getOptions() {
     reloadOnChange: Boolean(items?.reloadOnChange),
     propertiesWordWrap: Boolean(items?.propertiesWordWrap),
     jsonTheme: String(items?.jsonTheme ?? DEFAULT_OPTIONS.jsonTheme),
+    customLoginPaths: Array.isArray(items?.customLoginPaths) ? items.customLoginPaths : [],
   };
 }
 

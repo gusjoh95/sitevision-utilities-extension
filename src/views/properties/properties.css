@@ -16,31 +16,3 @@ pre {
     word-break: break-word;
   }
 }
-
-.properties-buttons {
-  display: flex;
-  gap: 8px;
-  flex-direction: row;
-
-  button {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-
-    .icon {
-      width: 16px;
-      height: 16px;
-      display: block;
-    }
-
-    &.active {
-      background-color: var(--bg-color-dark);
-      color: var(--fg-color-light);
-      border-color: var(--fg-color-light);
-    }
-
-    &:active:not(:disabled) {
-      box-shadow: inset 0 2px 4px 0 rgba(0, 0, 0, 0.2);
-    }
-  }
-}

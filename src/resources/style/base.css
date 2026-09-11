@@ -52,7 +52,7 @@ body {
 }
 
 body {
-  padding: 14px;
+  padding: 8px 14px;
   background-color: var(--bg-color);
   color: var(--fg-color);
 }
@@ -72,7 +72,7 @@ form {
   flex-direction: column;
 
   & fieldset {
-    margin: 4px 0;
+    margin: 0 0 4px;
     padding: 0;
     border-radius: 0;
     display: flex;
@@ -160,6 +160,8 @@ pre {
   color: var(--fg-color-light);
   padding: 12px;
   border-radius: var(--border-radius);
+  width: 100%;
+  overflow-x: auto;
 
   &:empty {
     display: none;
@@ -183,14 +185,14 @@ pre {
 }
 
 [id$='-wrapper'] {
-  padding: 6px 0 12px;
+  padding: 8px 0 12px;
 
   & h2 {
-    margin: 6px 0;
+    margin: 0 0 6px;
   }
 
   & > div {
-    margin: 6px 0 0;
+    margin: 6px 0;
   }
 
   & ~ [id$='-wrapper'] {
@@ -198,24 +200,25 @@ pre {
   }
 }
 
-/* Custom tooltips */
-.tooltipped {
+[data-tooltip] {
   display: inline-flex;
-
-  /* 1. Define anchor on parent */
   anchor-name: --tooltip-anchor;
-  /* Scope, multiple tooltips should not interfere */
   anchor-scope: --tooltip-anchor;
 
-  &::after {
-    content: attr(aria-label, attr(data-tooltip));
+  &::before {
+    content: attr(data-tooltip);
+  }
 
-    /* 2. Position fixed relative to viewport anchor */
+  &:is([data-tooltip='']) {
+    &::before {
+      content: attr(aria-label);
+    }
+  }
+
+  &::before {
     position: fixed;
     position-anchor: --tooltip-anchor;
     position-area: top;
-
-    /* 3. Automatic viewport collision handling (Y-axis: flip-block, X-axis: flip-inline) */
     position-try-fallbacks: flip-block, flip-inline;
     margin-bottom: 6px;
 
@@ -224,26 +227,83 @@ pre {
     font-size: 0.75rem;
     padding: 0.25rem 0.5rem;
     border-radius: calc(var(--border-radius) / 2);
-    white-space: nowrap;
     pointer-events: none;
     z-index: 1000;
 
     opacity: 0;
     visibility: hidden;
-
-    /* Reset delay on hide */
     transition-delay: 0.15s;
   }
 
-  &:hover::after,
-  &:focus-visible::after {
+  &:hover::before,
+  &:focus-visible::before,
+  &:has(> :is(input, textarea):focus-visible)::before {
     opacity: 1;
     visibility: visible;
     transition-delay: 0.4s;
   }
 
-  &:not([aria-label]):not([data-tooltip]) {
-    outline: 2px dashed red;
+  &:not([data-tooltip]):not([aria-label]),
+  &:not(:has(::before)) {
+    outline: 3px solid red;
+    outline-offset: 2px;
+  }
+
+  &:is(label) span::after {
+    content: '?';
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 1.125rem;
+    height: 1.125rem;
+    border: 1px solid var(--fg-color-light);
+    border-radius: 50%;
+    background-color: var(--bg-color-dark);
+    color: var(--fg-color-light);
+    font-size: 0.75em;
+    margin-left: 0.25em;
+    flex-shrink: 0;
+    vertical-align: baseline;
+  }
+}
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+div.button-collection {
+  display: flex;
+  gap: 8px;
+  flex-direction: row;
+
+  button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+
+    .icon {
+      width: var(--icon-size, 1rem);
+      height: var(--icon-size, 1rem);
+      display: block;
+    }
+
+    &.active {
+      background-color: var(--bg-color-dark);
+      color: var(--fg-color-light);
+      border-color: var(--fg-color-light);
+    }
+
+    &:active:not(:disabled) {
+      box-shadow: inset 0 2px 4px 0 rgba(0, 0, 0, 0.2);
+    }
   }
 }
 

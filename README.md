@@ -1,74 +1,129 @@
 # Sitevision Utilities Extension
 
-A lightweight browser extension for [Sitevision](https://sitevision.net/) developers providing debugging and development utilities.  
-Supports Chromium (Chrome, Edge, Brave) and Firefox using Manifest V3 with no build step required.
+A lightweight browser extension for [Sitevision](https://sitevision.net/) developers. It provides debugging and development utilities for Chromium browsers and Firefox using Manifest V3.
 
-## Contributing
+## For users
 
-For contribution guidelines and project direction, see [CONTRIBUTING.md](CONTRIBUTING.md).
+### Features
 
-## What the extension does
+The popup is arranged in this order:
 
-The extension is centered around the views in `src/views` and a small shared API layer in `src/api`.
+1. **Find login page**: checks `/edit` and configured custom paths for Sitevision login forms, internal redirects, and external identity-provider redirects. Results and request errors are shown in a dedicated discovery window.
+2. **Open options**: opens the extension settings page.
+3. **Node properties**: inspect the current page, current user, or a manually supplied node id through the Sitevision REST API. Referenced node ids can be opened directly from the JSON result. See the [Sitevision REST API documentation](https://developer.sitevision.se/docs/rest-api/model-rest-api).
+4. **Session parameters**: toggle `profiling`, `jsdebug`, and `slimRender`. The active page can be reloaded after a change when enabled in settings.
+5. **Consent cookie**: inspect accepted and denied consent-cookie categories. This feature requires additional browser permissions.
 
-- **Node properties:** From the popup, the user can inspect the current page, the current user (when available), or a manually supplied node id. The extension opens a dedicated properties view, fetches node properties from the Sitevision REST API, and lets the user navigate between referenced node ids directly in the result. For more information about the Sitevision API used here, see the [REST API documentation](https://developer.sitevision.se/docs/rest-api/model-rest-api).
-- **Session parameters:** The popup can toggle Sitevision session flags such as `profiling`, `jsdebug`, and `slimRender`. Changing either flag triggers a background request, and the active page is reloaded afterward when that behavior is enabled in settings.
-- **Consent cookie inspection:** The extension can read the Sitevision consent cookie, decode the accepted and denied cookie categories, and display them in a readable format. This function requires additional permissions.
+### Options
 
-The extension is split into a few focused views:
+The options page provides:
 
-- **`src/views/popup`**: the main control panel for fetching node properties, updating session parameters, and reading the consent cookie.
-- **`src/views/properties`**: the dedicated viewer for JSON property payloads, with clickable node ids and optional syntax highlighting.
-- **`src/views/options`**: configuration page for extension settings.
+- **Highlight JSON**: enables syntax highlighting and clickable node-id traversal in the properties view.
+- **JSON theme**: selects the visual theme for highlighted JSON output.
+- **Reload page when changing parameter**: reloads the current page after a session-parameter change, except when the URL contains `/edit`.
+- **Custom login paths**: adds candidate paths to login discovery. Enter paths one per line or separated by commas; paths without a leading `/` are normalized automatically.
 
-### Available options
+### Browser permissions
 
-The settings page currently contains the following user-configurable options:
+The extension requests additional permissions only for features that need them, such as consent-cookie inspection and login discovery. In Firefox, login discovery may ask for access to the current site when it is first launched. The popup closes so Firefox can display its permission prompt; after granting access, launch the feature again.
 
-- **Highlight JSON**: enables syntax highlighting in the properties view and node-id traversal within the rendered JSON.
-- **JSON theme**: selects the visual theme used for highlighted JSON output.
-- **Reload page when changing parameter**: automatically reloads the current page after a session parameter change, unless the current URL contains `/edit`.
+## For contributors
 
-## Architecture & File Structure
+### Development setup
 
-This project uses native ES modules directly in the browser with no build step, transpilation, or bundling required. The codebase is organized by responsibility: API layer, UI views, and shared resources.
+The extension uses native ES modules and does not need transpilation or bundling. It does require a manifest-selection step because Chrome-based browsers and Firefox use different background configurations.
+
+1. Install dependencies:
+
+   ```bash
+   npm install
+   ```
+
+2. Select the browser you are developing for:
+
+   ```bash
+   npm run dev:ch   # Chrome, Edge, or Brave
+   # or
+   npm run dev:ff   # Firefox
+   ```
+
+   This copies `src/manifest.chrome.json` or `src/manifest.firefox.json` to the generated `src/manifest.json`. The generated file is ignored by Git.
+
+3. Load the `src` directory as an unpacked extension in the browser. Run the matching manifest command again whenever you switch browsers.
+
+### Available scripts
+
+| Command                  | Purpose                                                |
+| ------------------------ | ------------------------------------------------------ |
+| `npm run dev:ch`         | Select the Chromium manifest for local development.    |
+| `npm run dev:ff`         | Select the Firefox manifest for local development.     |
+| `npm run lint`           | Run ESLint against the `src` directory.                |
+| `npm run format`         | Format the repository with Prettier.                   |
+| `npm run create-release` | Build release archives for the active browser targets. |
+
+#### Release packaging
+
+`npm run create-release` reads both browser manifest templates and creates archives under `dist/chrome` and `dist/firefox`. Each archive contains the shared source files plus the correct manifest renamed to `manifest.json`; the browser-specific template files are excluded.
+
+Before building, the script:
+
+- warns about differences in shared manifest keys and asks for confirmation;
+- compares Chrome and Firefox versions and asks whether to build only the higher-version target when they differ;
+- skips an existing archive unless overwrite is explicitly requested.
+
+Useful flags:
+
+```bash
+npm run create-release -- --force   # overwrite existing archives
+npm run create-release -- --yes     # skip prompts; on version mismatch, build the higher version target
+```
+
+Use `--force --yes` for a non-interactive overwrite build.
+
+### Architecture
+
+The project is organized by responsibility:
 
 ```
 src/
-├── manifest.json                 <-- MV3 manifest
-├── api/
-│   ├── index.js                  <-- Public API facade
-│   └── modules/                  <-- Internal implementation modules
-├── resources/
-│   ├── icons/
-│   └── style/                    <-- Shared CSS & theme files
+├── manifest.chrome.json          <-- Chromium MV3 manifest template
+├── manifest.firefox.json         <-- Firefox MV3 manifest template
+├── manifest.json                 <-- Generated local manifest (ignored)
+├── background/                   <-- Background fetch and runtime services
+├── api/                          <-- Shared extension API modules
+├── resources/                    <-- Icons, shared CSS, and JSON themes
 └── views/
-    ├── popup/
-    ├── options/
-    └── properties/
+    ├── popup/                    <-- Main extension control panel
+    ├── find-login/               <-- Login discovery window
+    ├── options/                  <-- Extension settings
+    └── properties/               <-- JSON node-property viewer
 ```
 
-**Key Design Principles:**
+`src/api/index.js` is the public API facade. Views use native browser modules directly, while background services handle work that should not run in the extension window, such as discovery requests and redirect inspection.
 
-- **Public API Layer:** `src/api/index.js` is the only public entry point for extension features.
-- **Buildless:** ES modules are loaded natively by the browser at runtime. No transpilation or bundling is required.
+### Cross-browser manifests
 
-## Cross-Browser Compatibility
+`src/manifest.chrome.json` and `src/manifest.firefox.json` share the extension metadata but provide browser-specific background settings and Firefox metadata. `src/manifest.json` is a generated local artifact, not a source file to edit manually.
 
-- **Unified API Namespace:** Uses a runtime check to normalize the API entry point across environments without external polyfill libraries:
+### Validation and contributions
 
-  export const ext = globalThis.browser || globalThis.chrome;
+Run validation before opening a pull request:
 
-- **Single Manifest (`manifest.json`):** Contains Firefox settings (`browser_specific_settings`) alongside standard Manifest V3 properties. Chromium ignores Firefox-specific fields without throwing errors.
+```bash
+npm run lint
+npm run format
+```
 
-## Versioning Scheme
+For contribution guidelines and project direction, see [CONTRIBUTING.md](CONTRIBUTING.md).
 
-The project uses a standard 4-digit versioning strategy (`MAJOR.MINOR.PATCH.HOTFIX`) in `manifest.json` to handle browser-specific store updates cleanly:
+### Versioning
+
+The project uses a four-part versioning strategy (`MAJOR.MINOR.PATCH.HOTFIX`) in the browser manifests:
 
 ```
 X . X . X . X
-│   │   │   └── Platform Hotfix (Chrome or Firefox specific fix)
-│   │   └────── Patch (Cross-platform bug fixes)
-│   └────────── Minor (New features)
-└────────────── Major (Breaking changes / complete overhaul)
+│   │   │   └── Platform hotfix (Chrome- or Firefox-specific fix)
+│   │   └────── Patch (cross-platform bug fix)
+│   └────────── Minor (new feature)
+└────────────── Major (breaking change or complete overhaul)
 ```

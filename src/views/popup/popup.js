@@ -10,6 +10,8 @@ import {
   withDeferredSpinner,
 } from '../../api/index.js';
 import { initCookieConsent } from './modules/cookie.js';
+import { initFindLogin } from './modules/find-login.js';
+import { initOpenOptions } from './modules/open-options.js';
 import { initParamButtons } from './modules/params.js';
 import { initProperties } from './modules/properties.js';
 
@@ -58,6 +60,7 @@ async function init() {
       }
     }
 
+    await initFindLogin();
     await initProperties(pageContext);
     if (pageContext) {
       await initParamButtons();
@@ -73,6 +76,15 @@ async function init() {
     /** @type {HTMLDivElement} */
     const errEl = getRequiredElement('#error');
     errEl.textContent = `Error: ${msg}`;
+  } finally {
+    try {
+      await initOpenOptions();
+    } catch (error) {
+      const msg = getErrorMessage(error);
+      /** @type {HTMLDivElement} */
+      const errEl = getRequiredElement('#error');
+      errEl.textContent = `Error: ${msg}`;
+    }
   }
 }
 
