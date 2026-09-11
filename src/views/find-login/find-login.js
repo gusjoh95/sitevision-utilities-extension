@@ -1,4 +1,9 @@
-import { getErrorMessage, getOption, getRequiredElement } from '../../api/index.js';
+import {
+  getErrorMessage,
+  getOption,
+  getRequiredElement,
+  withDeferredSpinner,
+} from '../../api/index.js';
 import { runDiscovery } from './modules/runDiscovery.js';
 
 /**
@@ -14,41 +19,30 @@ async function hasHostPermission(origin) {
 }
 
 export async function initFindLoginView() {
-  const params = new URLSearchParams(window.location.search);
-  const origin = params.get('origin');
-
-  /** @type {HTMLButtonElement} */
-  const startBtn = getRequiredElement('#start-discovery');
+  const origin = new URLSearchParams(window.location.search).get('origin');
   const logContainer = getRequiredElement('#log-container');
+  const spinnerEl = getRequiredElement('#spinner');
 
-  /**
-   * Validates permissions, fetches latest options and runs discovery.
-   */
-  async function startDiscovery() {
-    try {
-      if (!origin) {
-        startBtn.disabled = true;
-        throw new Error('Missing "origin" parameter.');
-      }
+  try {
+    await withDeferredSpinner(
+      async () => {
+        if (!origin) {
+          throw new Error('Missing "origin" parameter.');
+        }
 
-      if (!(await hasHostPermission(origin))) {
-        startBtn.disabled = true;
-        throw new Error(
-          `Missing host permission for ${origin}. Please launch discovery from the extension popup.`
-        );
-      }
+        if (!(await hasHostPermission(origin))) {
+          throw new Error(
+            `Missing host permission for ${origin}. Please launch discovery from the extension popup.`
+          );
+        }
 
-      const customPaths = await getOption('customLoginPaths');
-      runDiscovery(origin, customPaths);
-    } catch (error) {
-      logContainer.textContent = `Error: ${getErrorMessage(error)}`;
-    }
+        runDiscovery(origin, await getOption('customLoginPaths'));
+      },
+      { spinnerEl, delayMs: 0 }
+    );
+  } catch (error) {
+    logContainer.textContent = `Error: ${getErrorMessage(error)}`;
   }
-
-  startBtn.addEventListener('click', startDiscovery);
-
-  // Auto-run discovery on load
-  startDiscovery();
 }
 
 document.addEventListener('DOMContentLoaded', initFindLoginView);
