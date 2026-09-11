@@ -1,4 +1,5 @@
 export * as SiteVerification from './modules/siteVerification.js';
+export { default as matchDOM } from './modules/matchDOM.js';
 export { assignJsonTheme } from './modules/assignJsonTheme.js';
 export { getActiveTab } from './modules/getActiveTab.js';
 export { getErrorMessage } from './modules/getErrorMessage.js';
@@ -10,3 +11,4 @@ export { getOption, getOptions, setOptions } from './modules/options.js';
 export { registerCurrentTabChangeListener } from './modules/registerCurrentTabChangeListener.js';
 export { reloadCurrentTab } from './modules/reloadCurrentTab.js';
 export { updateSessionWithParam } from './modules/updateSessionWithParam.js';
+export { withDeferredSpinner } from './modules/spinner.js';
