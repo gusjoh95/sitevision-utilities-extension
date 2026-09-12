@@ -1,9 +1,10 @@
-import { getActiveTab, getErrorMessage, getRequiredElement } from '../../../api/index.js';
+import { getErrorMessage, getRequiredElement } from '../../../api/index.js';
 
 /**
+ * @param {chrome.tabs.Tab} tab - The active tab.
  * @param {import('../../../api/types.js').PageContext | null} pageContext
  */
-export async function initProperties(pageContext) {
+export async function initProperties(tab, pageContext) {
   /** @type {HTMLFormElement} */
   const form = getRequiredElement('#properties-form');
   /** @type {HTMLInputElement} */
@@ -65,7 +66,6 @@ export async function initProperties(pageContext) {
     }
 
     try {
-      const tab = await getActiveTab();
       if (!tab?.url) {
         throw new Error('No active tab URL available for properties lookup.');
       }

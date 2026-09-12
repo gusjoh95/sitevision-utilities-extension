@@ -1,12 +1,17 @@
 import {
-  getActiveTab,
   getErrorMessage,
   getRequiredElement,
-  reloadCurrentTab,
+  reloadInvocationTab,
   updateSessionWithParam,
 } from '../../../api/index.js';
 
-export async function initParamButtons() {
+/**
+ * @param {chrome.tabs.Tab} tab - The active tab.
+ * @param {import('../../../api/types.js').SitevisionMode} sitevisionMode
+ */
+export async function initParamButtons(tab, sitevisionMode) {
+  void sitevisionMode;
+
   const PARAMS = {
     profiling: 'profiling',
     jsdebug: 'jsdebug',
@@ -20,7 +25,6 @@ export async function initParamButtons() {
   /** @type {HTMLInputElement} */
   const toggleSlimrenderCheckbox = getRequiredElement('#toggle-slimrender');
 
-  const tab = await getActiveTab();
   const activeTabId = tab?.id;
   if (typeof activeTabId !== 'number') {
     throw new Error('No active tab available for session parameter checks.');
@@ -95,7 +99,7 @@ export async function initParamButtons() {
         const success = await updateSessionWithParam(paramKey, targetState);
 
         if (success) {
-          await reloadCurrentTab();
+          await reloadInvocationTab(tab);
         } else {
           // Revert GUI state if the network request failed
           checkbox.checked = !targetState;

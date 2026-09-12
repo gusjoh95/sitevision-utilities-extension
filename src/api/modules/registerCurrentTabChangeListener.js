@@ -1,4 +1,4 @@
-import { getActiveTab } from './getActiveTab.js';
+import { getInvocationTab } from './getInvocationTab.js';
 
 /**
  * Register a callback for active-tab update completion.
@@ -9,7 +9,7 @@ import { getActiveTab } from './getActiveTab.js';
 export function registerCurrentTabChangeListener(onTabComplete) {
   chrome.tabs.onUpdated.addListener(async (tabId, changeInfo) => {
     try {
-      const activeTab = await getActiveTab();
+      const activeTab = await getInvocationTab();
       // Unsure why this doesnt fail in firefox.
       if (!activeTab) return;
 

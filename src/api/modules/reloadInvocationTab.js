@@ -1,22 +1,21 @@
-import { getActiveTab } from './getActiveTab.js';
 import { getOptions } from './options.js';
 
 /**
- * Reloads the currently active tab using chrome.scripting, provided it's not in edit mode.
- * Can optionally bypass the "reloadOnChange" user setting.
+ * Reloads the tab where the extension was invoked using chrome.scripting, provided it's not in edit mode.
+ *
+ * @param {chrome.tabs.Tab} invocationTab - The tab where the extension was invoked.
  * @param {boolean} [respectOption=true] - Whether to respect the "reloadOnChange" user option.
  * @returns {Promise<void>} Resolves when the script has been executed on the tab.
  */
-export async function reloadCurrentTab(respectOption = true) {
-  const tab = await getActiveTab();
-  if (tab.url && !tab.url.includes('/edit')) {
+export async function reloadInvocationTab(invocationTab, respectOption = true) {
+  if (invocationTab.url && !invocationTab.url.includes('/edit')) {
     const { reloadOnChange } = respectOption ? await getOptions() : { reloadOnChange: true };
     if (reloadOnChange) {
-      if (typeof tab?.id !== 'number') {
+      if (typeof invocationTab?.id !== 'number') {
         throw new Error('No active tab available for reload.');
       }
       await chrome.scripting.executeScript({
-        target: { tabId: tab.id },
+        target: { tabId: invocationTab.id },
         func: () => window.location.reload(),
       });
     }

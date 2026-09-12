@@ -1,7 +1,8 @@
 import {
-  getActiveTab,
+  getInvocationTab,
   getErrorMessage,
   getPageContext,
+  getSitevisionMode,
   getRequiredElement,
   isFirefox,
   registerCurrentTabChangeListener,
@@ -22,8 +23,8 @@ let tabReloadListenerRegistered = false;
 
 async function init() {
   try {
-    const tab = await getActiveTab();
-    const activeUrl = tab?.url;
+    const invocationTab = await getInvocationTab();
+    const activeUrl = invocationTab?.url;
     if (!activeUrl) {
       throw new Error(
         'Unable to access tab URL. Please make sure you are on an active web page and try again.'
@@ -36,34 +37,35 @@ async function init() {
       );
     }
 
-    const pageContext = await getPageContext();
+    const pageContext = await getPageContext(invocationTab);
 
     if (pageContext) {
-      await SiteVerification.set(tab, true);
+      await SiteVerification.set(invocationTab, true);
     } else {
-      let status = await SiteVerification.get(tab);
+      let status = await SiteVerification.get(invocationTab);
 
       if (status === SiteVerification.Status.UNKNOWN) {
         const origin = new URL(activeUrl).origin;
-        const isSitevision = await matchDOM(tab, origin, {
+        const isSitevision = await matchDOM(invocationTab, origin, {
           selector: 'script',
           pattern: /\bsv\.PageContext\s*=\s*\{/i,
         });
-        await SiteVerification.set(tab, isSitevision);
+        await SiteVerification.set(invocationTab, isSitevision);
         status = isSitevision ? SiteVerification.Status.VERIFIED : SiteVerification.Status.REJECTED;
       }
-
-      if (status === SiteVerification.Status.REJECTED) {
-        throw new Error('Current tab is not a Sitevision site.');
-      }
     }
 
-    await initFindLogin();
-    await initProperties(pageContext);
+    const sitevisionMode = await getSitevisionMode(invocationTab);
+    if (sitevisionMode === null) {
+      throw new Error('Current tab is not a Sitevision site.');
+    }
+
+    await initFindLogin(invocationTab);
+    await initProperties(invocationTab, pageContext);
     if (pageContext) {
-      await initParamButtons();
+      await initParamButtons(invocationTab, sitevisionMode);
     }
-    await initCookieConsent();
+    await initCookieConsent(invocationTab);
 
     if (!tabReloadListenerRegistered) {
       registerCurrentTabChangeListener(handleTabReload);

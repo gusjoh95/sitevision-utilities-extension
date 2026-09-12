@@ -1,12 +1,9 @@
-import {
-  getActiveTab,
-  getErrorMessage,
-  getRequiredElement,
-  reloadCurrentTab,
-} from '../../../api/index.js';
+import { getErrorMessage, getRequiredElement, reloadInvocationTab } from '../../../api/index.js';
 
-export async function initCookieConsent() {
-  const tab = await getActiveTab();
+/**
+ * @param {chrome.tabs.Tab} tab - The active tab.
+ */
+export async function initCookieConsent(tab) {
   const activeTabUrl = tab?.url;
   if (!activeTabUrl) {
     throw new Error('No active tab URL available for cookie consent checks.');
@@ -81,7 +78,7 @@ export async function initCookieConsent() {
                     resolve(undefined);
                   });
                 });
-                await reloadCurrentTab(false);
+                await reloadInvocationTab(tab, false);
               } catch (error) {
                 getRequiredElement('#error').textContent = `Error: ${getErrorMessage(error)}`;
               }

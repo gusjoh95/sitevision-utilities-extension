@@ -1,14 +1,14 @@
 export * as SiteVerification from './modules/siteVerification.js';
 export { default as matchDOM } from './modules/matchDOM.js';
 export { assignJsonTheme } from './modules/assignJsonTheme.js';
-export { getActiveTab } from './modules/getActiveTab.js';
+export { getInvocationTab } from './modules/getInvocationTab.js';
 export { getErrorMessage } from './modules/getErrorMessage.js';
-export { getPageContext } from './modules/getPageContext.js';
+export { getPageContext, getSitevisionMode } from './modules/getPageContext.js';
 export { getRequiredElement } from './modules/getRequiredElement.js';
 export { highlightJson } from './modules/highlightJson.js';
 export { isFirefox } from './modules/isFirefox.js';
 export { getOption, getOptions, setOptions } from './modules/options.js';
 export { registerCurrentTabChangeListener } from './modules/registerCurrentTabChangeListener.js';
-export { reloadCurrentTab } from './modules/reloadCurrentTab.js';
+export { reloadInvocationTab } from './modules/reloadInvocationTab.js';
 export { updateSessionWithParam } from './modules/updateSessionWithParam.js';
 export { withDeferredSpinner } from './modules/spinner.js';

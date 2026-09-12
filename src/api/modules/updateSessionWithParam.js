@@ -1,4 +1,4 @@
-import { getActiveTab } from './getActiveTab.js';
+import { getInvocationTab } from './getInvocationTab.js';
 import { getErrorMessage } from './getErrorMessage.js';
 
 /**
@@ -19,7 +19,7 @@ export async function updateSessionWithParam(param, value) {
     throw new Error('Missing param or value when trying to update session');
   }
 
-  const tab = await getActiveTab();
+  const tab = await getInvocationTab();
   if (!tab?.id || !tab?.url) return false;
 
   const pageUrl = new URL(tab.url);

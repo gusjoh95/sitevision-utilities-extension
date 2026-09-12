@@ -4,20 +4,19 @@ import { getErrorMessage, getRequiredElement, isFirefox } from '../../../api/ind
  * Initializes the "Find login page" feature inside the popup.
  * Enables the button and attaches click event listener to launch discovery window.
  *
+ * @param {chrome.tabs.Tab} tab - The active tab.
  * @returns {Promise<void>}
  */
-export async function initFindLogin() {
+export async function initFindLogin(tab) {
   /** @type {HTMLButtonElement} */
   const findLoginBtn = getRequiredElement('#find-login');
 
   try {
-    const [activeTab] = await chrome.tabs.query({ active: true, currentWindow: true });
-
-    if (!activeTab?.url) {
+    if (!tab?.url) {
       throw new Error('No active tab URL found.');
     }
 
-    const origin = new URL(activeTab.url).origin;
+    const origin = new URL(tab.url).origin;
     const firefox = await isFirefox();
 
     let hasHostPerm = true;
