@@ -32,7 +32,27 @@ export async function initCookieConsent(tab) {
 
         try {
           /** @type {HTMLDivElement} */
-          const wrapper = getRequiredElement('#cookie-consent-wrapper');
+          const infoWrapper = getRequiredElement('#cookie-consent-info');
+          /** @type {HTMLParagraphElement} */
+          const acceptedLabel = getRequiredElement('#cookie-consent-accepted-label');
+          /** @type {HTMLPreElement} */
+          const acceptedValues = getRequiredElement('#cookie-consent-accepted-values');
+          /** @type {HTMLParagraphElement} */
+          const deniedLabel = getRequiredElement('#cookie-consent-denied-label');
+          /** @type {HTMLPreElement} */
+          const deniedValues = getRequiredElement('#cookie-consent-denied-values');
+          /** @type {HTMLParagraphElement} */
+          const missingCookieMessage = getRequiredElement('#cookie-consent-missing');
+          /** @type {HTMLButtonElement} */
+          const deleteConsentCookieBtn = getRequiredElement('#cookie-consent-delete-button');
+
+          infoWrapper.hidden = false;
+          missingCookieMessage.hidden = true;
+          missingCookieMessage.textContent = '';
+          acceptedValues.textContent = '';
+          deniedValues.textContent = '';
+          deleteConsentCookieBtn.hidden = false;
+
           if (cookie) {
             /* 
         If I've understood correctly there are potentially two base64 encoded parts in the cookie, separated by a dot.
@@ -45,27 +65,12 @@ export async function initCookieConsent(tab) {
             const acceptedCookieArr = accepted.split(',').filter(Boolean);
             const deniedCookieArr = denied.split(',').filter(Boolean);
 
-            const acceptedHeading = document.createElement('p');
-            acceptedHeading.textContent = `Accepted cookies (${acceptedCookieArr.length}):`;
+            acceptedLabel.textContent = `Accepted cookies (${acceptedCookieArr.length}):`;
+            acceptedValues.textContent = acceptedCookieArr.join('\n');
+            deniedLabel.textContent = `Denied cookies (${deniedCookieArr.length}):`;
+            deniedValues.textContent = deniedCookieArr.join('\n');
 
-            const acceptedPre = document.createElement('pre');
-            acceptedPre.textContent = acceptedCookieArr.join('\n');
-
-            const deniedHeading = document.createElement('p');
-            deniedHeading.textContent = `Denied cookies (${deniedCookieArr.length}):`;
-
-            const deniedPre = document.createElement('pre');
-            deniedPre.textContent = deniedCookieArr.join('\n');
-
-            wrapper.appendChild(acceptedHeading);
-            wrapper.appendChild(acceptedPre);
-            wrapper.appendChild(deniedHeading);
-            wrapper.appendChild(deniedPre);
-
-            const deleteConsentCookieBtn = document.createElement('button');
-            deleteConsentCookieBtn.textContent = 'Delete consent cookie';
-            wrapper.appendChild(deleteConsentCookieBtn);
-            deleteConsentCookieBtn.addEventListener('click', async () => {
+            deleteConsentCookieBtn.onclick = async () => {
               try {
                 await new Promise((resolve, reject) => {
                   chrome.cookies.remove({ url: safeTabUrl, name: cookieName }, (details) => {
@@ -82,9 +87,15 @@ export async function initCookieConsent(tab) {
               } catch (error) {
                 getRequiredElement('#error').textContent = `Error: ${getErrorMessage(error)}`;
               }
-            });
+            };
           } else {
-            wrapper.appendChild(document.createTextNode(`Cookie "${cookieName}" not found`));
+            acceptedLabel.textContent = '';
+            deniedLabel.textContent = '';
+            acceptedValues.textContent = '';
+            deniedValues.textContent = '';
+            missingCookieMessage.textContent = `Cookie "${cookieName}" not found`;
+            missingCookieMessage.hidden = false;
+            deleteConsentCookieBtn.hidden = true;
           }
           resolve(undefined);
         } catch (error) {
@@ -112,6 +123,8 @@ export async function initCookieConsent(tab) {
   }
 
   await new Promise((resolve, reject) => {
+    /** @type {HTMLDivElement} */
+    const promptWrapper = getRequiredElement('#cookie-consent-prompt');
     chrome.permissions.contains(
       { permissions: ['cookies'], origins: [origin] },
       (hasPermission) => {
@@ -121,23 +134,19 @@ export async function initCookieConsent(tab) {
           return;
         }
         if (hasPermission) {
+          promptWrapper.hidden = true;
           readSitevisionCookie().then(resolve, reject);
         } else {
-          /** @type {HTMLDivElement} */
-          const consentWrapper = getRequiredElement('#cookie-consent-wrapper');
-          const promptBtn = document.createElement('button');
-          promptBtn.id = 'cookie-consent-prompt';
-          promptBtn.textContent = `Grant permissions`;
-          const p = document.createElement('p');
-          p.textContent = `Host permissions for ${origin}, is required to read cookies. Please grant permissions by clicking the button below.`;
-          consentWrapper.appendChild(p);
-          consentWrapper.appendChild(promptBtn);
+          /** @type {HTMLButtonElement} */
+          const promptBtn = getRequiredElement('#cookie-consent-prompt-button');
+          const promptHelp = getRequiredElement('#cookie-consent-prompt-help');
 
+          promptHelp.textContent = `Host permissions for ${origin}, is required to read cookies. Please grant permissions by clicking the button below.`;
+          promptBtn.disabled = false;
           promptBtn.addEventListener('click', async () => {
             try {
               if (await requestCookiePermission()) {
-                p.remove();
-                promptBtn.remove();
+                promptWrapper.hidden = true;
               }
             } catch (error) {
               getRequiredElement('#error').textContent = `Error: ${getErrorMessage(error)}`;

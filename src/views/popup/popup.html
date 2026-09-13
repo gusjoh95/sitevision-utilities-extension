@@ -83,7 +83,6 @@
       </div>
       <div id="session-params-wrapper">
         <h2>Session parameters</h2>
-        <p id="session-params-info"></p>
         <label>
           <input type="checkbox" disabled id="toggle-profiling" />
           ?profiling=true
@@ -99,6 +98,21 @@
       </div>
       <div id="cookie-consent-wrapper">
         <h2>Consent cookie</h2>
+        <div id="cookie-consent-prompt">
+          <p id="cookie-consent-prompt-help">
+            Host permissions is required to read cookies. Please grant permissions by clicking the
+            button below.
+          </p>
+          <button id="cookie-consent-prompt-button" disabled>Grant permissions</button>
+        </div>
+        <div id="cookie-consent-info" hidden>
+          <p id="cookie-consent-accepted-label">Accepted cookies (0):</p>
+          <pre id="cookie-consent-accepted-values"></pre>
+          <p id="cookie-consent-denied-label">Denied cookies (0):</p>
+          <pre id="cookie-consent-denied-values"></pre>
+          <p id="cookie-consent-missing" hidden></p>
+          <button id="cookie-consent-delete-button" type="button">Delete consent cookie</button>
+        </div>
       </div>
     </div>
     <script type="module" src="popup.js"></script>

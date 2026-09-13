@@ -16,6 +16,11 @@ export async function initParamButtons(tab, sitevisionMode) {
     slimrender: 'slimRender',
   };
 
+  if (sitevisionMode !== 'online') {
+    console.info('Skipping initalization of parameters in popup');
+    return;
+  }
+
   /** @type {HTMLInputElement} */
   const toggleProfilingCheckbox = getRequiredElement('#toggle-profiling');
   /** @type {HTMLInputElement} */
@@ -23,7 +28,6 @@ export async function initParamButtons(tab, sitevisionMode) {
   /** @type {HTMLInputElement} */
   const toggleSlimrenderCheckbox = getRequiredElement('#toggle-slimrender');
   /** @type {HTMLParagraphElement} */
-  const sessionParamsInfo = getRequiredElement('#session-params-info');
 
   /** @type {Array<{ element: HTMLInputElement, param: string, key: 'profiling' | 'jsdebug' | 'slimrender' }>} */
   const toggles = [
@@ -31,13 +35,6 @@ export async function initParamButtons(tab, sitevisionMode) {
     { element: toggleJsDebugCheckbox, param: PARAMS.jsdebug, key: 'jsdebug' },
     { element: toggleSlimrenderCheckbox, param: PARAMS.slimrender, key: 'slimrender' },
   ];
-
-  if (sitevisionMode !== 'online') {
-    sessionParamsInfo.textContent = 'Session parameters are only available in online mode.';
-    return;
-  }
-
-  sessionParamsInfo.hidden = true;
 
   const activeTabId = tab?.id;
   if (typeof activeTabId !== 'number') {
@@ -61,7 +58,6 @@ export async function initParamButtons(tab, sitevisionMode) {
             (th) => th.textContent?.trim() === 'Profiling results'
           );
 
-          // TODO Improve
           // Jsdebug check
           const minifiedTemplateAssetsSelector =
             'script[src$="/sv-template-asset.js"], link[href$="/sv-template-asset.css"]';

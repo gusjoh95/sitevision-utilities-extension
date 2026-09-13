@@ -12,14 +12,20 @@
     <div id="login-paths-wrapper">
       <h2>Find login page</h2>
       <div>
-        <label for="custom-login-paths">
-          Custom candidate paths (one per line or comma-separated):
+        <label
+          for="custom-login-paths"
+          data-tooltip="Enter one path per line or separate them with commas (e.g., /login, /admin/*)."
+        >
+          <span>Target paths</span>
+          <span class="sr-only">
+            Enter one path per line or separate them with commas (e.g., /login, /admin/*).
+          </span>
+          <textarea
+            id="custom-login-paths"
+            rows="4"
+            placeholder="/login&#10;/system/login"
+          ></textarea>
         </label>
-        <textarea
-          id="custom-login-paths"
-          rows="4"
-          placeholder="/login&#10;/system/login"
-        ></textarea>
       </div>
     </div>
     <div id="properties-wrapper">

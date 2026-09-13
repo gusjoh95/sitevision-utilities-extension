@@ -32,9 +32,7 @@ async function init() {
     }
 
     if (!activeUrl.startsWith('http:') && !activeUrl.startsWith('https:')) {
-      throw new Error(
-        'Wrong protocol on current tab. Please navigate to a page with http or https protocol and try again.'
-      );
+      throw new Error('Wrong protocol on current tab.');
     }
 
     const pageContext = await getPageContext(invocationTab);
@@ -62,9 +60,7 @@ async function init() {
 
     await initFindLogin(invocationTab);
     await initProperties(invocationTab, pageContext);
-    if (pageContext) {
-      await initParamButtons(invocationTab, sitevisionMode);
-    }
+    await initParamButtons(invocationTab, sitevisionMode);
     await initCookieConsent(invocationTab);
 
     if (!tabReloadListenerRegistered) {

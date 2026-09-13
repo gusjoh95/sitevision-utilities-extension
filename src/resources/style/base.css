@@ -201,7 +201,6 @@ pre {
 }
 
 [data-tooltip] {
-  display: inline-flex;
   anchor-name: --tooltip-anchor;
   anchor-scope: --tooltip-anchor;
 

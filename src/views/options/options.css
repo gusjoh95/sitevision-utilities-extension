@@ -2,10 +2,18 @@
   --view-width: unset;
 }
 
+label:has(textarea) {
+  display: flex;
+  flex-direction: column;
+  max-width: unset;
+}
 textarea {
   width: 100%;
 }
 
-summary:hover {
-  cursor: pointer;
+summary {
+  width: max-content;
+  &:hover {
+    cursor: pointer;
+  }
 }

@@ -36,9 +36,9 @@ export async function initFindLoginView() {
           );
         }
 
-        runDiscovery(origin, await getOption('customLoginPaths'));
+        await runDiscovery(origin, await getOption('customLoginPaths'));
       },
-      { spinnerEl, delayMs: 0 }
+      { spinnerEl, delayMs: 250 }
     );
   } catch (error) {
     logContainer.textContent = `Error: ${getErrorMessage(error)}`;

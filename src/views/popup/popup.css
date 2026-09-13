@@ -24,3 +24,7 @@ div.button-collection {
     margin-left: auto;
   }
 }
+
+P:empty {
+  display: none;
+}

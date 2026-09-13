@@ -13,15 +13,19 @@ export async function initProperties(tab, pageContext) {
   const currentPageId = getRequiredElement('#current-page-id');
   /** @type {HTMLInputElement} */
   const currentUserId = getRequiredElement('#current-user-id');
+  /** @type {HTMLInputElement} */
+  const onlineModeRadioButton = getRequiredElement('#properties-online-mode');
+  /** @type {HTMLInputElement} */
+  const offlineModeRadioButton = getRequiredElement('#properties-offline-mode');
 
   propertiesIdInput.disabled = false;
   propertiesIdInput.focus();
+  onlineModeRadioButton.disabled = false;
+  offlineModeRadioButton.disabled = false;
 
   /** @type {HTMLButtonElement} */ (
     getRequiredElement("button[type='submit'][value='getProperties']")
   ).disabled = false;
-  /** @type {HTMLInputElement} */ (getRequiredElement('#properties-online-mode')).disabled = false;
-  /** @type {HTMLInputElement} */ (getRequiredElement('#properties-offline-mode')).disabled = false;
 
   if (pageContext?.pageId) {
     currentPageId.value = pageContext.pageId;
