@@ -10,8 +10,6 @@ import {
  * @param {import('../../../api/types.js').SitevisionMode} sitevisionMode
  */
 export async function initParamButtons(tab, sitevisionMode) {
-  void sitevisionMode;
-
   const PARAMS = {
     profiling: 'profiling',
     jsdebug: 'jsdebug',
@@ -24,15 +22,27 @@ export async function initParamButtons(tab, sitevisionMode) {
   const toggleJsDebugCheckbox = getRequiredElement('#toggle-jsdebug');
   /** @type {HTMLInputElement} */
   const toggleSlimrenderCheckbox = getRequiredElement('#toggle-slimrender');
+  /** @type {HTMLParagraphElement} */
+  const sessionParamsInfo = getRequiredElement('#session-params-info');
+
+  /** @type {Array<{ element: HTMLInputElement, param: string, key: 'profiling' | 'jsdebug' | 'slimrender' }>} */
+  const toggles = [
+    { element: toggleProfilingCheckbox, param: PARAMS.profiling, key: 'profiling' },
+    { element: toggleJsDebugCheckbox, param: PARAMS.jsdebug, key: 'jsdebug' },
+    { element: toggleSlimrenderCheckbox, param: PARAMS.slimrender, key: 'slimrender' },
+  ];
+
+  if (sitevisionMode !== 'online') {
+    sessionParamsInfo.textContent = 'Session parameters are only available in online mode.';
+    return;
+  }
+
+  sessionParamsInfo.hidden = true;
 
   const activeTabId = tab?.id;
   if (typeof activeTabId !== 'number') {
     throw new Error('No active tab available for session parameter checks.');
   }
-
-  toggleProfilingCheckbox.disabled = false;
-  toggleJsDebugCheckbox.disabled = false;
-  toggleSlimrenderCheckbox.disabled = false;
 
   /** @type {number} */
   const safeTabId = activeTabId;
@@ -115,23 +125,10 @@ export async function initParamButtons(tab, sitevisionMode) {
   }
 
   const sessionStates = await getSessionParamStates();
-  /**
-   * @typedef {Object} ToggleConfig
-   * @property {HTMLInputElement | null} element
-   * @property {string} param
-   * @property {keyof typeof sessionStates} key
-   */
-
-  /** @type {ToggleConfig[]} */
-  const toggles = [
-    { element: toggleProfilingCheckbox, param: PARAMS.profiling, key: 'profiling' },
-    { element: toggleJsDebugCheckbox, param: PARAMS.jsdebug, key: 'jsdebug' },
-    { element: toggleSlimrenderCheckbox, param: PARAMS.slimrender, key: 'slimrender' },
-  ];
-
   for (const { element, param, key } of toggles) {
     if (!element) continue;
     element.checked = Boolean(sessionStates[key]);
+    element.disabled = false;
     bindSessionToggle(element, param);
   }
 }
