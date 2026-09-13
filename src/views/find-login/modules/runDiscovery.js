@@ -4,18 +4,18 @@ import { appendLog, setStatus } from './logUtils.js';
 const LOGIN_SELECTORS = ['.sv-login-portlet', '.sv-login-form'].join(',');
 
 /**
- * @typedef {'FOUND' | 'EXTERNAL_IDP' | 'NOT_FOUND' | 'ERROR'} ProbeOutcome
+ * @typedef {'FOUND' | 'CROSS_ORIGIN_REDIRECT' | 'NOT_FOUND' | 'ERROR'} ProbeOutcome
  *
  * @typedef {Object} ProbeResult
- * @property {ProbeOutcome} outcome - The classified result of the probe.
+ * @property {ProbeOutcome} outcome - The classified outcome of the probe.
  * @property {string} [matchUrl] - The final URL where a local login form was discovered.
- * @property {string} [reason] - Loggable explanation or error details.
+ * @property {string} [reason] - Loggable error details or explanation.
  */
 
 /**
- * Parses raw HTML into an inert DOM and checks for Sitevision login form selectors.
+ * Checks raw HTML for Sitevision local login form elements.
  *
- * @param {string} html
+ * @param {string} html - Raw HTML markup to test.
  * @returns {boolean} True if a local login form match is detected.
  */
 function hasLocalLoginForm(html) {
@@ -24,9 +24,9 @@ function hasLocalLoginForm(html) {
 }
 
 /**
- * Performs a relaxed check for any meta-refresh tag in raw HTML.
+ * Checks raw HTML for meta-refresh redirect tags.
  *
- * @param {string} html
+ * @param {string} html - Raw HTML markup to test.
  * @returns {boolean} True if a meta-refresh tag is found.
  */
 function hasMetaRefresh(html) {
@@ -35,13 +35,13 @@ function hasMetaRefresh(html) {
 }
 
 /**
- * Evaluates whether a target URL belongs to an external IdP.
+ * Evaluates whether a target URL has redirected to a different origin.
  *
- * @param {string} targetUrl
- * @param {string} origin
- * @returns {boolean} True if the origin differs from the target site origin.
+ * @param {string} targetUrl - The URL to check.
+ * @param {string} origin - Expected target site origin.
+ * @returns {boolean} True if the target URL has a different origin.
  */
-function isExternalIdp(targetUrl, origin) {
+function isCrossOrigin(targetUrl, origin) {
   try {
     return new URL(targetUrl, origin).origin !== origin;
   } catch {
@@ -50,12 +50,12 @@ function isExternalIdp(targetUrl, origin) {
 }
 
 /**
- * Probes an endpoint and classifies the outcome (Local Login, External IdP, or Not Found).
+ * Probes an endpoint and classifies the outcome (Local Login, Cross-Origin Redirect, or Not Found).
  *
- * @param {number} tabId
- * @param {string} targetUrl
- * @param {string} origin
- * @param {HTMLElement} logContainer
+ * @param {number} tabId - Target browser tab ID.
+ * @param {string} targetUrl - Full target URL to fetch.
+ * @param {string} origin - Expected target site origin.
+ * @param {HTMLElement} logContainer - Container element for status logging.
  * @returns {Promise<ProbeResult>}
  */
 async function probeEndpoint(tabId, targetUrl, origin, logContainer) {
@@ -74,14 +74,14 @@ async function probeEndpoint(tabId, targetUrl, origin, logContainer) {
 
   const finalUrl = new URL(res.finalUrl || targetUrl);
 
-  // 1. Check HTTP 3xx-level redirect to external IdP
-  if (isExternalIdp(finalUrl.href, origin)) {
+  // 1. Check HTTP 3xx cross-origin redirect
+  if (isCrossOrigin(finalUrl.href, origin)) {
     appendLog(
       logContainer,
       'info',
-      `HTTP ${res.status} redirect to different Origin detected (indicative of IdP): ${finalUrl.host}`
+      `HTTP ${res.status} cross-origin redirect detected: ${finalUrl.host}`
     );
-    return { outcome: 'EXTERNAL_IDP' };
+    return { outcome: 'CROSS_ORIGIN_REDIRECT' };
   }
 
   if (finalUrl.href !== targetUrl) {
@@ -93,10 +93,10 @@ async function probeEndpoint(tabId, targetUrl, origin, logContainer) {
   }
 
   if (res.ok) {
-    // 2. Check HTML-level meta-refresh redirect (IdP)
+    // 2. Check HTML meta-refresh redirect
     if (hasMetaRefresh(res.html)) {
       appendLog(logContainer, 'info', `Meta-refresh redirect detected at ${finalUrl.pathname}`);
-      return { outcome: 'EXTERNAL_IDP' };
+      return { outcome: 'CROSS_ORIGIN_REDIRECT' };
     }
 
     // 3. Evaluate local login selectors
@@ -118,12 +118,12 @@ async function probeEndpoint(tabId, targetUrl, origin, logContainer) {
 
 /**
  * Runs the discovery sequence for identifying local login pages.
- * Iterates through `/edit` first, followed by any configured custom paths.
- * Continues traversing all paths even if an external IdP is encountered.
+ * Probes `/edit` first as a baseline, followed by configured custom paths.
+ * Continues traversing the queue even if a cross-origin redirect is encountered.
  *
- * @param {number} tabId - Target tab ID.
+ * @param {number} tabId - Target browser tab ID.
  * @param {string} origin - Target site origin.
- * @param {string[]} [customPaths=[]] - Optional custom path endpoints to probe.
+ * @param {string[]} [customPaths=[]] - Custom path endpoints to probe.
  * @returns {Promise<void>}
  */
 export async function runDiscovery(tabId, origin, customPaths = []) {
@@ -149,11 +149,11 @@ export async function runDiscovery(tabId, origin, customPaths = []) {
     try {
       const result = await probeEndpoint(tabId, targetUrl, origin, logContainer);
 
-      if (result.outcome === 'EXTERNAL_IDP') {
+      if (result.outcome === 'CROSS_ORIGIN_REDIRECT') {
         appendLog(
           logContainer,
           'info',
-          `Federated login (SAML/ADFS) detected on ${path}. Continuing search...`
+          `Cross-origin redirect detected on ${path}. Continuing search...`
         );
       } else if (result.outcome === 'FOUND' && result.matchUrl) {
         appendLog(logContainer, 'success', `FOUND! Local login form found at: ${result.matchUrl}`);
