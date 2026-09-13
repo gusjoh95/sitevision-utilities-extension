@@ -1,4 +1,4 @@
-import { getErrorMessage } from '../../../api/index.js';
+import { getErrorMessage, fetchDOM, matchDOM } from '../../../api/index.js';
 import { appendLog, setStatus } from './logUtils.js';
 
 const LOGIN_SELECTORS = ['.sv-login-portlet', '.sv-login-form'].join(',');
@@ -13,20 +13,6 @@ const LOGIN_SELECTORS = ['.sv-login-portlet', '.sv-login-form'].join(',');
  */
 
 /**
- * Executes fetch via the background service worker to prevent
- * document-level preload warnings in the extension window.
- *
- * @param {string} url
- * @returns {Promise<{ ok: boolean, status: number, html: string, finalUrl: string, error?: string }>}
- */
-async function fetchHtmlViaBackground(url) {
-  return chrome.runtime.sendMessage({
-    action: 'fetchHtmlForDiscovery',
-    url,
-  });
-}
-
-/**
  * Parses raw HTML into an inert DOM and checks for Sitevision login form selectors.
  *
  * @param {string} html
@@ -34,11 +20,7 @@ async function fetchHtmlViaBackground(url) {
  */
 function hasLocalLoginForm(html) {
   if (!html?.trim()) return false;
-
-  const parser = new DOMParser();
-  const doc = parser.parseFromString(html, 'text/html');
-
-  return doc.querySelector(LOGIN_SELECTORS) !== null;
+  return matchDOM(html, { selector: LOGIN_SELECTORS });
 }
 
 /**
@@ -49,7 +31,7 @@ function hasLocalLoginForm(html) {
  */
 function hasMetaRefresh(html) {
   if (!html?.trim()) return false;
-  return /<meta\s+[^>]*http-equiv=["']?refresh/i.test(html);
+  return matchDOM(html, { selector: 'meta[http-equiv="refresh"]' });
 }
 
 /**
@@ -70,21 +52,24 @@ function isExternalIdp(targetUrl, origin) {
 /**
  * Probes an endpoint and classifies the outcome (Local Login, External IdP, or Not Found).
  *
+ * @param {number} tabId
  * @param {string} targetUrl
  * @param {string} origin
  * @param {HTMLElement} logContainer
  * @returns {Promise<ProbeResult>}
  */
-async function probeEndpoint(targetUrl, origin, logContainer) {
-  const res = await fetchHtmlViaBackground(targetUrl);
-
-  if (res.status === 0 || res.error) {
+async function probeEndpoint(tabId, targetUrl, origin, logContainer) {
+  let res;
+  try {
+    res = await fetchDOM(tabId, targetUrl);
+  } catch (err) {
+    const errorMsg = getErrorMessage(err);
     appendLog(
       logContainer,
       'warn',
-      `Network error or request blocked for ${new URL(targetUrl).pathname} (${res.error || 'Status 0'})`
+      `Network error or request blocked for ${new URL(targetUrl).pathname} (${errorMsg})`
     );
-    return { outcome: 'ERROR', reason: res.error || 'Status 0' };
+    return { outcome: 'ERROR', reason: errorMsg };
   }
 
   const finalUrl = new URL(res.finalUrl || targetUrl);
@@ -94,7 +79,7 @@ async function probeEndpoint(targetUrl, origin, logContainer) {
     appendLog(
       logContainer,
       'info',
-      `HTTP ${res.status} redirect to external IdP detected: ${finalUrl.host}`
+      `HTTP ${res.status} redirect to different Origin detected (indicative of IdP): ${finalUrl.host}`
     );
     return { outcome: 'EXTERNAL_IDP' };
   }
@@ -110,11 +95,7 @@ async function probeEndpoint(targetUrl, origin, logContainer) {
   if (res.ok) {
     // 2. Check HTML-level meta-refresh redirect (IdP)
     if (hasMetaRefresh(res.html)) {
-      appendLog(
-        logContainer,
-        'info',
-        `Meta-refresh redirect (IdP) detected at ${finalUrl.pathname}`
-      );
+      appendLog(logContainer, 'info', `Meta-refresh redirect detected at ${finalUrl.pathname}`);
       return { outcome: 'EXTERNAL_IDP' };
     }
 
@@ -140,11 +121,12 @@ async function probeEndpoint(targetUrl, origin, logContainer) {
  * Iterates through `/edit` first, followed by any configured custom paths.
  * Continues traversing all paths even if an external IdP is encountered.
  *
+ * @param {number} tabId - Target tab ID.
  * @param {string} origin - Target site origin.
  * @param {string[]} [customPaths=[]] - Optional custom path endpoints to probe.
  * @returns {Promise<void>}
  */
-export async function runDiscovery(origin, customPaths = []) {
+export async function runDiscovery(tabId, origin, customPaths = []) {
   const logContainer = document.getElementById('log-container');
   if (!logContainer) return;
 
@@ -165,7 +147,7 @@ export async function runDiscovery(origin, customPaths = []) {
     );
 
     try {
-      const result = await probeEndpoint(targetUrl, origin, logContainer);
+      const result = await probeEndpoint(tabId, targetUrl, origin, logContainer);
 
       if (result.outcome === 'EXTERNAL_IDP') {
         appendLog(

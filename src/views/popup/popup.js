@@ -9,6 +9,7 @@ import {
   SiteVerification,
   matchDOM,
   withDeferredSpinner,
+  fetchDOM,
 } from '../../api/index.js';
 import { initCookieConsent } from './modules/cookie.js';
 import { initFindLogin } from './modules/find-login.js';
@@ -30,6 +31,10 @@ async function init() {
         'Unable to access tab URL. Please make sure you are on an active web page and try again.'
       );
     }
+    const tabId = invocationTab?.id;
+    if (!tabId) {
+      throw new Error('Missing tabid.');
+    }
 
     if (!activeUrl.startsWith('http:') && !activeUrl.startsWith('https:')) {
       throw new Error('Wrong protocol on current tab.');
@@ -44,7 +49,8 @@ async function init() {
 
       if (status === SiteVerification.Status.UNKNOWN) {
         const origin = new URL(activeUrl).origin;
-        const isSitevision = await matchDOM(invocationTab, origin, {
+        const { html } = await fetchDOM(tabId, origin);
+        const isSitevision = matchDOM(html, {
           selector: 'script',
           pattern: /\bsv\.PageContext\s*=\s*\{/i,
         });

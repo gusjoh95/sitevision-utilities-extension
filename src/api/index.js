@@ -1,5 +1,6 @@
 export * as SiteVerification from './modules/siteVerification.js';
 export { default as matchDOM } from './modules/matchDOM.js';
+export { default as fetchDOM } from './modules/fetchDOM.js';
 export { assignJsonTheme } from './modules/assignJsonTheme.js';
 export { getInvocationTab } from './modules/getInvocationTab.js';
 export { getErrorMessage } from './modules/getErrorMessage.js';
