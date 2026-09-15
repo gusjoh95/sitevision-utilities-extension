@@ -3,6 +3,15 @@ body {
   width: unset;
 }
 
+#status-summary {
+  span,
+  a {
+    &:empty {
+      display: none;
+    }
+  }
+}
+
 pre.log-container {
   width: 100%;
   overflow-x: auto;

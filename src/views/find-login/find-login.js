@@ -1,34 +1,40 @@
 import {
+  assertTargetTabAccessible,
   getErrorMessage,
   getOption,
   getRequiredElement,
+  registerTargetPermissionListener,
   withDeferredSpinner,
 } from '../../api/index.js';
 import { getCurrentState } from './modules/getCurrentState.js';
 import { runDiscovery } from './modules/runDiscovery.js';
 
-export async function initFindLoginView() {
+async function initFindLoginView() {
   const { origin, anchorTabId } = getCurrentState();
 
-  const logContainer = getRequiredElement('#log-container');
   const spinnerEl = getRequiredElement('#spinner');
+  const errorElem = getRequiredElement('#error');
+
+  registerTargetPermissionListener({
+    tabId: anchorTabId,
+    origin,
+    onLost: ({ message }) => {
+      errorElem.textContent = `Warning: ${message}`;
+    },
+  });
 
   try {
     await withDeferredSpinner(
       async () => {
-        if (!origin) {
-          throw new Error('Missing "origin" parameter.');
-        }
-        if (!anchorTabId) {
-          throw new Error('Missing "anchorTabId" parameter.');
-        }
-
-        await runDiscovery(anchorTabId, origin, await getOption('customLoginPaths'));
+        await assertTargetTabAccessible(anchorTabId, origin);
+        const options = await getOption('customLoginPaths');
+        await runDiscovery(anchorTabId, origin, options);
       },
       { spinnerEl, delayMs: 250 }
     );
   } catch (error) {
-    logContainer.textContent = `Error: ${getErrorMessage(error)}`;
+    const errorMsg = getErrorMessage(error);
+    errorElem.textContent = `Error: ${errorMsg}`;
   }
 }
 

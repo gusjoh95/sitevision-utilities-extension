@@ -1,7 +1,9 @@
 import {
+  assertTargetTabAccessible,
   getErrorMessage,
   getOption,
   getRequiredElement,
+  getTargetAccessErrorMessage,
   highlightJson,
 } from '../../../api/index.js';
 import { restApiPath } from '../properties.js';
@@ -12,6 +14,7 @@ const useSyntaxHighlighting = await getOption('useSyntaxHighlighting');
 
 /** @type {HTMLPreElement} */
 const preElem = getRequiredElement('.json-holder pre');
+const errorElem = getRequiredElement('#error');
 
 if (useSyntaxHighlighting) {
   // Event Delegation: Set up click listener once on the parent container
@@ -42,9 +45,11 @@ export function renderUI(data, state) {
   }
 
   if (data.error) {
-    preElem.textContent = `Error: ${data.message}`;
+    preElem.textContent = `${data.error}: ${data.message}`;
     return;
   }
+
+  errorElem.textContent = '';
 
   if (!useSyntaxHighlighting) {
     preElem.textContent = JSON.stringify(data, null, 2);
@@ -67,21 +72,22 @@ export async function navigateToNode(nextNode, cachedData = null, historyAction 
   const newUrlString = `${window.location.pathname}?${params.toString()}`;
 
   let data = cachedData;
+  const previousPreContent = preElem.cloneNode(true);
 
   if (!data) {
-    preElem.textContent = 'Loading...';
     try {
+      await assertTargetTabAccessible(state.anchorTabId, state.origin);
+      preElem.textContent = 'Loading...';
       data = await fetchFromTab(state);
     } catch (error) {
       const msg = getErrorMessage(error);
+      const targetAccessErrorMessage = getTargetAccessErrorMessage(msg);
       let errorData;
 
-      if (msg.includes('No tab with id') || msg.includes('is not a valid tab ID')) {
-        errorData = {
-          error: 'Tab Disconnected',
-          message:
-            'The original website tab was closed. Please open this view again from an active page.',
-        };
+      if (targetAccessErrorMessage) {
+        preElem.replaceChildren(...previousPreContent.childNodes);
+        errorElem.textContent = `Warning: ${targetAccessErrorMessage}`;
+        return;
       } else {
         // Safely check if the thrown error message is a JSON payload from the API
         try {

@@ -20,6 +20,10 @@
   "permissions": ["activeTab", "scripting", "storage"],
   "optional_permissions": ["cookies"],
   "optional_host_permissions": ["https://*/*", "http://*/*"],
+  "background": {
+    "scripts": ["background/index.js"],
+    "type": "module"
+  },
   "browser_specific_settings": {
     "gecko": {
       "id": "gusjoh95@sitevision-utilities-extension",

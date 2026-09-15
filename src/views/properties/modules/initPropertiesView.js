@@ -1,4 +1,9 @@
-import { assignJsonTheme, getErrorMessage, getRequiredElement } from '../../../api/index.js';
+import {
+  assignJsonTheme,
+  getErrorMessage,
+  getRequiredElement,
+  registerTargetPermissionListener,
+} from '../../../api/index.js';
 import { initButtons } from './initButtons.js';
 import { getCurrentState } from './getCurrentState.js';
 import { navigateToNode, renderUI } from './renderUI.js';
@@ -23,11 +28,20 @@ export async function initPropertiesView() {
 
   /** @type {HTMLPreElement} */
   const preElement = getRequiredElement('.json-holder pre');
+  const errorElement = getRequiredElement('#error');
 
-  if (!state.origin || !state.node) {
-    preElement.textContent = 'Error: Missing required URL parameters (origin/node).';
+  if (!state.origin || !state.node || !state.anchorTabId) {
+    preElement.textContent = 'Error: Missing required URL parameters (origin/node/anchorTabId).';
     return;
   }
+
+  registerTargetPermissionListener({
+    tabId: state.anchorTabId,
+    origin: state.origin,
+    onLost: ({ message }) => {
+      errorElement.textContent = `Warning: ${message}`;
+    },
+  });
 
   // Ensure initial history state has an index tracker
   if (!window.history.state || typeof window.history.state.index !== 'number') {

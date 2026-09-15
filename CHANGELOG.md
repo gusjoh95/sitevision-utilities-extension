@@ -12,6 +12,7 @@ For details on the 4-digit versioning strategy (`MAJOR.MINOR.PATCH.HOTFIX`), see
 - New function: `find-login` where supplied endpoints are traversed in order to find an instance of [`sv-login-portlet`](https://help.sitevision.se/en/loginHelp.html)
 - Add configurable custom login paths and a dedicated discovery view for detecting local login forms and external identity-provider redirects.
 - Add browser-specific Chrome and Firefox manifests, background discovery fetching, and popup controls for launching login discovery.
+- Add shared target-tab access helpers and background tab watchers for detecting closed tabs, origin changes, and revoked browser permissions across extension views.
 
 ### Changed
 

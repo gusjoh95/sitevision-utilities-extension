@@ -10,6 +10,12 @@ export { highlightJson } from './modules/highlightJson.js';
 export { isFirefox } from './modules/isFirefox.js';
 export { getOption, getOptions, setOptions } from './modules/options.js';
 export { registerCurrentTabChangeListener } from './modules/registerCurrentTabChangeListener.js';
+export {
+  assertTargetTabAccessible,
+  getTargetAccessErrorMessage,
+  getTargetLostMessage,
+  registerTargetPermissionListener,
+} from './modules/targetPermissions.js';
 export { reloadInvocationTab } from './modules/reloadInvocationTab.js';
 export { updateSessionWithParam } from './modules/updateSessionWithParam.js';
 export { withDeferredSpinner } from './modules/spinner.js';

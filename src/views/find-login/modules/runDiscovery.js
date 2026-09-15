@@ -1,10 +1,15 @@
-import { getErrorMessage, fetchDOM, matchDOM } from '../../../api/index.js';
+import {
+  getErrorMessage,
+  fetchDOM,
+  getTargetAccessErrorMessage,
+  matchDOM,
+} from '../../../api/index.js';
 import { appendLog, setStatus } from './logUtils.js';
 
 const LOGIN_SELECTORS = ['.sv-login-portlet', '.sv-login-form'].join(',');
 
 /**
- * @typedef {'FOUND' | 'CROSS_ORIGIN_REDIRECT' | 'NOT_FOUND' | 'ERROR'} ProbeOutcome
+ * @typedef {'FOUND' | 'CROSS_ORIGIN_REDIRECT' | 'NOT_FOUND' | 'TARGET_UNAVAILABLE' | 'ERROR'} ProbeOutcome
  *
  * @typedef {Object} ProbeResult
  * @property {ProbeOutcome} outcome - The classified outcome of the probe.
@@ -64,6 +69,12 @@ async function probeEndpoint(tabId, targetUrl, origin, logContainer) {
     res = await fetchDOM(tabId, targetUrl);
   } catch (err) {
     const errorMsg = getErrorMessage(err);
+    const targetAccessErrorMessage = getTargetAccessErrorMessage(errorMsg);
+    if (targetAccessErrorMessage) {
+      appendLog(logContainer, 'warn', `-> ${targetAccessErrorMessage}`, { append: true });
+      return { outcome: 'TARGET_UNAVAILABLE', reason: targetAccessErrorMessage };
+    }
+
     appendLog(logContainer, 'warn', `-> Network error (${errorMsg})`, { append: true });
     return { outcome: 'ERROR', reason: errorMsg };
   }
@@ -142,6 +153,10 @@ export async function runDiscovery(tabId, origin, customPaths = []) {
 
       if (result.outcome === 'FOUND' && result.matchUrl) {
         setStatus('success', 'Local login found at:', result.matchUrl);
+        return;
+      }
+      if (result.outcome === 'TARGET_UNAVAILABLE' && result.reason) {
+        setStatus('error', 'Target unavailable:', result.reason);
         return;
       }
       // Note: Removed the redundant CROSS_ORIGIN_REDIRECT log since probeEndpoint already appends the reason.
