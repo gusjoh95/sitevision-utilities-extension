@@ -11,8 +11,9 @@ For details on the 4-digit versioning strategy (`MAJOR.MINOR.PATCH.HOTFIX`), see
 
 - New function: `find-login` where supplied endpoints are traversed in order to find an instance of [`sv-login-portlet`](https://help.sitevision.se/en/loginHelp.html)
 - Add configurable custom login paths and a dedicated discovery view for detecting local login forms and external identity-provider redirects.
-- Add browser-specific Chrome and Firefox manifests, background discovery fetching, and popup controls for launching login discovery.
+- Add browser-specific Chrome and Firefox manifests and popup controls for launching login discovery.
 - Add shared target-tab access helpers and background tab watchers for detecting closed tabs, origin changes, and revoked browser permissions across extension views.
+- Add `assertTargetTabAccessible` and `registerTargetPermissionListener` helpers to standardize detection of closed tabs, origin changes, and revoked host permissions (developer-facing API).
 
 ### Changed
 
@@ -23,6 +24,8 @@ For details on the 4-digit versioning strategy (`MAJOR.MINOR.PATCH.HOTFIX`), see
 - UI feedback and state rollback for session parameter toggles ([#1](https://github.com/gusjoh95/sitevision-utilities-extension/issues/1)):
   - Disable checkbox and set indeterminate state while processing network request.
   - Revert checkbox state if the background request fails.
+- Preserve rendered properties JSON when the originating tab becomes inaccessible; show a non-destructive target-access warning in `#error` instead of replacing the JSON output.
+- Make `find-login` discovery stop and report a clear `Target unavailable` status when the originating tab is closed or host permissions are revoked, avoiding repetitive network error logs.
 
 ### Deprecated
 
