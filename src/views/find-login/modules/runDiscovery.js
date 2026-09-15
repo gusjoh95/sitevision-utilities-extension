@@ -64,11 +64,7 @@ async function probeEndpoint(tabId, targetUrl, origin, logContainer) {
     res = await fetchDOM(tabId, targetUrl);
   } catch (err) {
     const errorMsg = getErrorMessage(err);
-    appendLog(
-      logContainer,
-      'warn',
-      `Network error or request blocked for ${new URL(targetUrl).pathname} (${errorMsg})`
-    );
+    appendLog(logContainer, 'warn', `-> Network error (${errorMsg})`, { append: true });
     return { outcome: 'ERROR', reason: errorMsg };
   }
 
@@ -79,40 +75,36 @@ async function probeEndpoint(tabId, targetUrl, origin, logContainer) {
     appendLog(
       logContainer,
       'info',
-      `HTTP ${res.status} cross-origin redirect detected: ${finalUrl.host}`
+      `-> HTTP ${res.status} cross-origin redirect (${finalUrl.host})`,
+      { append: true }
     );
     return { outcome: 'CROSS_ORIGIN_REDIRECT' };
   }
 
   if (finalUrl.href !== targetUrl) {
-    appendLog(
-      logContainer,
-      'info',
-      `Landed at internal redirect: ${finalUrl.pathname}${finalUrl.search}`
-    );
+    appendLog(logContainer, 'info', `-> Internal redirect (${finalUrl.pathname})`, {
+      append: true,
+    });
   }
 
   if (res.ok) {
     // 2. Check HTML meta-refresh redirect
     if (hasMetaRefresh(res.html)) {
-      appendLog(logContainer, 'info', `Meta-refresh redirect detected at ${finalUrl.pathname}`);
+      appendLog(logContainer, 'info', `-> Meta-refresh redirect detected`, { append: true });
       return { outcome: 'CROSS_ORIGIN_REDIRECT' };
     }
 
     // 3. Evaluate local login selectors
     if (hasLocalLoginForm(res.html)) {
+      appendLog(logContainer, 'success', `-> FOUND! Local login form detected`, { append: true });
       return { outcome: 'FOUND', matchUrl: finalUrl.toString() };
     }
 
-    appendLog(
-      logContainer,
-      'info',
-      `No login form or redirect identified at ${finalUrl.pathname} (HTTP 200)`
-    );
+    appendLog(logContainer, 'info', `-> HTTP 200 No login form`, { append: true });
     return { outcome: 'NOT_FOUND' };
   }
 
-  appendLog(logContainer, 'info', `HTTP ${res.status} for ${finalUrl.pathname}`);
+  appendLog(logContainer, 'info', `-> HTTP ${res.status}`, { append: true });
   return { outcome: 'NOT_FOUND' };
 }
 
@@ -132,36 +124,29 @@ export async function runDiscovery(tabId, origin, customPaths = []) {
 
   logContainer.textContent = '';
   setStatus('running', 'Probing target site(s)...');
-  appendLog(logContainer, 'info', `Starting discovery sequence on origin: ${origin}`);
+  appendLog(logContainer, 'info', `Starting discovery on: ${origin}`);
 
   const queue = [...new Set(['/edit', ...customPaths])].filter(Boolean);
 
-  for (const path of queue) {
-    const isBaseline = path === '/edit';
-    const targetUrl = new URL(path, origin).toString();
+  // Find the longest path to calculate padding for alignment
+  const maxPathLength = Math.max(...queue.map((p) => p.length));
 
-    appendLog(
-      logContainer,
-      'info',
-      isBaseline ? 'Probing baseline endpoint: /edit' : `Probing custom path: ${path}`
-    );
+  for (const path of queue) {
+    const targetUrl = new URL(path, origin).toString();
+    const paddedPath = path.padEnd(maxPathLength, ' ');
+
+    appendLog(logContainer, 'info', `GET ${paddedPath}`);
 
     try {
       const result = await probeEndpoint(tabId, targetUrl, origin, logContainer);
 
-      if (result.outcome === 'CROSS_ORIGIN_REDIRECT') {
-        appendLog(
-          logContainer,
-          'info',
-          `Cross-origin redirect detected on ${path}. Continuing search...`
-        );
-      } else if (result.outcome === 'FOUND' && result.matchUrl) {
-        appendLog(logContainer, 'success', `FOUND! Local login form found at: ${result.matchUrl}`);
-        setStatus('success', `Local login found at ${result.matchUrl}`);
+      if (result.outcome === 'FOUND' && result.matchUrl) {
+        setStatus('success', 'Local login found at:', result.matchUrl);
         return;
       }
+      // Note: Removed the redundant CROSS_ORIGIN_REDIRECT log since probeEndpoint already appends the reason.
     } catch (err) {
-      appendLog(logContainer, 'error', `Probe error for ${path}: ${getErrorMessage(err)}`);
+      appendLog(logContainer, 'error', `-> Error: ${getErrorMessage(err)}`, { append: true });
     }
   }
 

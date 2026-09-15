@@ -66,6 +66,10 @@ h2 {
   margin: 20px 0 8px;
 }
 
+a {
+  color: var(--color-white-light);
+}
+
 form {
   align-items: start;
   display: flex;
