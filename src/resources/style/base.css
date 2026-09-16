@@ -157,6 +157,7 @@ label {
 
   &:has(textarea) {
     flex-direction: column;
+    align-items: flex-start;
     gap: 8px;
     max-width: unset;
     pointer-events: none; /* Disable clicks on empty layout space */
