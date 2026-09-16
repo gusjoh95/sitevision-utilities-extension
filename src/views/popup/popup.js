@@ -4,6 +4,7 @@ import {
   getPageContext,
   getSitevisionMode,
   getRequiredElement,
+  assertTargetTabAccessible,
   isFirefox,
   registerCurrentTabChangeListener,
   SiteVerification,
@@ -27,28 +28,29 @@ async function init() {
     const invocationTab = await getInvocationTab();
     const activeUrl = invocationTab?.url;
     if (!activeUrl) {
-      throw new Error(
-        'Unable to access tab URL. Please make sure you are on an active web page and try again.'
-      );
+      throw new Error('Unable to access active tab URL.');
     }
     const tabId = invocationTab?.id;
-    if (!tabId) {
-      throw new Error('Missing tabid.');
+    if (typeof tabId !== 'number') {
+      throw new Error('Missing tab ID.');
     }
 
-    if (!activeUrl.startsWith('http:') && !activeUrl.startsWith('https:')) {
-      throw new Error('Wrong protocol on current tab.');
+    const { protocol, origin } = new URL(activeUrl);
+    if (protocol !== 'http:' && protocol !== 'https:') {
+      throw new Error('Active tab must use HTTP or HTTPS.');
     }
+    // Can probably be removed without problems
+    await assertTargetTabAccessible(tabId, origin);
 
     const pageContext = await getPageContext(invocationTab);
 
+    // Determine if website is running Sitevision
     if (pageContext) {
       await SiteVerification.set(invocationTab, true);
     } else {
       let status = await SiteVerification.get(invocationTab);
 
       if (status === SiteVerification.Status.UNKNOWN) {
-        const origin = new URL(activeUrl).origin;
         const { html } = await fetchDOM(tabId, origin);
         const isSitevision = matchDOM(html, {
           selector: 'script',
