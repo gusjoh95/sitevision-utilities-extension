@@ -1,3 +1,5 @@
+/* 1. Variables & Design Tokens */
+
 :root {
   --color-black-dark: #0f1115;
   --color-black: #333;
@@ -25,16 +27,12 @@
   }
 }
 
+/* 2. Reset & Base Styles */
+
 *,
 *::before,
 *::after {
   box-sizing: border-box;
-}
-
-*:disabled,
-label:has([disabled]) {
-  opacity: 0.5 !important;
-  cursor: not-allowed !important;
 }
 
 html,
@@ -57,6 +55,27 @@ body {
   color: var(--fg-color);
 }
 
+*:disabled,
+label:has([disabled]) {
+  opacity: 0.5 !important;
+  cursor: not-allowed !important;
+}
+
+/* Global Focus States (Native element) */
+a,
+button,
+input,
+select,
+textarea,
+summary {
+  &:focus-visible {
+    outline: 2px solid var(--fg-color);
+    outline-offset: 2px;
+  }
+}
+
+/* 3. Typography & Text Elements */
+
 h1 {
   margin: 0 0 8px;
   font-size: 1.6rem;
@@ -69,6 +88,30 @@ h2 {
 a {
   color: var(--color-white-light);
 }
+
+p:empty {
+  display: none;
+}
+
+pre {
+  background-color: var(--bg-color-dark);
+  color: var(--fg-color-light);
+  padding: 12px;
+  border-radius: var(--border-radius);
+  width: 100%;
+  overflow-x: auto;
+
+  &:empty {
+    display: none;
+  }
+}
+
+summary {
+  width: max-content;
+  cursor: pointer;
+}
+
+/* 4. Form Controls & Inputs */
 
 form {
   align-items: start;
@@ -103,90 +146,46 @@ legend {
   font-weight: 600;
 }
 
-button,
-input[type='checkbox'],
-input[type='radio'] {
-  margin: 4px 0;
-  padding: 0;
-}
-
-button {
-  padding: 8px 10px;
-  border: 1px solid var(--fg-color);
-  cursor: pointer;
-  font-weight: 600;
-  font-size: 1rem;
-  transition:
-    transform 0.08s ease,
-    box-shadow 0.12s ease;
-  background-color: var(--fg-color);
-  color: var(--bg-color);
-}
-
 label {
   font-size: 1rem;
   display: flex;
   flex-direction: row;
-  gap: 8px;
-  align-items: flex-start;
+  gap: 4px;
+  align-items: center;
   cursor: pointer;
   max-width: fit-content;
+
+  &:has(textarea) {
+    flex-direction: column;
+    gap: 8px;
+    max-width: unset;
+    pointer-events: none; /* Disable clicks on empty layout space */
+    & > span,
+    & > textarea {
+      pointer-events: auto; /* Re-enable clicks strictly on text and textarea */
+    }
+  }
+}
+
+input[type='checkbox'],
+input[type='radio'] {
+  padding: 0;
+  margin: 0;
+  cursor: pointer;
+  height: 1rem;
+  width: 1rem;
 }
 
 select {
   padding: 4px;
-}
-
-button,
-input[type='text'],
-select {
   border-radius: var(--border-radius);
 }
 
-button,
-input,
-select,
-summary {
-  &:focus-visible {
-    outline: 2px solid var(--fg-color);
-    outline-offset: 2px;
-  }
-}
-
-.bordered-container {
-  border: 1px solid var(--fg-color);
-  border-radius: var(--border-radius);
-  padding: 8px;
-}
-
-pre {
-  background-color: var(--bg-color-dark);
-  color: var(--fg-color-light);
-  padding: 12px;
-  border-radius: var(--border-radius);
+textarea {
   width: 100%;
-  overflow-x: auto;
-
-  &:empty {
-    display: none;
-  }
 }
 
-.flex-row {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  gap: 8px;
-}
-
-#error {
-  margin-bottom: 10px;
-  color: red;
-
-  &:empty {
-    display: none;
-  }
-}
+/* 5. Structural Layout & Utilities */
 
 [id$='-wrapper'] {
   padding: 8px 0 8px;
@@ -201,6 +200,77 @@ pre {
 
   & ~ [id$='-wrapper'] {
     border-top: 1px solid var(--fg-color);
+  }
+}
+
+.flex-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+}
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+.bordered-container {
+  border: 1px solid var(--fg-color);
+  border-radius: var(--border-radius);
+  padding: 8px;
+}
+
+/* 6. Components & Interactive UI */
+
+/* All styles for buttons are strictly consolidated here */
+button {
+  margin: 4px 0;
+  padding: 8px 10px;
+  border: 1px solid var(--fg-color);
+  border-radius: var(--border-radius);
+  background-color: var(--fg-color);
+  color: var(--bg-color);
+  font-weight: 600;
+  font-size: 1rem;
+  cursor: pointer;
+  transition:
+    transform 0.08s ease,
+    box-shadow 0.12s ease;
+}
+
+div.button-collection {
+  display: flex;
+  gap: 8px;
+  flex-direction: row;
+
+  button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+
+    .icon {
+      width: var(--icon-size, 1rem);
+      height: var(--icon-size, 1rem);
+      display: block;
+    }
+
+    &.active {
+      background-color: var(--bg-color-dark);
+      color: var(--fg-color-light);
+      border-color: var(--fg-color-light);
+    }
+
+    &:active:not(:disabled) {
+      box-shadow: inset 0 2px 4px 0 rgba(0, 0, 0, 0.2);
+    }
   }
 }
 
@@ -270,43 +340,12 @@ pre {
   }
 }
 
-.sr-only {
-  position: absolute;
-  width: 1px;
-  height: 1px;
-  padding: 0;
-  margin: -1px;
-  overflow: hidden;
-  clip: rect(0, 0, 0, 0);
-  white-space: nowrap;
-  border: 0;
-}
+#error {
+  margin-bottom: 10px;
+  color: red;
 
-div.button-collection {
-  display: flex;
-  gap: 8px;
-  flex-direction: row;
-
-  button {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-
-    .icon {
-      width: var(--icon-size, 1rem);
-      height: var(--icon-size, 1rem);
-      display: block;
-    }
-
-    &.active {
-      background-color: var(--bg-color-dark);
-      color: var(--fg-color-light);
-      border-color: var(--fg-color-light);
-    }
-
-    &:active:not(:disabled) {
-      box-shadow: inset 0 2px 4px 0 rgba(0, 0, 0, 0.2);
-    }
+  &:empty {
+    display: none;
   }
 }
 

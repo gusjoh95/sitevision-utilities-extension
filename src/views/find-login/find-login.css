@@ -11,8 +11,3 @@ body {
     }
   }
 }
-
-pre.log-container {
-  width: 100%;
-  overflow-x: auto;
-}

@@ -9,61 +9,65 @@
 
   <body>
     <div id="error"></div>
-    <div id="login-paths-wrapper">
-      <h2>Find login page</h2>
-      <div>
+    <form id="options-form">
+      <div id="login-paths-wrapper">
+        <h2>Find login page</h2>
+        <div>
+          <label
+            for="custom-login-paths"
+            data-tooltip="Enter one path per line or separate them with commas (e.g., /login, /admin/login)."
+          >
+            <span>Target paths</span>
+            <span class="sr-only">
+              Enter one path per line or separate them with commas (e.g., /login, /admin/login).
+            </span>
+            <textarea
+              id="custom-login-paths"
+              rows="4"
+              placeholder="/login&#10;/system/login"
+            ></textarea>
+          </label>
+        </div>
+      </div>
+      <div id="properties-wrapper">
+        <h2>Node properties</h2>
         <label
-          for="custom-login-paths"
-          data-tooltip="Enter one path per line or separate them with commas (e.g., /login, /admin/login)."
+          data-tooltip="Enables syntax highlighting and clickable node traversal in the properties view."
         >
-          <span>Target paths</span>
-          <span class="sr-only">
-            Enter one path per line or separate them with commas (e.g., /login, /admin/login).
+          <input type="checkbox" id="use-syntax-highlighting" aria-describedby="syntax-desc" />
+          <span>Rich JSON view</span>
+          <span id="syntax-desc" class="sr-only">
+            Enables syntax highlighting and clickable node traversal in the properties view.
           </span>
-          <textarea
-            id="custom-login-paths"
-            rows="4"
-            placeholder="/login&#10;/system/login"
-          ></textarea>
+        </label>
+        <div>
+          <label for="theme-dropdown">JSON theme:</label>
+          <select name="Theme" id="theme-dropdown">
+            <option value="">Default</option>
+          </select>
+        </div>
+        <div>
+          <details id="expandable">
+            <summary>Theme preview</summary>
+            <div class="json-holder">
+              <pre></pre>
+            </div>
+          </details>
+        </div>
+      </div>
+      <div id="session-params-wrapper">
+        <h2>Session parameters</h2>
+        <label data-tooltip="Not applicable in edit mode">
+          <input type="checkbox" id="reload-on-change" />
+          <span>Reload on parameter update</span>
+          <span id="param-desc" class="sr-only">Not applicable in edit mode</span>
         </label>
       </div>
-    </div>
-    <div id="properties-wrapper">
-      <h2>Node properties</h2>
-      <label data-tooltip="Enables colors and clickable nodes">
-        <input type="checkbox" id="use-syntax-highlighting" aria-describedby="syntax-desc" />
-        <span>Rich JSON view</span>
-        <span id="syntax-desc" class="sr-only">
-          Enables syntax highlighting and clickable node traversal in the properties view.
-        </span>
-      </label>
-      <div>
-        <label for="theme-dropdown">JSON theme:</label>
-        <select name="Theme" id="theme-dropdown">
-          <option value="">Default</option>
-        </select>
+      <div id="save-wrapper">
+        <button id="save" type="button" disabled>Save</button>
+        <pre id="properties"></pre>
       </div>
-      <div>
-        <details id="expandable">
-          <summary>Theme preview</summary>
-          <div class="json-holder">
-            <pre></pre>
-          </div>
-        </details>
-      </div>
-    </div>
-    <div id="session-params-wrapper">
-      <h2>Session parameters</h2>
-      <label data-tooltip="Not applicable in edit mode">
-        <input type="checkbox" id="reload-on-change" />
-        <span>Reload on parameter update</span>
-        <span id="param-desc" class="sr-only">Not applicable in edit mode</span>
-      </label>
-    </div>
-    <div id="save-wrapper">
-      <button id="save" disabled>Save</button>
-      <pre id="properties"></pre>
-    </div>
+    </form>
     <script type="module" src="options.js"></script>
   </body>
 </html>

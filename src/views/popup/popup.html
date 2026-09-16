@@ -9,7 +9,7 @@
   <body>
     <div id="app">
       <div id="header-buttons-wrapper" class="button-collection">
-        <button id="find-login" data-tooltip aria-label="Find login page" disabled>
+        <button id="find-login" type="button" data-tooltip aria-label="Find login page" disabled>
           <svg
             class="icon"
             aria-hidden="true"
@@ -27,7 +27,7 @@
             <circle cx="12" cy="12" r="1" />
           </svg>
         </button>
-        <button id="open-options" data-tooltip aria-label="Open extension options">
+        <button id="open-options" type="button" data-tooltip aria-label="Open extension options">
           <svg
             class="icon"
             aria-hidden="true"
@@ -83,18 +83,20 @@
       </div>
       <div id="session-params-wrapper">
         <h2>Session parameters</h2>
-        <label>
-          <input type="checkbox" disabled id="toggle-profiling" />
-          ?profiling=true
-        </label>
-        <label>
-          <input type="checkbox" disabled id="toggle-jsdebug" />
-          ?jsdebug=true
-        </label>
-        <label>
-          <input type="checkbox" disabled id="toggle-slimrender" />
-          ?slimRender=true
-        </label>
+        <form id="session-params-form">
+          <label>
+            <input type="checkbox" disabled id="toggle-profiling" />
+            ?profiling=true
+          </label>
+          <label>
+            <input type="checkbox" disabled id="toggle-jsdebug" />
+            ?jsdebug=true
+          </label>
+          <label>
+            <input type="checkbox" disabled id="toggle-slimrender" />
+            ?slimRender=true
+          </label>
+        </form>
       </div>
       <div id="cookie-consent-wrapper">
         <h2>Consent cookie</h2>
@@ -103,7 +105,9 @@
             Host permissions is required to read cookies. Please grant permissions by clicking the
             button below.
           </p>
-          <button id="cookie-consent-prompt-button" disabled>Grant permissions</button>
+          <button id="cookie-consent-prompt-button" type="button" disabled>
+            Grant permissions
+          </button>
         </div>
         <div id="cookie-consent-info" hidden>
           <p id="cookie-consent-accepted-label">Accepted cookies (0):</p>

@@ -2,18 +2,7 @@
   --view-width: unset;
 }
 
-label:has(textarea) {
-  display: flex;
-  flex-direction: column;
-  max-width: unset;
-}
-textarea {
-  width: 100%;
-}
-
-summary {
-  width: max-content;
-  &:hover {
-    cursor: pointer;
-  }
+/* Wrapper sections need full width; default form shrinks to content */
+#options-form {
+  display: block;
 }
