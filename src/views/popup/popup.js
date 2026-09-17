@@ -10,7 +10,7 @@ import {
   SiteVerification,
   matchDOM,
   withDeferredSpinner,
-  fetchDOM,
+  fetchInTabContext,
 } from '../../api/index.js';
 import { initCookieConsent } from './modules/cookie.js';
 import { initFindLogin } from './modules/find-login.js';
@@ -51,8 +51,8 @@ async function init() {
       let status = await SiteVerification.get(invocationTab);
 
       if (status === SiteVerification.Status.UNKNOWN) {
-        const { html } = await fetchDOM(tabId, origin);
-        const isSitevision = matchDOM(html, {
+        const res = await fetchInTabContext(tabId, origin);
+        const isSitevision = matchDOM(res.data, {
           selector: 'script',
           pattern: /\bsv\.PageContext\s*=\s*\{/i,
         });

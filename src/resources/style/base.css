@@ -86,7 +86,7 @@ h2 {
 }
 
 a {
-  color: var(--color-white-light);
+  color: var(--color-black-light);
 }
 
 p:empty {

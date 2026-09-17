@@ -1,19 +1,55 @@
 import {
   getErrorMessage,
-  fetchDOM,
+  fetchInTabContext,
   getTargetAccessErrorMessage,
   matchDOM,
 } from '../../../api/index.js';
-import { appendLog, setStatus } from './logUtils.js';
+
+import Logger from './logger.js';
 
 const LOGIN_SELECTORS = ['.sv-login-portlet', '.sv-login-form'].join(',');
 
 /**
- * @typedef {'FOUND' | 'CROSS_ORIGIN_REDIRECT' | 'NOT_FOUND' | 'TARGET_UNAVAILABLE' | 'ERROR'} ProbeOutcome
+ * Updates the view's status summary bar.
  *
+ * @param {'running' | 'success' | 'warn' | 'error'} state - Status state classifier.
+ * @param {string} message - Summary message text to display.
+ * @param {string} [url=''] - Optional target URL to attach to the summary link.
+ */
+export function setStatus(state, message, url = '') {
+  const summaryText = document.getElementById('summary-text');
+  const badge = document.querySelector('#status-summary .badge');
+  const link = document.getElementById('summary-link');
+
+  if (summaryText) {
+    summaryText.textContent = message;
+  }
+
+  if (badge) {
+    badge.className = `badge badge-${state}`;
+    badge.textContent = state.toUpperCase();
+  }
+
+  if (link) {
+    if (url) {
+      link.dataset.url = url;
+      link.textContent = url;
+      link.classList.remove('hidden');
+    } else {
+      link.dataset.url = '';
+      link.textContent = '';
+      link.classList.add('hidden');
+    }
+  }
+}
+
+/**
+ * @typedef {'FOUND' | 'CROSS_ORIGIN_REDIRECT' | 'NOT_FOUND' | 'TARGET_UNAVAILABLE' | 'ERROR'} ProbeOutcome
+ * @typedef {'FORM' | 'WEBDAV'} MatchType
  * @typedef {Object} ProbeResult
  * @property {ProbeOutcome} outcome - The classified outcome of the probe.
- * @property {string} [matchUrl] - The final URL where a local login form was discovered.
+ * @property {string} [matchUrl] - The final URL where a local login form or Basic Auth endpoint was discovered.
+ * @property {MatchType} [type] - The type of login endpoint discovered.
  * @property {string} [reason] - Loggable error details or explanation.
  */
 
@@ -55,27 +91,32 @@ function isCrossOrigin(targetUrl, origin) {
 }
 
 /**
- * Probes an endpoint and classifies the outcome (Local Login, Cross-Origin Redirect, or Not Found).
+ * Probes an endpoint and classifies the outcome (Local Login, Basic Auth, Cross-Origin Redirect, or Not Found).
+ * Suppresses HTTP Basic Auth modal prompts using `credentials: 'omit'`.
  *
  * @param {number} tabId - Target browser tab ID.
  * @param {string} targetUrl - Full target URL to fetch.
  * @param {string} origin - Expected target site origin.
- * @param {HTMLElement} logContainer - Container element for status logging.
+ * @param {Logger} logger - Logger instance for status logging.
  * @returns {Promise<ProbeResult>}
  */
-async function probeEndpoint(tabId, targetUrl, origin, logContainer) {
+async function probeEndpoint(tabId, targetUrl, origin, logger) {
   let res;
   try {
-    res = await fetchDOM(tabId, targetUrl);
+    res = await fetchInTabContext(tabId, targetUrl, {
+      reqOptions: {
+        credentials: 'omit', // Prevents native HTTP Basic Auth browser modal from popping up
+      },
+    });
   } catch (err) {
     const errorMsg = getErrorMessage(err);
     const targetAccessErrorMessage = getTargetAccessErrorMessage(errorMsg);
     if (targetAccessErrorMessage) {
-      appendLog(logContainer, 'warn', `-> ${targetAccessErrorMessage}`, { append: true });
+      logger.append(`-> ${targetAccessErrorMessage}`);
       return { outcome: 'TARGET_UNAVAILABLE', reason: targetAccessErrorMessage };
     }
 
-    appendLog(logContainer, 'warn', `-> Network error (${errorMsg})`, { append: true });
+    logger.append(`-> Network error (${errorMsg})`);
     return { outcome: 'ERROR', reason: errorMsg };
   }
 
@@ -83,46 +124,47 @@ async function probeEndpoint(tabId, targetUrl, origin, logContainer) {
 
   // 1. Check HTTP 3xx cross-origin redirect
   if (isCrossOrigin(finalUrl.href, origin)) {
-    appendLog(
-      logContainer,
-      'info',
-      `-> HTTP ${res.status} cross-origin redirect (${finalUrl.host})`,
-      { append: true }
-    );
+    logger.append(`-> HTTP ${res.status} cross-origin redirect (${finalUrl.host})`);
     return { outcome: 'CROSS_ORIGIN_REDIRECT' };
   }
 
   if (finalUrl.href !== targetUrl) {
-    appendLog(logContainer, 'info', `-> Internal redirect (${finalUrl.pathname})`, {
-      append: true,
-    });
+    logger.append(`-> Internal redirect (${finalUrl.pathname})`);
+  }
+
+  // 2. Check HTTP Basic Auth (WebDAV / protected endpoints)
+  const authHeader = res.headers['www-authenticate'] || '';
+  if (res.status === 401 && authHeader.toLowerCase().includes('basic')) {
+    logger.append('-> SEMI-FOUND! Basic Auth detected.');
+    return { outcome: 'FOUND', matchUrl: finalUrl.toString(), type: 'WEBDAV' };
   }
 
   if (res.ok) {
-    // 2. Check HTML meta-refresh redirect
-    if (hasMetaRefresh(res.html)) {
-      appendLog(logContainer, 'info', `-> Meta-refresh redirect detected`, { append: true });
+    const html = res.data || '';
+
+    // 3. Check HTML meta-refresh redirect
+    if (hasMetaRefresh(html)) {
+      logger.append('-> Meta-refresh redirect detected');
       return { outcome: 'CROSS_ORIGIN_REDIRECT' };
     }
 
-    // 3. Evaluate local login selectors
-    if (hasLocalLoginForm(res.html)) {
-      appendLog(logContainer, 'success', `-> FOUND! Local login form detected`, { append: true });
-      return { outcome: 'FOUND', matchUrl: finalUrl.toString() };
+    // 4. Evaluate local login selectors
+    if (hasLocalLoginForm(html)) {
+      logger.append('-> FOUND! Local login form detected');
+      return { outcome: 'FOUND', matchUrl: finalUrl.toString(), type: 'FORM' };
     }
 
-    appendLog(logContainer, 'info', `-> HTTP 200 No login form`, { append: true });
+    logger.append(`-> HTTP ${res.status} No login form`);
     return { outcome: 'NOT_FOUND' };
   }
 
-  appendLog(logContainer, 'info', `-> HTTP ${res.status}`, { append: true });
+  logger.append(`-> HTTP ${res.status}`);
   return { outcome: 'NOT_FOUND' };
 }
 
 /**
- * Runs the discovery sequence for identifying local login pages.
- * Probes `/edit` first as a baseline, followed by configured custom paths.
- * Continues traversing the queue even if a cross-origin redirect is encountered.
+ * Runs the discovery sequence for identifying local login pages or HTTP Basic Auth endpoints.
+ * Prioritizes standard login forms and uses WebDAV endpoints as a secondary fallback.
  *
  * @param {number} tabId - Target browser tab ID.
  * @param {string} origin - Target site origin.
@@ -133,38 +175,58 @@ export async function runDiscovery(tabId, origin, customPaths = []) {
   const logContainer = document.getElementById('log-container');
   if (!logContainer) return;
 
-  logContainer.textContent = '';
-  setStatus('running', 'Probing target site(s)...');
-  appendLog(logContainer, 'info', `Starting discovery on: ${origin}`);
+  const logger = new Logger(logContainer);
+  logger.clear();
 
-  const queue = [...new Set(['/edit', ...customPaths])].filter(Boolean);
+  setStatus('running', 'Probing target site(s)...');
+  logger.log('info', `Starting discovery on: ${origin}`);
+
+  const webdavTestPaths = ['/webdav/images/', '/webdav/files/'];
+  const queue = [...new Set(['/edit', ...webdavTestPaths, ...customPaths])].filter(Boolean);
 
   // Find the longest path to calculate padding for alignment
   const maxPathLength = Math.max(...queue.map((p) => p.length));
+
+  let webdavFallbackUrl = null;
 
   for (const path of queue) {
     const targetUrl = new URL(path, origin).toString();
     const paddedPath = path.padEnd(maxPathLength, ' ');
 
-    appendLog(logContainer, 'info', `GET ${paddedPath}`);
+    logger.log('info', `GET ${paddedPath}`);
 
     try {
-      const result = await probeEndpoint(tabId, targetUrl, origin, logContainer);
+      const result = await probeEndpoint(tabId, targetUrl, origin, logger);
 
       if (result.outcome === 'FOUND' && result.matchUrl) {
-        setStatus('success', 'Local login found at:', result.matchUrl);
-        return;
+        if (result.type === 'WEBDAV') {
+          // Store WebDAV as a secondary fallback and continue searching for a primary login form
+          webdavFallbackUrl = result.matchUrl;
+          logger.append('Continuing search for login form.');
+        } else {
+          // Primary login form detected — terminate search immediately
+          setStatus('success', 'Login form found at:', result.matchUrl);
+          return;
+        }
       }
+
       if (result.outcome === 'TARGET_UNAVAILABLE' && result.reason) {
         setStatus('error', 'Target unavailable:', result.reason);
         return;
       }
-      // Note: Removed the redundant CROSS_ORIGIN_REDIRECT log since probeEndpoint already appends the reason.
     } catch (err) {
-      appendLog(logContainer, 'error', `-> Error: ${getErrorMessage(err)}`, { append: true });
+      logger.append(`-> Error: ${getErrorMessage(err)}`);
     }
   }
 
-  appendLog(logContainer, 'warn', 'Discovery finished. No local login form was found.');
-  setStatus('warn', 'No local login form was found.');
+  // Fallback to WebDAV endpoint if no primary login form was found during queue traversal
+  if (webdavFallbackUrl) {
+    setStatus('success', 'Basic Auth found at:', webdavFallbackUrl);
+    logger.log('info', `Basic Auth found at: ${webdavFallbackUrl}`);
+    logger.log('warn', 'Discovery finished — only Basic Auth was found.');
+    return;
+  }
+
+  logger.log('warn', 'Discovery finished — no login found.');
+  setStatus('warn', 'No login found.');
 }

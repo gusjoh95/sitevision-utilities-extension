@@ -14,6 +14,8 @@ async function initFindLoginView() {
 
   const spinnerEl = getRequiredElement('#spinner');
   const errorElem = getRequiredElement('#error');
+  // Bind click handler once for clipboard copy & tooltip/feedback state
+  const summaryLink = getRequiredElement('#summary-link');
 
   registerTargetPermissionListener({
     tabId: anchorTabId,
@@ -22,6 +24,27 @@ async function initFindLoginView() {
       errorElem.textContent = `Warning: ${message}`;
     },
   });
+
+  if (summaryLink) {
+    summaryLink.addEventListener('click', async (e) => {
+      e.preventDefault();
+      const url = summaryLink.dataset.url;
+      if (!url) return;
+
+      try {
+        await navigator.clipboard.writeText(url);
+
+        // Temporary inline feedback (or trigger your custom tooltip here)
+        const originalText = summaryLink.textContent;
+        summaryLink.textContent = 'Copied!';
+        setTimeout(() => {
+          summaryLink.textContent = originalText;
+        }, 1500);
+      } catch (err) {
+        console.error('Failed to copy URL to clipboard:', err);
+      }
+    });
+  }
 
   try {
     await withDeferredSpinner(
