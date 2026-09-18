@@ -27,21 +27,14 @@ async function initFindLoginView() {
 
   if (summaryLink) {
     summaryLink.addEventListener('click', async (e) => {
-      e.preventDefault();
-      const url = summaryLink.dataset.url;
-      if (!url) return;
-
       try {
-        await navigator.clipboard.writeText(url);
+        e.preventDefault();
+        const url = summaryLink.dataset.url;
+        if (!url) return;
 
-        // Temporary inline feedback (or trigger your custom tooltip here)
-        const originalText = summaryLink.textContent;
-        summaryLink.textContent = 'Copied!';
-        setTimeout(() => {
-          summaryLink.textContent = originalText;
-        }, 1500);
+        chrome.tabs.create({ url });
       } catch (err) {
-        console.error('Failed to copy URL to clipboard:', err);
+        errorElem.textContent = `Error: ${getErrorMessage(err)}`;
       }
     });
   }
