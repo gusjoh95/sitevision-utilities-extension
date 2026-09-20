@@ -2,14 +2,16 @@
 
 A lightweight browser extension for [Sitevision](https://sitevision.net/) developers. It provides debugging and development utilities for Chromium browsers and Firefox using Manifest V3.
 
+[![Get the extension on Chrome Web Store](./assets/docs/chrome_web_store.png)](https://chromewebstore.google.com/detail/sitevision-utilities/mddhjfmdpmfplpmiamdpmebndmhakaia) [![Get the extension on Mozilla Addons](./assets/docs/get-the-addon-ff.png)](https://addons.mozilla.org/en-US/firefox/addon/sitevision-utilities/)
+
 ## For users
 
 ### Features
 
-The popup is arranged in this order:
+The extension is arranged in this order:
 
-1. **Find login page**: checks `/edit` and configured custom paths for Sitevision login forms, internal redirects, and external identity-provider redirects. Results and request errors are shown in a dedicated discovery window.
-2. **Open options**: opens the extension settings page.
+1. **Find login page**: checks pre-configured paths (such as `/edit`) and configured custom paths for Basic-auth prompts and Sitevision login forms.
+2. **Open options**: opens the extension settings page. See [Options](#options).
 3. **Node properties**: inspect the current page, current user, or a manually supplied node id through the Sitevision REST API. Referenced node ids can be opened directly from the JSON result. See the [Sitevision REST API documentation](https://developer.sitevision.se/docs/rest-api/model-rest-api).
 4. **Session parameters**: toggle `profiling`, `jsdebug`, and `slimRender`. The active page can be reloaded after a change when enabled in settings.
 5. **Consent cookie**: inspect accepted and denied consent-cookie categories. This feature requires additional browser permissions.
@@ -18,10 +20,10 @@ The popup is arranged in this order:
 
 The options page provides:
 
-- **Highlight JSON**: enables syntax highlighting and clickable node-id traversal in the properties view.
-- **JSON theme**: selects the visual theme for highlighted JSON output.
-- **Reload page when changing parameter**: reloads the current page after a session-parameter change, except when the URL contains `/edit`.
-- **Custom login paths**: adds candidate paths to login discovery. Enter paths one per line or separated by commas; paths without a leading `/` are normalized automatically.
+- **Target paths**: adds candidate paths to login discovery. Enter paths one per line or separated by commas; paths without a leading `/` are normalized automatically.
+- **Rich JSON view**: enables syntax highlighting and clickable node-id traversal in the properties view.
+- **JSON theme**: selects the visual theme for Rich JSON view.
+- **Reload on parameter update**: reloads the current page after a session-parameter change.
 
 ### Browser permissions
 
@@ -88,8 +90,8 @@ The project is organized by responsibility:
 src/
 ├── manifest.chrome.json          <-- Chromium MV3 manifest template
 ├── manifest.firefox.json         <-- Firefox MV3 manifest template
-├── manifest.json                 <-- Generated local manifest (ignored)
-├── background/                   <-- Background fetch and runtime services
+├── manifest.json                 <-- Generated local manifest (gitignored)
+├── background/                   <-- Background runtime services
 ├── api/                          <-- Shared extension API modules
 ├── resources/                    <-- Icons, shared CSS, and JSON themes
 └── views/
@@ -99,7 +101,7 @@ src/
     └── properties/               <-- JSON node-property viewer
 ```
 
-`src/api/index.js` is the public API facade. Views use native browser modules directly, while background services handle work that should not run in the extension window, such as discovery requests and redirect inspection.
+`src/api/index.js` is the public API facade. Views use native browser modules directly, while background services handle work that doesnt necessitate running in a "scripting context" (to keep required permissions to a minimum).
 
 ### Cross-browser manifests
 
