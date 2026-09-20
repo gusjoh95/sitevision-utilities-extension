@@ -51,6 +51,14 @@ The extension uses native ES modules and does not need transpilation or bundling
 
    This copies `src/manifest.chrome.json` or `src/manifest.firefox.json` to the generated `src/manifest.json`. The generated file is ignored by Git.
 
+**Note about the `browser` namespace and types**
+
+Starting with Chrome 148 the browser exposes the standard `browser` namespace in addition to `chrome`. This project adopts `browser.*` at runtime and sets `minimum_chrome_version` in the Chromium manifest template to ensure `browser` is available. For editor type-checking we use the `chrome-types` package together with a local declaration file in `types/browser.d.ts` that maps `browser` to `typeof chrome` so the JS/TS language server understands the `browser` API without adding `.d.ts` files to `src/`.
+
+Why JSDoc still references `chrome.*`:
+
+The shipped `chrome-types` package provides the publicly-consumable API shapes used by the editor and TypeScript tooling. Referencing `chrome.*` in JSDoc ensures the language server resolves types from that package. At runtime we use `browser.*` (available when `minimum_chrome_version` >= 148). The `types/browser.d.ts` file maps the runtime `browser` global to `typeof chrome` so both runtime code and editor types work together without duplicating or emitting type files into `src/`.
+
 3. Load the `src` directory as an unpacked extension in the browser. Run the matching manifest command again whenever you switch browsers.
 
 ### Available scripts
@@ -106,6 +114,8 @@ src/
 ### Cross-browser manifests
 
 `src/manifest.chrome.json` and `src/manifest.firefox.json` share the extension metadata but provide browser-specific background settings and Firefox metadata. `src/manifest.json` is a generated local artifact, not a source file to edit manually.
+
+If you update the Chromium manifest to require Chrome >=148, the `browser` namespace will be available at runtime and code using `browser.*` will work without any runtime shim.
 
 ### Validation and contributions
 

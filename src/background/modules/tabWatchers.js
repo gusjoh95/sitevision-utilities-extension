@@ -13,22 +13,22 @@ export function registerTabWatchers() {
   /** @type {Map<number, ActiveTarget>} */
   const activeTargets = new Map();
 
-  chrome.runtime.onMessage.addListener((msg) => {
+  browser.runtime.onMessage.addListener((msg) => {
     if (msg.type === 'SET_ACTIVE_TARGET') {
       activeTargets.set(msg.tabId, { tabId: msg.tabId, origin: msg.origin });
     }
   });
 
   // 1. Detect if the tab is completely closed
-  chrome.tabs.onRemoved.addListener((tabId) => {
+  browser.tabs.onRemoved.addListener((tabId) => {
     if (activeTargets.has(tabId)) {
-      chrome.runtime.sendMessage({ type: 'TARGET_LOST', tabId, reason: 'closed' });
+      browser.runtime.sendMessage({ type: 'TARGET_LOST', tabId, reason: 'closed' });
       activeTargets.delete(tabId);
     }
   });
 
   // 2. Detect if the tab reloads or navigates
-  chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
+  browser.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
     // Skip immediately if it's the wrong tab or not in loading state
     const activeTarget = activeTargets.get(tabId);
     if (!activeTarget) return;
@@ -39,8 +39,8 @@ export function registerTabWatchers() {
 
     // If Chrome hides the URL, the activeTab permission was lost (likely cross-origin)
     if (!currentUrl) {
-      console.warn('ActiveTab permission lost! Chrome hid the URL. Likely cross-origin redirect.');
-      chrome.runtime.sendMessage({ type: 'TARGET_LOST', tabId, reason: 'cross-origin' });
+      console.warn('ActiveTab permission lost! browser hid the URL. Likely cross-origin redirect.');
+      browser.runtime.sendMessage({ type: 'TARGET_LOST', tabId, reason: 'cross-origin' });
       activeTargets.delete(tabId);
       return;
     }
@@ -53,12 +53,12 @@ export function registerTabWatchers() {
         console.warn(
           `Origin changed! Started at ${activeTarget.origin} but navigated to ${currentOrigin}`
         );
-        chrome.runtime.sendMessage({ type: 'TARGET_LOST', tabId, reason: 'cross-origin' });
+        browser.runtime.sendMessage({ type: 'TARGET_LOST', tabId, reason: 'cross-origin' });
         activeTargets.delete(tabId);
       }
     } catch {
       // If the URL cannot be parsed (e.g., chrome:// or about:blank)
-      chrome.runtime.sendMessage({ type: 'TARGET_LOST', tabId, reason: 'cross-origin' });
+      browser.runtime.sendMessage({ type: 'TARGET_LOST', tabId, reason: 'cross-origin' });
       activeTargets.delete(tabId);
     }
   });

@@ -50,7 +50,7 @@ export async function initParamButtons(tab, sitevisionMode) {
    */
   async function getSessionParamStates() {
     const results = await /** @type {Promise<chrome.scripting.InjectionResult[]>} */ (
-      chrome.scripting.executeScript({
+      browser.scripting.executeScript({
         target: { tabId: safeTabId },
         func: () => {
           // Profiling check

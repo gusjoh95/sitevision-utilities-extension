@@ -27,6 +27,8 @@ For details on the 4-digit versioning strategy (`MAJOR.MINOR.PATCH.HOTFIX`), see
 - Preserve rendered properties JSON when the originating tab becomes inaccessible; show a non-destructive target-access warning in `#error` instead of replacing the JSON output.
 - Make `find-login` discovery stop and report a clear `Target unavailable` status when the originating tab is closed or host permissions are revoked, avoiding repetitive network error logs.
 
+- Adopt `browser` runtime namespace for Chromium (Chrome ≥148). Added `types/browser.d.ts` to map `browser` to `typeof chrome` for editor type-checking, updated `jsconfig.json` and `eslint.config.js`, and migrated runtime API calls from `chrome.*` to `browser.*` across `src/`. JSDoc/type annotations remain `chrome.*` to preserve `chrome-types` resolution. This change requires setting `minimum_chrome_version` in the Chromium manifest and may be incompatible with older Chrome versions.
+
 ### Deprecated
 
 ### Removed

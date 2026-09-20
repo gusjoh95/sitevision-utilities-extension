@@ -45,7 +45,7 @@ function getOriginFromTab(tab) {
  */
 export async function get(tab) {
   const origin = getOriginFromTab(tab);
-  const res = await chrome.storage.session.get(origin);
+  const res = await browser.storage.session.get(origin);
   const value = res[origin];
 
   if (value === true) return Status.VERIFIED;
@@ -62,7 +62,7 @@ export async function get(tab) {
  */
 export async function set(tab, isSitevision) {
   const origin = getOriginFromTab(tab);
-  await chrome.storage.session.set({ [origin]: Boolean(isSitevision) });
+  await browser.storage.session.set({ [origin]: Boolean(isSitevision) });
 }
 
 /**
@@ -73,10 +73,10 @@ export async function set(tab, isSitevision) {
  */
 export async function clear(tab) {
   if (!tab) {
-    await chrome.storage.session.clear();
+    await browser.storage.session.clear();
     return;
   }
 
   const origin = getOriginFromTab(tab);
-  await chrome.storage.session.remove(origin);
+  await browser.storage.session.remove(origin);
 }

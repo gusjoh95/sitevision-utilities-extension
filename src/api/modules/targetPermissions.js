@@ -98,7 +98,7 @@ export async function assertTargetTabAccessible(tabId, origin) {
   let invocationTab;
 
   try {
-    invocationTab = await chrome.tabs.get(Number(tabId));
+    invocationTab = await browser.tabs.get(Number(tabId));
   } catch (error) {
     throw new Error(getTargetLostMessage(targetLostReasons.closed), { cause: error });
   }
@@ -140,13 +140,13 @@ export function registerTargetPermissionListener({ tabId, origin, onLost }) {
     return () => {};
   }
 
-  chrome.runtime.sendMessage({
+  browser.runtime.sendMessage({
     type: 'SET_ACTIVE_TARGET',
     tabId: targetTabId,
     origin,
   });
 
-  /** @type {Parameters<typeof chrome.runtime.onMessage.addListener>[0]} */
+  /** @type {Parameters<typeof browser.runtime.onMessage.addListener>[0]} */
   const listener = (msg) => {
     /** @type {{ type?: string, tabId?: number, reason?: TargetLostReason }} */
     const targetMessage = msg;
@@ -169,7 +169,7 @@ export function registerTargetPermissionListener({ tabId, origin, onLost }) {
     return undefined;
   };
 
-  chrome.runtime.onMessage.addListener(listener);
+  browser.runtime.onMessage.addListener(listener);
 
-  return () => chrome.runtime.onMessage.removeListener(listener);
+  return () => browser.runtime.onMessage.removeListener(listener);
 }

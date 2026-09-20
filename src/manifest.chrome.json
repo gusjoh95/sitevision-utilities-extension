@@ -3,6 +3,7 @@
   "description": "Unofficial Sitevision extension to inspect JCR node properties, toggle debug parameters and streamline your development workflow.",
   "version": "1.0.0.0",
   "manifest_version": 3,
+  "minimum_chrome_version": "148",
   "action": {
     "default_popup": "views/popup/popup.html",
     "default_icon": "resources/icons/16.png"

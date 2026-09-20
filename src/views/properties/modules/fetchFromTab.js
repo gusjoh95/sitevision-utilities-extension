@@ -48,7 +48,7 @@ export async function fetchFromTab(state) {
     }
   };
 
-  const injectionResults = await chrome.scripting.executeScript({
+  const injectionResults = await browser.scripting.executeScript({
     target: { tabId: targetTabId },
     func: fetchPropertiesTask,
     args: [state.origin, restApiPath, state.version, state.node],

@@ -7,7 +7,7 @@ import { getInvocationTab } from './getInvocationTab.js';
  * @returns {void}
  */
 export function registerCurrentTabChangeListener(onTabComplete) {
-  chrome.tabs.onUpdated.addListener(async (tabId, changeInfo) => {
+  browser.tabs.onUpdated.addListener(async (tabId, changeInfo) => {
     try {
       const activeTab = await getInvocationTab();
       // Unsure why this doesnt fail in firefox.

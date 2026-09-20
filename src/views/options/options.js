@@ -33,7 +33,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     const jsonTheme = opts?.jsonTheme || '';
     try {
-      const jsonUrl = chrome.runtime.getURL('resources/style/json-themes/themes.json');
+      const jsonUrl = browser.runtime.getURL('resources/style/json-themes/themes.json');
       const response = await fetch(jsonUrl);
       if (!response.ok) {
         throw new Error(`Failed to load themes: HTTP ${response.status} ${response.statusText}`);
@@ -59,7 +59,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
     dropdown.addEventListener('change', () => {
       const selectedTheme = dropdown.value || 'default.css';
-      themeLink.href = chrome.runtime.getURL(`resources/style/json-themes/${selectedTheme}`);
+      themeLink.href = browser.runtime.getURL(`resources/style/json-themes/${selectedTheme}`);
     });
 
     saveBtn.removeAttribute('disabled');
@@ -103,7 +103,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         const preview = getRequiredElement('.json-holder pre');
         if (!preview.hasChildNodes()) {
           const dummyJson = await fetch(
-            chrome.runtime.getURL('views/options/dummydata/dummy.json')
+            browser.runtime.getURL('views/options/dummydata/dummy.json')
           );
           if (!dummyJson.ok) {
             throw new Error(

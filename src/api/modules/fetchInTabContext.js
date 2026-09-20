@@ -91,7 +91,7 @@ export default async function fetchInTabContext(tabId, url, options = {}) {
   let injectionResults;
 
   try {
-    injectionResults = await chrome.scripting.executeScript({
+    injectionResults = await browser.scripting.executeScript({
       target: { tabId: targetTabId },
       func: fetchTask,
       args: [url, reqOptions, responseType],

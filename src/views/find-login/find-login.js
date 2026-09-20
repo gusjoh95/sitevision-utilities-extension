@@ -32,7 +32,7 @@ async function initFindLoginView() {
         const url = summaryLink.dataset.url;
         if (!url) return;
 
-        chrome.tabs.create({ url });
+        await browser.tabs.create({ url });
       } catch (err) {
         errorElem.textContent = `Error: ${getErrorMessage(err)}`;
       }
