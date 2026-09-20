@@ -13,6 +13,7 @@
     "lint": "eslint src",
     "format": "prettier --write .",
     "create-release": "node ./scripts/create-release.js",
+    "check:theme-contrast": "node scripts/check-theme-contrast.js",
     "dev:ch": "node scripts/switch-manifest.js chrome",
     "dev:ff": "node scripts/switch-manifest.js firefox"
   }

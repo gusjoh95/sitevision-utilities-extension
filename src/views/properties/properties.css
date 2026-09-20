@@ -1,18 +1,16 @@
+:root {
+  --base-font-size: 16px;
+}
+
 html,
 body {
   width: unset;
 }
 
-pre {
-  font-family: monospace;
-  padding: 16px;
-  line-height: 1.25;
-  min-width: 100%;
-  font-size: 16px;
-  overflow-x: auto;
-
-  &.wrap {
-    white-space: pre-wrap;
-    word-break: break-word;
+.json-holder pre {
+  .json-id {
+    padding: 1px 4px;
+    border-radius: 4px;
+    cursor: pointer;
   }
 }

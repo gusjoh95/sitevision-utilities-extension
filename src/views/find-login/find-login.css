@@ -3,7 +3,7 @@ body {
   width: unset;
 }
 
-#status-summary {
+#status-wrapper {
   span,
   a {
     &:empty {

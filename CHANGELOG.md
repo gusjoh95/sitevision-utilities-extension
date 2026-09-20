@@ -17,27 +17,32 @@ For details on the 4-digit versioning strategy (`MAJOR.MINOR.PATCH.HOTFIX`), see
 
 ### Changed
 
-- Development and release workflows now select a browser manifest before loading or packaging the extension (`npm run dev:ch` or `npm run dev:ff`).
-- Add Firefox host-permission handling from the popup click gesture and update the UI when discovery requires permission.
-- Improve tooltip accessibility across the UI by switching to `data-tooltip` and `sr-only` descriptions, while updating the HTML lint rules to enforce the new pattern.
-- Update release packaging to create browser-specific archives and validate manifest differences.
-- UI feedback and state rollback for session parameter toggles ([#1](https://github.com/gusjoh95/sitevision-utilities-extension/issues/1)):
-  - Disable checkbox and set indeterminate state while processing network request.
-  - Revert checkbox state if the background request fails.
-- Preserve rendered properties JSON when the originating tab becomes inaccessible; show a non-destructive target-access warning in `#error` instead of replacing the JSON output.
-- Make `find-login` discovery stop and report a clear `Target unavailable` status when the originating tab is closed or host permissions are revoked, avoiding repetitive network error logs.
-
-- Adopt `browser` runtime namespace for Chromium (Chrome ≥148). Added `types/browser.d.ts` to map `browser` to `typeof chrome` for editor type-checking, updated `jsconfig.json` and `eslint.config.js`, and migrated runtime API calls from `chrome.*` to `browser.*` across `src/`. JSDoc/type annotations remain `chrome.*` to preserve `chrome-types` resolution. This change requires setting `minimum_chrome_version` in the Chromium manifest and may be incompatible with older Chrome versions.
+- Themes: Add six JSON themes (`neon-noir`, `pastel-sunset`, `matrix-glow`, `solar-flare`, `retro-wave`, `aurora-borealis`).
+- Spacing: Standardize JSON spacing with `--spacing-*` variables in `resources/style/base.css`.
+- Presentation: Move `.json-id` presentation to global styles; themes now only provide color tokens.
+- Keys: Improve key emphasis (`--json-key-fg` + bold `.json-key`) for clearer key/value separation.
+- Logger: Move logger to `src/api/modules/logger.js`; it now sizes the log container (`max-height`) on resize, exposes `destroy()`, and avoids page scrolling.
+- UI: Small layout and logging tweaks in `find-login`/discovery; update options, popup, and properties to support themes and spacing tokens.
+- Tooling: Add `scripts/check-theme-contrast.js` to validate theme contrast and suggest fixes; add `check:theme-contrast` npm script and README note.
+- Dev workflow: Development and release workflows now select a browser manifest before loading or packaging the extension (`npm run dev:ch` or `npm run dev:ff`).
+- Permissions: Add Firefox host-permission handling from the popup click gesture and update the UI when discovery requires permission.
+- Accessibility: Improve tooltip accessibility by switching to `data-tooltip` and `sr-only` descriptions; update HTML lint rules accordingly.
+- Packaging: Update release packaging to create browser-specific archives and validate manifest differences.
+- UX: UI feedback and state rollback for session parameter toggles (disable checkbox + indeterminate while processing; revert state on failure).
+- Resilience: Preserve rendered properties JSON when the originating tab becomes inaccessible; show a non-destructive target-access warning in `#error`.
+- Discovery: Make `find-login` discovery stop and report a clear `Target unavailable` status when the originating tab is closed or host permissions are revoked.
+- Runtime: Adopt `browser` runtime namespace for Chromium (Chrome ≥148). Added `types/browser.d.ts` to map `browser` to `typeof chrome` for editor type-checking, updated `jsconfig.json` and `eslint.config.js`, and migrated runtime API calls from `chrome.*` to `browser.*` across `src/`. JSDoc/type annotations remain `chrome.*` to preserve `chrome-types` resolution. This change requires setting `minimum_chrome_version` in the Chromium manifest and may be incompatible with older Chrome versions.
 
 ### Deprecated
 
 ### Removed
 
-- Updating paramaters is no longer possible in edit-mode. The session state when populating the checkboxes is no longer evaluated in edit-mode either (the checkboxes are kept disabled). ([#2](https://github.com/gusjoh95/sitevision-utilities-extension/issues/2)).
+- Updating paramaters is no longer possible in edit-mode.
 
 ### Fixed
 
 - Fix tab reload after parameter updates on 404 pages ([#1](https://github.com/gusjoh95/sitevision-utilities-extension/issues/1)).
+- The session state when populating the checkboxes is no longer evaluated in edit-mode either (the checkboxes are kept disabled). ([#2](https://github.com/gusjoh95/sitevision-utilities-extension/issues/2)).
 - Remove fixed layout width in options page and refine input element styling ([#3](https://github.com/gusjoh95/sitevision-utilities-extension/issues/3)).
 
 ### Security

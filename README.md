@@ -63,13 +63,14 @@ The shipped `chrome-types` package provides the publicly-consumable API shapes u
 
 ### Available scripts
 
-| Command                  | Purpose                                                |
-| ------------------------ | ------------------------------------------------------ |
-| `npm run dev:ch`         | Select the Chromium manifest for local development.    |
-| `npm run dev:ff`         | Select the Firefox manifest for local development.     |
-| `npm run lint`           | Run ESLint against the `src` directory.                |
-| `npm run format`         | Format the repository with Prettier.                   |
-| `npm run create-release` | Build release archives for the active browser targets. |
+| Command                        | Purpose                                                                                                                                                                                         |
+| ------------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `npm run dev:ch`               | Select the Chromium manifest for local development.                                                                                                                                             |
+| `npm run dev:ff`               | Select the Firefox manifest for local development.                                                                                                                                              |
+| `npm run lint`                 | Run ESLint against the `src` directory.                                                                                                                                                         |
+| `npm run format`               | Format the repository with Prettier.                                                                                                                                                            |
+| `npm run create-release`       | Build release archives for the active browser targets.                                                                                                                                          |
+| `npm run check:theme-contrast` | Scan and validate JSON theme colors under [src/resources/style/json-themes](src/resources/style/json-themes); composites translucent `-bg` over `--json-bg` and prints WCAG >= 4.5 suggestions. |
 
 #### Release packaging
 

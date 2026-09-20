@@ -13,10 +13,17 @@ export default class Logger {
     }
     /** @type {HTMLElement} */
     this.container = container;
+    this._boundUpdate = this._updateContainerSize.bind(this);
+    // keep the container sized to the available viewport space
+    window.addEventListener('resize', this._boundUpdate, { passive: true });
+    // initial sizing
+    this._updateContainerSize();
   }
 
   clear() {
     this.container.textContent = '';
+    // recalc size after clearing (content may shrink)
+    this._updateContainerSize();
   }
 
   /**
@@ -44,9 +51,35 @@ export default class Logger {
   append(message) {
     if (this.container.lastElementChild) {
       this.container.lastElementChild.textContent += ` ${message}`;
+      this._updateContainerSize();
       this.container.scrollTop = this.container.scrollHeight;
     } else {
       this.log('info', message);
     }
+  }
+
+  /**
+   * Recalculate and set the container max-height based on available viewport space.
+   * Uses the container's top offset and document body padding to compute available height.
+   */
+  _updateContainerSize() {
+    try {
+      const rect = this.container.getBoundingClientRect();
+      const bodyStyle = getComputedStyle(document.body);
+      const bodyPaddingBottom = parseFloat(bodyStyle.paddingBottom) || 0;
+      // Increased safety margin to prevent window scrollbars
+      const margin = 24;
+      const available = Math.max(64, window.innerHeight - rect.top - bodyPaddingBottom - margin);
+      this.container.style.maxHeight = `${available}px`;
+    } catch {
+      // ignore — sizing is best-effort
+    }
+  }
+
+  /**
+   * Remove attached listeners and cleanup
+   */
+  destroy() {
+    window.removeEventListener('resize', this._boundUpdate);
   }
 }

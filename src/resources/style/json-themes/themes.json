@@ -1,6 +1,12 @@
 [
+  { "name": "Aurora Borealis", "file": "aurora-borealis.css" },
   { "name": "Calm", "file": "calm.css" },
   { "name": "Cyberpunk", "file": "cyberpunk.css" },
+  { "name": "Deep Space", "file": "deep-space.css" },
+  { "name": "Matrix Glow", "file": "matrix-glow.css" },
+  { "name": "Neon Noir", "file": "neon-noir.css" },
   { "name": "Nordic Frost", "file": "nordic-frost.css" },
-  { "name": "Deep Space", "file": "deep-space.css" }
+  { "name": "Pastel Sunset", "file": "pastel-sunset.css" },
+  { "name": "Retro Wave", "file": "retro-wave.css" },
+  { "name": "Solar Flare", "file": "solar-flare.css" }
 ]

@@ -1,4 +1,5 @@
 export * as SiteVerification from './modules/siteVerification.js';
+export { default as Logger } from './modules/logger.js';
 export { default as matchDOM } from './modules/matchDOM.js';
 export { default as fetchInTabContext } from './modules/fetchInTabContext.js';
 export { assignJsonTheme } from './modules/assignJsonTheme.js';
