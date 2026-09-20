@@ -100,6 +100,7 @@ pre {
   border-radius: var(--border-radius);
   width: 100%;
   overflow-x: auto;
+  margin: 0;
 
   &:empty {
     display: none;

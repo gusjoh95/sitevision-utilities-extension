@@ -36,7 +36,7 @@ export async function initPropertiesView() {
   }
 
   registerTargetPermissionListener({
-    tabId: state.anchorTabId,
+    tabId: Number(state.anchorTabId),
     origin: state.origin,
     onLost: ({ message }) => {
       errorElement.textContent = `Warning: ${message}`;

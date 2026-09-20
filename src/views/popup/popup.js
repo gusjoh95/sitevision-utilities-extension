@@ -63,7 +63,7 @@ async function init() {
 
     const sitevisionMode = await getSitevisionMode(invocationTab);
     if (sitevisionMode === null) {
-      throw new Error('Current tab is not a Sitevision site.');
+      throw new Error('Active tab is not a Sitevision site.');
     }
 
     await initFindLogin(invocationTab);
@@ -97,7 +97,7 @@ async function handleTabReload() {
 
   // Firefox drops the temporary activeTab permission when the popup page itself is reloaded or navigated.
   // Closing the popup is more reliable than resetting the DOM in that browser, while Chrome can still recover
-  // by rebuilding the popup state from the current tab.
+  // by rebuilding the popup state from the active tab.
   if (firefox) {
     window.close();
     return;

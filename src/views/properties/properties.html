@@ -10,7 +10,7 @@
   </head>
 
   <body>
-    <div class="properties-header">
+    <div id="header-wrapper" class="properties-header">
       <h1>Properties</h1>
       <div class="button-collection">
         <button data-tooltip type="button" aria-label="Previous node" id="back">
@@ -87,7 +87,8 @@
       </div>
     </div>
     <div id="error"></div>
-    <div class="json-holder">
+    <div id="spinner" class="bar hidden"></div>
+    <div id="json-wrapper" class="json-holder">
       <pre></pre>
     </div>
     <script type="module" src="properties.js"></script>
