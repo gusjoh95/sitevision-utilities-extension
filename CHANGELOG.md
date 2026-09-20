@@ -33,6 +33,8 @@ For details on the 4-digit versioning strategy (`MAJOR.MINOR.PATCH.HOTFIX`), see
 
 ### Removed
 
+- Updating paramaters is no longer possible in edit-mode. The session state when populating the checkboxes is no longer evaluated in edit-mode either (the checkboxes are kept disabled). ([#2](https://github.com/gusjoh95/sitevision-utilities-extension/issues/2)).
+
 ### Fixed
 
 - Fix tab reload after parameter updates on 404 pages ([#1](https://github.com/gusjoh95/sitevision-utilities-extension/issues/1)).
