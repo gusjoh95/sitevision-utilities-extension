@@ -28,7 +28,7 @@ export async function getOption(key) {
   }
 
   const defaultValue = DEFAULT_OPTIONS[key];
-  const items = await chrome.storage.sync.get({ [key]: defaultValue });
+  const items = await browser.storage.sync.get({ [key]: defaultValue });
   return /** @type {Options[K]} */ (items[key]);
 }
 
@@ -38,7 +38,7 @@ export async function getOption(key) {
  * @returns {Promise<Options>} A promise that resolves to the full options object.
  */
 export async function getOptions() {
-  const items = await chrome.storage.sync.get(DEFAULT_OPTIONS);
+  const items = await browser.storage.sync.get(DEFAULT_OPTIONS);
 
   return {
     useSyntaxHighlighting: Boolean(items?.useSyntaxHighlighting),
@@ -69,6 +69,6 @@ export async function setOptions(options = {}) {
     throw new Error('Invalid option key(s): ' + invalid.join(', '));
   }
 
-  await chrome.storage.sync.set(options);
+  await browser.storage.sync.set(options);
   return true;
 }

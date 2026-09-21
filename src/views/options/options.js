@@ -15,9 +15,11 @@ document.addEventListener('DOMContentLoaded', async () => {
   /** @type {HTMLTextAreaElement} */
   const customLoginPaths = getRequiredElement('#custom-login-paths');
   /** @type {HTMLPreElement} */
-  const properties = getRequiredElement('#properties');
+  const errorElem = getRequiredElement('#error');
   /** @type {HTMLSelectElement} */
   const dropdown = getRequiredElement('#theme-dropdown');
+  /** @type {HTMLDetailsElement} */
+  const expandable = getRequiredElement('#expandable');
   /** @type {HTMLButtonElement} */
   const saveBtn = getRequiredElement('#save');
 
@@ -33,7 +35,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     const jsonTheme = opts?.jsonTheme || '';
     try {
-      const jsonUrl = chrome.runtime.getURL('resources/style/json-themes/themes.json');
+      const jsonUrl = browser.runtime.getURL('resources/style/json-themes/themes.json');
       const response = await fetch(jsonUrl);
       if (!response.ok) {
         throw new Error(`Failed to load themes: HTTP ${response.status} ${response.statusText}`);
@@ -55,16 +57,17 @@ document.addEventListener('DOMContentLoaded', async () => {
       themes.forEach(renderTheme);
     } catch (error) {
       console.error('Failed to load themes', error);
-      properties.textContent = getErrorMessage(error);
+      errorElem.textContent = getErrorMessage(error);
     }
     dropdown.addEventListener('change', () => {
       const selectedTheme = dropdown.value || 'default.css';
-      themeLink.href = chrome.runtime.getURL(`resources/style/json-themes/${selectedTheme}`);
+      themeLink.href = browser.runtime.getURL(`resources/style/json-themes/${selectedTheme}`);
+      expandable.open = true;
     });
 
     saveBtn.removeAttribute('disabled');
   } catch (error) {
-    properties.textContent = getErrorMessage(error);
+    errorElem.textContent = getErrorMessage(error);
   }
 
   async function handleSave() {
@@ -82,20 +85,20 @@ document.addEventListener('DOMContentLoaded', async () => {
         jsonTheme: String(dropdown.value),
       };
       saveBtn.setAttribute('disabled', '');
-      await setOptions(toStore);
+      if (await setOptions(toStore)) {
+        window.close();
+      }
 
-      properties.textContent = JSON.stringify(toStore, null, 2);
+      errorElem.textContent = JSON.stringify(toStore, null, 2);
     } catch (error) {
       const msg = getErrorMessage(error);
-      properties.textContent = msg;
+      errorElem.textContent = msg;
     } finally {
       saveBtn.removeAttribute('disabled');
     }
   }
   saveBtn.addEventListener('click', handleSave);
 
-  /** @type {HTMLDetailsElement} */
-  const expandable = getRequiredElement('#expandable');
   expandable.addEventListener('toggle', async () => {
     try {
       if (expandable.open) {
@@ -103,7 +106,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         const preview = getRequiredElement('.json-holder pre');
         if (!preview.hasChildNodes()) {
           const dummyJson = await fetch(
-            chrome.runtime.getURL('views/options/dummydata/dummy.json')
+            browser.runtime.getURL('views/options/dummydata/dummy.json')
           );
           if (!dummyJson.ok) {
             throw new Error(
@@ -114,7 +117,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
       }
     } catch (error) {
-      properties.textContent = getErrorMessage(error);
+      errorElem.textContent = getErrorMessage(error);
     }
   });
 });

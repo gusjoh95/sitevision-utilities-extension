@@ -3,10 +3,10 @@ import { getRequiredElement } from '../../../api/index.js';
 export async function initOpenOptions() {
   const optionsBtn = getRequiredElement('#open-options');
   optionsBtn.addEventListener('click', () => {
-    if (chrome.runtime.openOptionsPage) {
-      chrome.runtime.openOptionsPage();
+    if (browser.runtime.openOptionsPage) {
+      browser.runtime.openOptionsPage();
     } else {
-      window.open(chrome.runtime.getURL('options.html'));
+      window.open(browser.runtime.getURL('options.html'));
     }
   });
 }

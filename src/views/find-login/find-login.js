@@ -18,7 +18,7 @@ async function initFindLoginView() {
   const summaryLink = getRequiredElement('#summary-link');
 
   registerTargetPermissionListener({
-    tabId: anchorTabId,
+    tabId: Number(anchorTabId),
     origin,
     onLost: ({ message }) => {
       errorElem.textContent = `Warning: ${message}`;
@@ -32,7 +32,7 @@ async function initFindLoginView() {
         const url = summaryLink.dataset.url;
         if (!url) return;
 
-        chrome.tabs.create({ url });
+        await browser.tabs.create({ url });
       } catch (err) {
         errorElem.textContent = `Error: ${getErrorMessage(err)}`;
       }
@@ -42,9 +42,9 @@ async function initFindLoginView() {
   try {
     await withDeferredSpinner(
       async () => {
-        await assertTargetTabAccessible(anchorTabId, origin);
+        await assertTargetTabAccessible(Number(anchorTabId), origin);
         const options = await getOption('customLoginPaths');
-        await runDiscovery(anchorTabId, origin, options);
+        await runDiscovery(Number(anchorTabId), origin, options);
       },
       { spinnerEl, delayMs: 250 }
     );

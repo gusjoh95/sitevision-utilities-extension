@@ -17,13 +17,13 @@ export async function initCookieConsent(tab) {
 
   function getRuntimeError() {
     /** @type {any} */
-    const runtime = chrome.runtime;
+    const runtime = browser.runtime;
     return runtime.lastError;
   }
 
   function readSitevisionCookie() {
     return new Promise((resolve, reject) => {
-      chrome.cookies.get({ url: safeTabUrl, name: cookieName }, (cookie) => {
+      browser.cookies.get({ url: safeTabUrl, name: cookieName }, (cookie) => {
         const runtimeError = getRuntimeError();
         if (runtimeError) {
           reject(new Error(runtimeError.message));
@@ -73,7 +73,7 @@ export async function initCookieConsent(tab) {
             deleteConsentCookieBtn.onclick = async () => {
               try {
                 await new Promise((resolve, reject) => {
-                  chrome.cookies.remove({ url: safeTabUrl, name: cookieName }, (details) => {
+                  browser.cookies.remove({ url: safeTabUrl, name: cookieName }, (details) => {
                     const runtimeError = getRuntimeError();
                     if (runtimeError) {
                       reject(new Error(runtimeError.message));
@@ -106,7 +106,7 @@ export async function initCookieConsent(tab) {
   }
   function requestCookiePermission() {
     return new Promise((resolve, reject) => {
-      chrome.permissions.request({ permissions: ['cookies'], origins: [origin] }, (granted) => {
+      browser.permissions.request({ permissions: ['cookies'], origins: [origin] }, (granted) => {
         const runtimeError = getRuntimeError();
         if (runtimeError) {
           reject(new Error(runtimeError.message));
@@ -125,7 +125,7 @@ export async function initCookieConsent(tab) {
   await new Promise((resolve, reject) => {
     /** @type {HTMLDivElement} */
     const promptWrapper = getRequiredElement('#cookie-consent-prompt');
-    chrome.permissions.contains(
+    browser.permissions.contains(
       { permissions: ['cookies'], origins: [origin] },
       (hasPermission) => {
         const runtimeError = getRuntimeError();

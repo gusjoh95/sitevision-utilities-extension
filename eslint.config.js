@@ -11,8 +11,10 @@ export default defineConfig([
     extends: ['js/recommended'],
     languageOptions: {
       globals: {
-        ...globals.browser,
+        // Explicitly mark the `browser` and `chrome` extension globals readonly
+        browser: 'readonly',
         chrome: 'readonly',
+        ...globals.browser,
       },
     },
     rules: {

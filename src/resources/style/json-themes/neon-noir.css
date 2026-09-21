@@ -1,0 +1,46 @@
+.json-holder pre {
+  --json-bg: #0b0b12ff;
+  --json-fg: #c8d1ddff;
+
+  --json-key-fg: #ffb86bff;
+
+  --json-string-fg: #39ff14ff;
+
+  --json-primitive-fg: #00f0ffff;
+
+  --json-boolean-fg: #fffb00ff;
+
+  --json-number-fg: #ff0040ff;
+
+  --json-null-fg: #9aa5b8ff;
+
+  --json-id-fg: #ffffffff;
+  --json-id-bg: #ff00aa20;
+
+  background: var(--json-bg);
+  color: var(--json-fg);
+}
+
+.json-key {
+  color: var(--json-key-fg);
+  font-weight: bold;
+}
+.json-string {
+  color: var(--json-string-fg);
+}
+.json-primitive {
+  color: var(--json-primitive-fg);
+}
+.json-boolean {
+  color: var(--json-boolean-fg);
+}
+.json-number {
+  color: var(--json-number-fg);
+}
+.json-null {
+  color: var(--json-null-fg);
+}
+.json-id {
+  color: var(--json-id-fg);
+  background: var(--json-id-bg);
+}

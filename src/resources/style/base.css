@@ -7,6 +7,15 @@
   --color-white: #e6e6e6;
   --view-width: 320px;
   --border-radius: 8px;
+  --font-family: sans-serif;
+  --mono-font-family: monospace;
+  --base-font-size: 14px;
+  --base-line-height: 1.45;
+  --spacing-xs: 4px;
+  --spacing-sm: 6px;
+  --spacing-md: 8px;
+  --spacing-lg: 12px;
+  --spacing-xl: 16px;
 }
 
 @media (prefers-color-scheme: light) {
@@ -39,18 +48,15 @@ html,
 body {
   width: var(--view-width);
   margin: 0;
-  font-family:
-    system-ui,
-    -apple-system,
-    'Segoe UI',
-    Roboto,
-    'Helvetica Neue',
-    Arial;
-  line-height: 1.4;
+  font-family: var(--font-family);
+  font-size: var(--base-font-size);
+  line-height: var(--base-line-height);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
 body {
-  padding: 8px 14px;
+  padding: var(--spacing-md) 14px;
   background-color: var(--bg-color);
   color: var(--fg-color);
 }
@@ -96,10 +102,13 @@ p:empty {
 pre {
   background-color: var(--bg-color-dark);
   color: var(--fg-color-light);
-  padding: 12px;
+  font-family: var(--mono-font-family);
+  font-size: 0.8rem;
+  padding: var(--spacing-lg);
   border-radius: var(--border-radius);
   width: 100%;
   overflow-x: auto;
+  margin: 0 0 6px;
 
   &:empty {
     display: none;
@@ -119,7 +128,7 @@ form {
   flex-direction: column;
 
   & fieldset {
-    margin: 0 0 4px;
+    margin: 0 0 var(--spacing-xs);
     padding: 0;
     border-radius: 0;
     display: flex;
@@ -128,13 +137,13 @@ form {
     border: 0;
 
     & label {
-      padding: 0 6px;
+      padding: 0 var(--spacing-sm);
     }
   }
 
   & input[type='text'] {
-    margin: 4px 0;
-    padding: 10px 12px;
+    margin: var(--spacing-xs) 0;
+    padding: 10px var(--spacing-lg);
     width: 100%;
     border: 1px solid var(--fg-color);
     border-radius: var(--border-radius);
@@ -150,7 +159,7 @@ label {
   font-size: 1rem;
   display: flex;
   flex-direction: row;
-  gap: 4px;
+  gap: var(--spacing-xs);
   align-items: center;
   cursor: pointer;
   max-width: fit-content;
@@ -189,14 +198,16 @@ textarea {
 /* 5. Structural Layout & Utilities */
 
 [id$='-wrapper'] {
-  padding: 8px 0 8px;
+  padding: var(--spacing-md) 0 var(--spacing-md);
 
-  & h2 {
-    margin: 0 0 6px;
+  & h2,
+  & h3,
+  & p {
+    margin: 0 0 var(--spacing-sm);
   }
 
   & > div {
-    margin: 6px 0;
+    margin: var(--spacing-sm) 0;
   }
 
   & ~ [id$='-wrapper'] {
@@ -208,7 +219,7 @@ textarea {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  gap: 8px;
+  gap: var(--spacing-md);
 }
 
 .sr-only {
@@ -226,15 +237,15 @@ textarea {
 .bordered-container {
   border: 1px solid var(--fg-color);
   border-radius: var(--border-radius);
-  padding: 8px;
+  padding: var(--spacing-md);
 }
 
 /* 6. Components & Interactive UI */
 
 /* All styles for buttons are strictly consolidated here */
 button {
-  margin: 4px 0;
-  padding: 8px 10px;
+  margin: var(--spacing-xs) 0;
+  padding: var(--spacing-md) 10px;
   border: 1px solid var(--fg-color);
   border-radius: var(--border-radius);
   background-color: var(--fg-color);
@@ -249,7 +260,7 @@ button {
 
 div.button-collection {
   display: flex;
-  gap: 8px;
+  gap: var(--spacing-md);
   flex-direction: row;
 
   button {
@@ -275,6 +286,15 @@ div.button-collection {
   }
 }
 
+.json-holder pre {
+  line-height: 1.25;
+
+  &.wrap {
+    white-space: pre-wrap;
+    word-break: break-word;
+  }
+}
+
 [data-tooltip] {
   anchor-name: --tooltip-anchor;
   anchor-scope: --tooltip-anchor;
@@ -294,11 +314,11 @@ div.button-collection {
     position-anchor: --tooltip-anchor;
     position-area: top;
     position-try-fallbacks: flip-block, flip-inline;
-    margin-bottom: 6px;
+    margin-bottom: var(--spacing-sm);
 
     background-color: var(--bg-color-dark);
     color: var(--fg-color-light);
-    font-size: 0.75rem;
+    font-size: 0.875rem;
     padding: 0.25rem 0.5rem;
     border-radius: calc(var(--border-radius) / 2);
     pointer-events: none;
@@ -334,8 +354,8 @@ div.button-collection {
     border-radius: 50%;
     background-color: var(--bg-color-dark);
     color: var(--fg-color-light);
-    font-size: 0.75em;
-    margin-left: 0.25em;
+    font-size: 0.75rem;
+    margin-left: var(--spacing-xs);
     flex-shrink: 0;
     vertical-align: baseline;
   }
@@ -352,7 +372,7 @@ div.button-collection {
 
 #spinner.bar {
   width: 100%;
-  height: 4px;
+  height: var(--spacing-xs);
   background-color: var(--bg-color-dark);
   position: relative;
   overflow: hidden;

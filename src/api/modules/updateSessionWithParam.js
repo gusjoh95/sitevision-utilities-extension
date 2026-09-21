@@ -7,7 +7,7 @@ import { getErrorMessage } from './getErrorMessage.js';
  *
  * To avoid cookie/CORS mismatches and erroneous log entries when fetching within
  * the extension context, this function executes the fetch request inside the target
- * tab's content script context (via `chrome.scripting.executeScript`).
+ * tab's content script context (via `browser.scripting.executeScript`).
  *
  * @param {string} param - The query parameter name to set (e.g., "jsdebug" or "profiling").
  * @param {boolean} value - The boolean state value for the parameter.
@@ -28,7 +28,7 @@ export async function updateSessionWithParam(param, value) {
 
   try {
     // Injected task executed in the target tab's context.
-    // Overriding TS signature with `@type {any}` due to chrome.scripting API limitation with `args`.
+    // Overriding TS signature with `@type {any}` due to browser.scripting API limitation with `args`.
     /** @type {any} */
     const checkUrlTask = async (/** @type {string} */ urlToFetch) => {
       try {
@@ -55,7 +55,7 @@ export async function updateSessionWithParam(param, value) {
       }
     };
 
-    const results = await chrome.scripting.executeScript({
+    const results = await browser.scripting.executeScript({
       target: { tabId: tab.id },
       func: checkUrlTask,
       args: [reqUrl],

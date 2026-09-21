@@ -5,9 +5,10 @@ import {
   getRequiredElement,
   getTargetAccessErrorMessage,
   highlightJson,
+  withDeferredSpinner,
 } from '../../../api/index.js';
 import { restApiPath } from '../properties.js';
-import { fetchFromTab } from './fetchFromTab.js';
+import { fetchInTabContext } from '../../../api/index.js';
 import { getCurrentState } from './getCurrentState.js';
 
 const useSyntaxHighlighting = await getOption('useSyntaxHighlighting');
@@ -34,7 +35,7 @@ if (useSyntaxHighlighting) {
 
 /**
  * @param {any} data
- * @param {{ origin: string, version: string, node: string }} state
+ * @param {{ origin: string, version: string, node: string, anchorTabId: string }} state
  */
 export function renderUI(data, state) {
   document.title = `${state.origin}${restApiPath}/${state.version}/${state.node}/properties`;
@@ -76,9 +77,32 @@ export async function navigateToNode(nextNode, cachedData = null, historyAction 
 
   if (!data) {
     try {
-      await assertTargetTabAccessible(state.anchorTabId, state.origin);
+      await assertTargetTabAccessible(Number(state.anchorTabId), state.origin);
       preElem.textContent = 'Loading...';
-      data = await fetchFromTab(state);
+      const url = new URL(
+        `${restApiPath}/${state.version}/${state.node}/properties`,
+        state.origin
+      ).toString();
+      const res = await withDeferredSpinner(
+        () => fetchInTabContext(Number(state.anchorTabId), url, { responseType: 'json' }),
+        {
+          spinnerEl: getRequiredElement('#spinner'),
+          delayMs: 250,
+        }
+      );
+
+      if (res?.__isError) {
+        throw new Error(res.errorMessage ?? 'Unknown error during in-tab fetch');
+      }
+
+      if (!res.ok) {
+        const payload = res.data
+          ? JSON.stringify(res.data)
+          : `HTTP ${res.status} ${res.statusText}`;
+        throw new Error(payload);
+      }
+
+      data = res.data;
     } catch (error) {
       const msg = getErrorMessage(error);
       const targetAccessErrorMessage = getTargetAccessErrorMessage(msg);

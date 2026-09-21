@@ -23,7 +23,7 @@ export async function initFindLogin(tab) {
 
     findLoginBtn.addEventListener('click', async () => {
       try {
-        await chrome.windows.create({
+        await browser.windows.create({
           url: `/views/find-login/find-login.html?origin=${encodeURIComponent(origin)}&anchorTabId=${tab.id}`,
           type: 'popup',
           width: 800,

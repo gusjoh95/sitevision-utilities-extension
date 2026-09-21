@@ -86,6 +86,45 @@ if (vDiff !== 0) {
   }
 }
 
+// 3. Verify release notes exist for every version being built
+const RELEASES_DIR = path.resolve('src/resources/releases');
+const VERSIONS_FILE = path.join(RELEASES_DIR, 'versions.json');
+
+if (!fs.existsSync(VERSIONS_FILE)) {
+  console.error(`\x1b[31mError: Missing ${VERSIONS_FILE}\x1b[0m`);
+  process.exit(1);
+}
+
+const catalogue = JSON.parse(fs.readFileSync(VERSIONS_FILE, 'utf8'));
+const releasedVersions = Array.isArray(catalogue?.releases) ? catalogue.releases : [];
+
+for (const target of activeTargets) {
+  const version = TARGETS[target].manifest.version;
+
+  const notesPath = path.join(RELEASES_DIR, `${version}.md`);
+  if (!fs.existsSync(notesPath)) {
+    console.error(
+      `\x1b[31mError: Missing release notes for v${version} (expected ${notesPath}).\x1b[0m`
+    );
+    process.exit(1);
+  }
+
+  const entry = releasedVersions.find((release) => release.version === version);
+  if (!entry) {
+    console.error(
+      `\x1b[31mError: v${version} is not listed in ${VERSIONS_FILE}. Add it to the catalogue before releasing.\x1b[0m`
+    );
+    process.exit(1);
+  }
+
+  if (entry.hotfixTarget && entry.hotfixTarget !== target) {
+    console.error(
+      `\x1b[31mError: v${version} is marked as a '${entry.hotfixTarget}'-only hotfix in ${VERSIONS_FILE}, but is being built for ${target}.\x1b[0m`
+    );
+    process.exit(1);
+  }
+}
+
 /** Helper to build a target-specific zip package using its own manifest. */
 async function buildPackage(target) {
   const { manifest, path: manifestPath } = TARGETS[target];
@@ -138,7 +177,7 @@ async function buildPackage(target) {
   await archive.finalize();
 }
 
-// 3. Execute builds
+// 4. Execute builds
 for (const target of activeTargets) {
   await buildPackage(target);
 }

@@ -3,7 +3,7 @@
     "@eslint/js": "^10.0.1",
     "@html-eslint/eslint-plugin": "^0.65.0",
     "archiver": "^8.0.0",
-    "chrome-types": "^0.1.429",
+    "chrome-types": "^0.1.448",
     "eslint": "^10.4.0",
     "globals": "^17.6.0",
     "prettier": "^3.3.0"
@@ -13,6 +13,7 @@
     "lint": "eslint src",
     "format": "prettier --write .",
     "create-release": "node ./scripts/create-release.js",
+    "check:theme-contrast": "node scripts/check-theme-contrast.js",
     "dev:ch": "node scripts/switch-manifest.js chrome",
     "dev:ff": "node scripts/switch-manifest.js firefox"
   }

@@ -3,9 +3,9 @@ import {
   fetchInTabContext,
   getTargetAccessErrorMessage,
   matchDOM,
+  getRequiredElement,
+  Logger,
 } from '../../../api/index.js';
-
-import Logger from './logger.js';
 
 const LOGIN_SELECTORS = ['.sv-login-portlet', '.sv-login-form'].join(',');
 
@@ -17,9 +17,9 @@ const LOGIN_SELECTORS = ['.sv-login-portlet', '.sv-login-form'].join(',');
  * @param {string} [url=''] - Optional target URL to attach to the summary link.
  */
 export function setStatus(state, message, url = '') {
-  const summaryText = document.getElementById('summary-text');
-  const badge = document.querySelector('#status-summary .badge');
-  const link = document.getElementById('summary-link');
+  const summaryText = getRequiredElement('#summary-text');
+  const badge = getRequiredElement('#status-wrapper .badge');
+  const link = getRequiredElement('#summary-link');
 
   if (summaryText) {
     summaryText.textContent = message;
@@ -172,7 +172,7 @@ async function probeEndpoint(tabId, targetUrl, origin, logger) {
  * @returns {Promise<void>}
  */
 export async function runDiscovery(tabId, origin, customPaths = []) {
-  const logContainer = document.getElementById('log-container');
+  const logContainer = getRequiredElement('#log-container');
   if (!logContainer) return;
 
   const logger = new Logger(logContainer);

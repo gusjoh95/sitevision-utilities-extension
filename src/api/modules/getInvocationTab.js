@@ -4,7 +4,7 @@
  * @returns {Promise<chrome.tabs.Tab | undefined>}
  */
 export async function getInvocationTab() {
-  const [tab] = await chrome.tabs.query({
+  const [tab] = await browser.tabs.query({
     active: true,
     currentWindow: true,
   });

@@ -90,15 +90,19 @@ export function getTargetAccessErrorMessage(errorMessage) {
 /**
  * Verifies that the target tab still exists and exposes a readable URL.
  *
- * @param {string | number} tabId
+ * @param {number} tabId - Target tab ID (must be a number).
  * @param {string} [origin]
  * @returns {Promise<void>}
  */
 export async function assertTargetTabAccessible(tabId, origin) {
+  if (typeof tabId !== 'number' || !Number.isInteger(tabId) || tabId <= 0) {
+    throw new Error('Missing or invalid Tab ID.');
+  }
+
   let invocationTab;
 
   try {
-    invocationTab = await chrome.tabs.get(Number(tabId));
+    invocationTab = await browser.tabs.get(tabId);
   } catch (error) {
     throw new Error(getTargetLostMessage(targetLostReasons.closed), { cause: error });
   }
@@ -128,25 +132,25 @@ export async function assertTargetTabAccessible(tabId, origin) {
  * Registers a target tab in the background service worker and listens for access loss.
  *
  * @param {Object} options
- * @param {string | number} options.tabId
+ * @param {number} options.tabId
  * @param {string} options.origin
  * @param {(event: TargetLostEvent) => void} options.onLost
  * @returns {() => void} Cleanup function that removes the listener.
  */
 export function registerTargetPermissionListener({ tabId, origin, onLost }) {
-  const targetTabId = Number(tabId);
-
-  if (!targetTabId || !origin) {
+  if (typeof tabId !== 'number' || !Number.isInteger(tabId) || tabId <= 0 || !origin) {
     return () => {};
   }
 
-  chrome.runtime.sendMessage({
+  const targetTabId = tabId;
+
+  browser.runtime.sendMessage({
     type: 'SET_ACTIVE_TARGET',
     tabId: targetTabId,
     origin,
   });
 
-  /** @type {Parameters<typeof chrome.runtime.onMessage.addListener>[0]} */
+  /** @type {Parameters<typeof browser.runtime.onMessage.addListener>[0]} */
   const listener = (msg) => {
     /** @type {{ type?: string, tabId?: number, reason?: TargetLostReason }} */
     const targetMessage = msg;
@@ -169,7 +173,7 @@ export function registerTargetPermissionListener({ tabId, origin, onLost }) {
     return undefined;
   };
 
-  chrome.runtime.onMessage.addListener(listener);
+  browser.runtime.onMessage.addListener(listener);
 
-  return () => chrome.runtime.onMessage.removeListener(listener);
+  return () => browser.runtime.onMessage.removeListener(listener);
 }

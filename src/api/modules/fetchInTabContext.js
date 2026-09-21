@@ -26,10 +26,11 @@ import { getErrorMessage } from './getErrorMessage.js';
  * @returns {Promise<any>} Returns the callback's return value if provided, otherwise the FetchInTabResult object.
  */
 export default async function fetchInTabContext(tabId, url, options = {}) {
-  const targetTabId = Number(tabId);
-  if (!targetTabId || Number.isNaN(targetTabId)) {
+  if (typeof tabId !== 'number' || !Number.isInteger(tabId) || tabId <= 0) {
     throw new Error('Missing or invalid Tab ID.');
   }
+
+  const targetTabId = tabId;
 
   const { reqOptions = {}, responseType = 'text', callback } = options;
 
@@ -91,7 +92,7 @@ export default async function fetchInTabContext(tabId, url, options = {}) {
   let injectionResults;
 
   try {
-    injectionResults = await chrome.scripting.executeScript({
+    injectionResults = await browser.scripting.executeScript({
       target: { tabId: targetTabId },
       func: fetchTask,
       args: [url, reqOptions, responseType],

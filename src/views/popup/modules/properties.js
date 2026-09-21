@@ -79,7 +79,7 @@ export async function initProperties(tab, pageContext) {
       }
       const origin = new URL(tab.url).origin;
       const anchorTabId = tab.id;
-      chrome.windows.create({
+      browser.windows.create({
         url:
           '/views/properties/properties.html?origin=' +
           origin +
