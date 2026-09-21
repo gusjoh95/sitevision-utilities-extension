@@ -2,6 +2,7 @@ export * as SiteVerification from './modules/siteVerification.js';
 export { default as Logger } from './modules/logger.js';
 export { default as matchDOM } from './modules/matchDOM.js';
 export { default as fetchInTabContext } from './modules/fetchInTabContext.js';
+export { default as executeInTab } from './modules/executeInTab.js';
 export { assignJsonTheme } from './modules/assignJsonTheme.js';
 export { getInvocationTab } from './modules/getInvocationTab.js';
 export { getErrorMessage } from './modules/getErrorMessage.js';

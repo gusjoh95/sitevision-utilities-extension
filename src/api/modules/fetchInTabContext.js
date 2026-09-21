@@ -1,4 +1,5 @@
 import { getErrorMessage } from './getErrorMessage.js';
+import executeInTab from './executeInTab.js';
 
 /**
  * @typedef {Object} FetchInTabOptions
@@ -26,15 +27,8 @@ import { getErrorMessage } from './getErrorMessage.js';
  * @returns {Promise<any>} Returns the callback's return value if provided, otherwise the FetchInTabResult object.
  */
 export default async function fetchInTabContext(tabId, url, options = {}) {
-  if (typeof tabId !== 'number' || !Number.isInteger(tabId) || tabId <= 0) {
-    throw new Error('Missing or invalid Tab ID.');
-  }
-
-  const targetTabId = tabId;
-
   const { reqOptions = {}, responseType = 'text', callback } = options;
 
-  /** @type {any} */
   const fetchTask = async (
     /** @type {string} */ targetUrl,
     /** @type {RequestInit} */ customReqOptions,
@@ -89,19 +83,7 @@ export default async function fetchInTabContext(tabId, url, options = {}) {
     }
   };
 
-  let injectionResults;
-
-  try {
-    injectionResults = await browser.scripting.executeScript({
-      target: { tabId: targetTabId },
-      func: fetchTask,
-      args: [url, reqOptions, responseType],
-    });
-  } catch (error) {
-    throw new Error(getErrorMessage(error), { cause: error });
-  }
-
-  const res = injectionResults?.[0]?.result;
+  const res = await executeInTab(tabId, fetchTask, [url, reqOptions, responseType]);
 
   if (res?.__isError) {
     throw new Error(getErrorMessage(res.errorMessage));

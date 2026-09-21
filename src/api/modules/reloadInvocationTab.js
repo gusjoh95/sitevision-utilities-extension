@@ -1,4 +1,5 @@
 import { getOptions } from './options.js';
+import executeInTab from './executeInTab.js';
 
 /**
  * Reloads the tab where the extension was invoked using browser.scripting, provided it's not in edit mode.
@@ -14,10 +15,7 @@ export async function reloadInvocationTab(invocationTab, respectOption = true) {
       if (typeof invocationTab?.id !== 'number') {
         throw new Error('No active tab available for reload.');
       }
-      await browser.scripting.executeScript({
-        target: { tabId: invocationTab.id },
-        func: () => window.location.reload(),
-      });
+      await executeInTab(invocationTab.id, () => window.location.reload());
     }
   }
 }

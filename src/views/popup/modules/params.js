@@ -1,4 +1,5 @@
 import {
+  executeInTab,
   getErrorMessage,
   getRequiredElement,
   reloadInvocationTab,
@@ -49,43 +50,36 @@ export async function initParamButtons(tab, sitevisionMode) {
    * @returns {Promise<{ profiling: boolean, jsdebug: boolean, slimrender: boolean }>}
    */
   async function getSessionParamStates() {
-    const results = await /** @type {Promise<chrome.scripting.InjectionResult[]>} */ (
-      browser.scripting.executeScript({
-        target: { tabId: safeTabId },
-        func: () => {
-          // Profiling check
-          const isProfiling = [...document.querySelectorAll('body table th')].some(
-            (th) => th.textContent?.trim() === 'Profiling results'
-          );
+    const result = await executeInTab(safeTabId, () => {
+      // Profiling check
+      const isProfiling = [...document.querySelectorAll('body table th')].some(
+        (th) => th.textContent?.trim() === 'Profiling results'
+      );
 
-          // Jsdebug check
-          const minifiedTemplateAssetsSelector =
-            'script[src$="/sv-template-asset.js"], link[href$="/sv-template-asset.css"]';
-          const minifiedWebappAssetsSelector = 'script[src$="/webapp-assets.js"]';
-          const count1 = document.querySelectorAll(minifiedTemplateAssetsSelector)?.length ?? 0;
-          const count2 = document.querySelectorAll(minifiedWebappAssetsSelector)?.length ?? 0;
-          const minifiedAssetCount = count1 + count2;
-          // Jsdebug is considered on if no minified assets
-          const isJsdebug = !minifiedAssetCount;
-          // Slimrender check
-          const isSlimrender =
-            (document.querySelectorAll('head link[as="script"][href$="slim.js"]')?.length ?? 0) > 0;
+      // Jsdebug check
+      const minifiedTemplateAssetsSelector =
+        'script[src$="/sv-template-asset.js"], link[href$="/sv-template-asset.css"]';
+      const minifiedWebappAssetsSelector = 'script[src$="/webapp-assets.js"]';
+      const count1 = document.querySelectorAll(minifiedTemplateAssetsSelector)?.length ?? 0;
+      const count2 = document.querySelectorAll(minifiedWebappAssetsSelector)?.length ?? 0;
+      const minifiedAssetCount = count1 + count2;
+      // Jsdebug is considered on if no minified assets
+      const isJsdebug = !minifiedAssetCount;
+      // Slimrender check
+      const isSlimrender =
+        (document.querySelectorAll('head link[as="script"][href$="slim.js"]')?.length ?? 0) > 0;
 
-          return {
-            profiling: isProfiling,
-            jsdebug: isJsdebug,
-            slimrender: isSlimrender,
-          };
-        },
-      })
-    );
+      return {
+        profiling: isProfiling,
+        jsdebug: isJsdebug,
+        slimrender: isSlimrender,
+      };
+    });
 
-    /** @type {{ result?: { profiling: boolean, jsdebug: boolean, slimrender: boolean } } | undefined} */
-    const res = results?.[0];
-    if (!res?.result) {
+    if (!result) {
       throw new Error('Session parameter check returned no result.');
     }
-    return res.result;
+    return result;
   }
 
   /**

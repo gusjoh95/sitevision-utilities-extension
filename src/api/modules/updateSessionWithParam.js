@@ -1,5 +1,6 @@
 import { getInvocationTab } from './getInvocationTab.js';
 import { getErrorMessage } from './getErrorMessage.js';
+import executeInTab from './executeInTab.js';
 
 /**
  * Updates a session state on the active page by making a background HTTP GET request
@@ -28,8 +29,6 @@ export async function updateSessionWithParam(param, value) {
 
   try {
     // Injected task executed in the target tab's context.
-    // Overriding TS signature with `@type {any}` due to browser.scripting API limitation with `args`.
-    /** @type {any} */
     const checkUrlTask = async (/** @type {string} */ urlToFetch) => {
       try {
         const response = await fetch(urlToFetch, {
@@ -55,13 +54,7 @@ export async function updateSessionWithParam(param, value) {
       }
     };
 
-    const results = await browser.scripting.executeScript({
-      target: { tabId: tab.id },
-      func: checkUrlTask,
-      args: [reqUrl],
-    });
-
-    const executionResult = results?.[0]?.result;
+    const executionResult = await executeInTab(tab.id, checkUrlTask, [reqUrl]);
 
     if (!executionResult?.ok) {
       const errorMsg = executionResult?.error || 'Unknown script execution error';

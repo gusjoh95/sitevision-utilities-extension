@@ -1,4 +1,5 @@
 import * as SiteVerification from './siteVerification.js';
+import executeInTab from './executeInTab.js';
 
 /** @type {'window' | 'frame' | null} */
 let pageContextSource = null;
@@ -42,10 +43,9 @@ export async function getPageContext(tab) {
     throw new Error('Could not retrieve PageContext: No valid active tab found.');
   }
 
-  const results = await browser.scripting.executeScript({
-    target: { tabId: tab.id },
-    world: 'MAIN',
-    func: () => {
+  const result = await executeInTab(
+    tab.id,
+    () => {
       /** @type {CustomWindow} */
       const win = window;
 
@@ -63,13 +63,14 @@ export async function getPageContext(tab) {
         source: frameWin?.sv?.PageContext ? 'frame' : null,
       };
     },
-  });
+    [],
+    { world: 'MAIN' }
+  );
 
-  if (!results?.[0]) {
+  if (!result) {
     throw new Error('Could not retrieve PageContext: Script returned no result.');
   }
 
-  const result = results[0].result;
   pageContextSource = result.source;
   return result.pageContext;
 }
