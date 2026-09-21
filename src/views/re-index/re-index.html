@@ -1,0 +1,38 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="stylesheet" href="../../resources/style/base.css" />
+    <link rel="stylesheet" href="re-index.css" />
+    <title>Reindex Node Tree</title>
+  </head>
+
+  <body>
+    <div class="reindex-header">
+      <h1>Reindex Node Tree</h1>
+    </div>
+    <div id="error"></div>
+
+    <div class="controls-panel">
+      <div class="input-group">
+        <span id="current-node-label">Current Node ID:</span>
+        <output id="current-node-id" aria-labelledby="current-node-label">Loading...</output>
+        <button id="start-reindex-btn" type="button">Start Reindex</button>
+        <button id="cancel-reindex-btn" type="button" disabled>Cancel</button>
+      </div>
+    </div>
+
+    <div class="status-summary" id="status-summary">
+      <span class="badge badge-idle">IDLE</span>
+      <span id="summary-text">Ready to reindex</span>
+      <div id="spinner" class="bar hidden"></div>
+    </div>
+
+    <div class="log-holder">
+      <pre id="log-container" class="log-container" role="log" aria-live="polite"></pre>
+    </div>
+
+    <script type="module" src="re-index.js"></script>
+  </body>
+</html>

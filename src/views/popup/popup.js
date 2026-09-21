@@ -17,6 +17,7 @@ import { initFindLogin } from './modules/find-login.js';
 import { initOpenOptions } from './modules/open-options.js';
 import { initParamButtons } from './modules/params.js';
 import { initProperties } from './modules/properties.js';
+import { initReindex } from './modules/re-index.js';
 
 /** @type {HTMLDivElement} */
 const appEl = getRequiredElement('#app');
@@ -67,6 +68,7 @@ async function init() {
     }
 
     await initFindLogin(invocationTab);
+    await initReindex(invocationTab);
     await initProperties(invocationTab, pageContext);
     await initParamButtons(invocationTab, sitevisionMode);
     await initCookieConsent(invocationTab);
