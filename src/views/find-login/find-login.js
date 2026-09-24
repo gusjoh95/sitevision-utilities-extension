@@ -14,7 +14,6 @@ async function initFindLoginView() {
 
   const spinnerEl = getRequiredElement('#spinner');
   const errorElem = getRequiredElement('#error');
-  // Bind click handler once for clipboard copy & tooltip/feedback state
   const summaryLink = getRequiredElement('#summary-link');
 
   registerTargetPermissionListener({

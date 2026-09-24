@@ -4,9 +4,10 @@ import { getErrorMessage, getRequiredElement } from '../../../api/index.js';
  * Initializes the "Reindex node tree" feature inside the popup.
  *
  * @param {chrome.tabs.Tab} tab - The active tab.
+ * @param {string} rootNodeId - The root node ID to reindex recursively.
  * @returns {Promise<void>}
  */
-export async function initReindex(tab) {
+export async function initReindex(tab, rootNodeId) {
   /** @type {HTMLButtonElement} */
   const reindexBtn = getRequiredElement('#reindex-tree');
 
@@ -22,7 +23,7 @@ export async function initReindex(tab) {
     reindexBtn.addEventListener('click', async () => {
       try {
         await chrome.windows.create({
-          url: `/views/re-index/re-index.html?origin=${encodeURIComponent(origin)}&anchorTabId=${tab.id}`,
+          url: `/views/re-index/re-index.html?origin=${encodeURIComponent(origin)}&anchorTabId=${tab.id}&rootNodeId=${encodeURIComponent(rootNodeId)}`,
           type: 'popup',
           width: 800,
           height: 600,

@@ -3,6 +3,11 @@
 declare global {
   // `browser` is available on globalThis in Chromium 148+.
   const browser: typeof chrome;
+
+  interface Window {
+    // Injected by Sitevision's edit-mode page on `window` before app scripts run.
+    bootstrapData?: { csrfToken?: string };
+  }
 }
 
 export {};

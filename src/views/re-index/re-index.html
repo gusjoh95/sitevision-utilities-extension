@@ -15,21 +15,45 @@
     <div id="error"></div>
 
     <div class="controls-panel">
+      <span id="current-node-label">Root node ID:</span>
+      <output id="current-node-id" aria-labelledby="current-node-label">Loading...</output>
       <div class="input-group">
-        <span id="current-node-label">Current Node ID:</span>
-        <output id="current-node-id" aria-labelledby="current-node-label">Loading...</output>
-        <button id="start-reindex-btn" type="button">Start Reindex</button>
-        <button id="cancel-reindex-btn" type="button" disabled>Cancel</button>
+        <!-- TODO, revise tooltips/labels -->
+        <button
+          id="start-reindex-btn"
+          type="button"
+          data-tooltip
+          aria-label="Starts a depth-first reindex of the node tree. Will use a finished preview if available."
+        >
+          Start Reindex
+        </button>
+        <button
+          id="preview-reindex-btn"
+          type="button"
+          data-tooltip
+          aria-label="Generates a preview of the node tree to be reindexed."
+        >
+          Preview
+        </button>
+        <button
+          id="cancel-reindex-btn"
+          type="button"
+          data-tooltip
+          aria-label="Cancels the ongoing reindex or preview operation."
+          disabled
+        >
+          Cancel
+        </button>
       </div>
     </div>
 
-    <div class="status-summary" id="status-summary">
+    <div id="status-wrapper">
       <span class="badge badge-idle">IDLE</span>
       <span id="summary-text">Ready to reindex</span>
-      <div id="spinner" class="bar hidden"></div>
     </div>
+    <div id="spinner" class="bar hidden"></div>
 
-    <div class="log-holder">
+    <div id="log-wrapper">
       <pre id="log-container" class="log-container" role="log" aria-live="polite"></pre>
     </div>
 

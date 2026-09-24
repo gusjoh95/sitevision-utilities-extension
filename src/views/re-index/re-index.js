@@ -1,50 +1,30 @@
-import { getErrorMessage, getRequiredElement } from '../../api/index.js';
-import { getCurrentState } from '../find-login/modules/getCurrentState.js'; // eller flytta getCurrentState till api/
-import { runReindex, cancelReindex } from './modules/runReindex.js';
+import {
+  executeInTab,
+  getErrorMessage,
+  getPageContext,
+  getRequiredElement,
+} from '../../api/index.js';
+import { getCurrentState } from './modules/getCurrentState.js'; // Getting params could be done in the API layer instead of the view layer.
+import { runReindex, previewReindex, cancelReindex } from './modules/runReindex.js';
+import { fetchNodeProperties } from './modules/restApi.js';
 
 /**
- * Extracts the current Sitevision node ID from an edit URL.
- *
- * @param {string | undefined} url - URL of the Sitevision tab.
- * @returns {string | null} The node ID, or null when the URL is not an edit URL.
- */
-function extractNodeId(url) {
-  if (!url) return null;
-
-  const match = new URL(url).pathname.match(/\/edit\/([^/]+)/);
-  return match?.[1] ?? null;
-}
-
-/**
- * Reads the current node ID from the anchor tab.
- *
- * @param {number} tabId - ID of the Sitevision tab.
- * @returns {Promise<string>} The current node ID.
- * @throws {Error} If the tab URL is unavailable or is not a Sitevision edit URL.
- */
-async function getCurrentNodeId(tabId) {
-  const tab = await chrome.tabs.get(tabId);
-  const nodeId = extractNodeId(tab.url);
-  if (!nodeId) {
-    throw new Error('Could not find a Sitevision node ID in the current tab URL.');
-  }
-  return nodeId;
-}
-
-/**
- * Retrieves the edit-mode CSRF token from the anchor tab.
+ * Retrieves the CSRF token from PageContext, falling back to edit-mode bootstrap data.
  *
  * @param {number} tabId - ID of the Sitevision tab.
  * @returns {Promise<string | null>} The CSRF token, or null when unavailable.
  */
 async function getBootstrapCsrfToken(tabId) {
-  const results = await chrome.scripting.executeScript({
-    target: { tabId },
+  const pageContext = await getPageContext(tabId);
+  if (pageContext?.csrfToken) {
+    return pageContext.csrfToken;
+  }
+
+  const token = await executeInTab(tabId, () => window.bootstrapData?.csrfToken ?? null, [], {
     world: 'MAIN',
-    func: () => window.bootstrapData?.csrfToken ?? null,
   });
 
-  return results[0]?.result ?? null;
+  return token ?? null;
 }
 
 /**
@@ -53,55 +33,87 @@ async function getBootstrapCsrfToken(tabId) {
  * @returns {Promise<void>} Resolves after the view event handlers are registered.
  */
 document.addEventListener('DOMContentLoaded', async () => {
-  /** @type {{origin: string, anchorTabId: number}} */
-  const { origin, anchorTabId } = getCurrentState();
+  const { origin, anchorTabId, rootNodeId } = getCurrentState();
 
   const startBtn = /** @type {HTMLButtonElement} */ (getRequiredElement('#start-reindex-btn'));
+  const previewBtn = /** @type {HTMLButtonElement} */ (getRequiredElement('#preview-reindex-btn'));
   const cancelBtn = /** @type {HTMLButtonElement} */ (getRequiredElement('#cancel-reindex-btn'));
   const nodeOutput = /** @type {HTMLOutputElement} */ (getRequiredElement('#current-node-id'));
   const errorElement = getRequiredElement('#error');
   let csrfToken = null;
+  /** @type {import('./modules/reindexQueue.js').DiscoveredNode | null} */
+  let rootNode = null;
 
-  /**
-   * Updates the displayed node ID from the current anchor tab.
-   *
-   * @returns {Promise<string>} The current node ID.
-   */
-  async function refreshCurrentNode() {
-    const nodeId = await getCurrentNodeId(anchorTabId);
-    nodeOutput.value = nodeId;
-    nodeOutput.textContent = nodeId;
-    errorElement.textContent = '';
-    return nodeId;
+  try {
+    const rootProperties = await fetchNodeProperties(Number(anchorTabId), origin, rootNodeId);
+    rootNode = {
+      id: rootProperties['jcr:uuid'],
+      type: rootProperties['jcr:primaryType'],
+      displayName: rootProperties.displayName ?? '',
+      robotsIndex: rootProperties.robotsIndex !== false,
+    };
+    nodeOutput.value = rootNode.id;
+    nodeOutput.textContent = rootNode.id;
+  } catch (err) {
+    errorElement.textContent = `Error: ${getErrorMessage(err)}`;
+    startBtn.disabled = true;
+    previewBtn.disabled = true;
   }
 
   try {
-    await refreshCurrentNode();
-    csrfToken = await getBootstrapCsrfToken(anchorTabId);
+    csrfToken = await getBootstrapCsrfToken(Number(anchorTabId));
     if (!csrfToken) {
-      throw new Error('No CSRF token found. Open a rendered Sitevision page in edit mode first.');
+      throw new Error(
+        `No CSRF token found – ensure that you're logged in. Reindexing will not be possible.`
+      );
     }
   } catch (err) {
     errorElement.textContent = `Error: ${getErrorMessage(err)}`;
     startBtn.disabled = true;
+    previewBtn.disabled = true;
   }
 
   /** @type {() => void} */
   startBtn?.addEventListener('click', () => {
     void (async () => {
-      let rootNodeId;
-      try {
-        rootNodeId = await refreshCurrentNode();
-      } catch (err) {
-        errorElement.textContent = `Error: ${getErrorMessage(err)}`;
+      if (!rootNode) {
+        errorElement.textContent = 'Error: Root node properties are unavailable.';
+        return;
+      }
+
+      const token = csrfToken;
+      if (!token) {
+        errorElement.textContent = `Error: No CSRF token found – ensure that you're logged in.`;
         return;
       }
 
       startBtn.disabled = true;
+      previewBtn.disabled = true;
       cancelBtn.disabled = false;
 
-      runReindex(anchorTabId, origin, rootNodeId, csrfToken).finally(() => {
+      runReindex(Number(anchorTabId), origin, rootNode, token).finally(() => {
         startBtn.disabled = false;
+        previewBtn.disabled = false;
+        cancelBtn.disabled = true;
+      });
+    })();
+  });
+
+  /** @type {() => void} */
+  previewBtn?.addEventListener('click', () => {
+    void (async () => {
+      if (!rootNode) {
+        errorElement.textContent = 'Error: Root node properties are unavailable.';
+        return;
+      }
+
+      startBtn.disabled = true;
+      previewBtn.disabled = true;
+      cancelBtn.disabled = false;
+
+      previewReindex(Number(anchorTabId), origin, rootNode).finally(() => {
+        startBtn.disabled = false;
+        previewBtn.disabled = false;
         cancelBtn.disabled = true;
       });
     })();

@@ -33,14 +33,16 @@ export default class Logger {
    * @param {string} message - Text message to log.
    */
   log(type, message) {
-    const entry = document.createElement('div');
-    entry.className = `log-entry log-${type}`;
+    this._updateWithAutoScroll(() => {
+      const entry = document.createElement('div');
+      entry.className = `log-entry log-${type}`;
 
-    const timestamp = new Date().toLocaleTimeString();
-    entry.textContent = `[${timestamp}] ${message}`;
+      const timestamp = new Date().toLocaleTimeString();
+      entry.textContent = `[${timestamp}] ${message}`;
 
-    this.container.appendChild(entry);
-    this.container.scrollTop = this.container.scrollHeight;
+      this.container.appendChild(entry);
+      this._updateContainerSize();
+    });
   }
 
   /**
@@ -49,12 +51,30 @@ export default class Logger {
    * @param {string} message - Text message to append to the existing log line.
    */
   append(message) {
-    if (this.container.lastElementChild) {
-      this.container.lastElementChild.textContent += ` ${message}`;
-      this._updateContainerSize();
-      this.container.scrollTop = this.container.scrollHeight;
-    } else {
+    const lastEntry = this.container.lastElementChild;
+    if (!lastEntry) {
       this.log('info', message);
+      return;
+    }
+
+    this._updateWithAutoScroll(() => {
+      lastEntry.textContent += ` ${message}`;
+    });
+  }
+
+  /**
+   * Applies a log update and follows it only when the user was already near the bottom.
+   *
+   * @param {() => void} update - DOM update to apply before scrolling.
+   */
+  _updateWithAutoScroll(update) {
+    const wasNearBottom =
+      this.container.scrollHeight - this.container.scrollTop - this.container.clientHeight <= 48;
+
+    update();
+
+    if (wasNearBottom) {
+      this.container.scrollTop = this.container.scrollHeight;
     }
   }
 

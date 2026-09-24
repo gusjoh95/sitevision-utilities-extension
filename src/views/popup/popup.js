@@ -11,6 +11,7 @@ import {
   matchDOM,
   withDeferredSpinner,
   fetchInTabContext,
+  EditMode,
 } from '../../api/index.js';
 import { initCookieConsent } from './modules/cookie.js';
 import { initFindLogin } from './modules/find-login.js';
@@ -43,7 +44,7 @@ async function init() {
     // Can probably be removed without problems
     await assertTargetTabAccessible(tabId, origin);
 
-    const pageContext = await getPageContext(invocationTab);
+    const pageContext = await getPageContext(tabId);
 
     // Determine if website is running Sitevision
     if (pageContext) {
@@ -67,11 +68,38 @@ async function init() {
       throw new Error('Active tab is not a Sitevision site.');
     }
 
-    await initFindLogin(invocationTab);
-    await initReindex(invocationTab);
-    await initProperties(invocationTab, pageContext);
-    await initParamButtons(invocationTab, sitevisionMode);
-    await initCookieConsent(invocationTab);
+    // Initialize UI tasks array for parallel execution
+    const uiTasks = [
+      initFindLogin(invocationTab),
+      initProperties(invocationTab, pageContext),
+      initParamButtons(invocationTab, sitevisionMode),
+      initCookieConsent(invocationTab),
+    ];
+
+    if (sitevisionMode === 'online' || sitevisionMode === 'offline') {
+      if (pageContext?.pageId) {
+        uiTasks.push(initReindex(invocationTab, pageContext.pageId));
+      } else if (await EditMode.isEdit(invocationTab)) {
+        // Added await: EditMode.isEdit interacts with the tab and is asynchronous
+        const editInfo = await EditMode.getEditInfo(invocationTab);
+        // Added await: Fetching edit info requires asynchronous execution in the target tab
+
+        if (editInfo?.isEditMode && editInfo?.nodeId) {
+          uiTasks.push(initReindex(invocationTab, editInfo.nodeId));
+        }
+      }
+    }
+
+    // Execute all independent UI initialization promises concurrently.
+    // Promise.allSettled ensures one failing module doesn't crash the others.
+    const results = await Promise.allSettled(uiTasks);
+
+    // Log failures to console for easier debugging
+    results.forEach((result, index) => {
+      if (result.status === 'rejected') {
+        console.error(`UI Module at index ${index} failed to initialize:`, result.reason);
+      }
+    });
 
     if (!tabReloadListenerRegistered) {
       registerCurrentTabChangeListener(handleTabReload);

@@ -4,6 +4,7 @@ export { default as matchDOM } from './modules/matchDOM.js';
 export { default as fetchInTabContext } from './modules/fetchInTabContext.js';
 export { default as executeInTab } from './modules/executeInTab.js';
 export { assignJsonTheme } from './modules/assignJsonTheme.js';
+export * as EditMode from './modules/editMode.js';
 export { getInvocationTab } from './modules/getInvocationTab.js';
 export { getErrorMessage } from './modules/getErrorMessage.js';
 export { getPageContext, getSitevisionMode } from './modules/getPageContext.js';

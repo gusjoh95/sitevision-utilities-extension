@@ -1,8 +1,9 @@
 import * as SiteVerification from './siteVerification.js';
 import executeInTab from './executeInTab.js';
+import { isEdit } from './editMode.js';
 
-/** @type {'window' | 'frame' | null} */
-let pageContextSource = null;
+/** @type {'window' | 'frame' | null | undefined} */
+let pageContextSource = undefined;
 
 /**
  * @typedef {Object} PageContext
@@ -28,23 +29,22 @@ let pageContextSource = null;
  * @remarks CSP: Running in the MAIN world means the script is subject to the page's Content Security Policy.
  *
  * @throws {Error} Throws if no active tab or valid tab ID is found.
- * @param {chrome.tabs.Tab} tab - The active tab to inspect.
+ * @param {number} tabId - ID of the active tab to inspect.
  * @returns {Promise<PageContext | null>} Resolves to the PageContext object, or null if unavailable on the page.
  */
-
-export async function getPageContext(tab) {
+export async function getPageContext(tabId) {
   pageContextSource = null;
 
   /**
    * @typedef {Window & { sv?: { PageContext?: PageContext } }} CustomWindow
    */
 
-  if (typeof tab?.id !== 'number') {
-    throw new Error('Could not retrieve PageContext: No valid active tab found.');
+  if (typeof tabId !== 'number') {
+    throw new Error('Could not retrieve PageContext: No valid tab ID supplied.');
   }
 
   const result = await executeInTab(
-    tab.id,
+    tabId,
     () => {
       /** @type {CustomWindow} */
       const win = window;
@@ -68,7 +68,7 @@ export async function getPageContext(tab) {
   );
 
   if (!result) {
-    throw new Error('Could not retrieve PageContext: Script returned no result.');
+    throw new Error('Could not execute retrieval of PageContext');
   }
 
   pageContextSource = result.source;
@@ -88,11 +88,23 @@ export async function getPageContext(tab) {
  * `null` means the tab is cached as non-Sitevision; `undefined` means verification is unknown.
  */
 export async function getSitevisionMode(tab) {
+  // TODO, figure out how to define this helper in comparison to isEdit.
+  // This helper is broad but not extensive, online mode is not evaluated enough..?
+  if (pageContextSource === undefined) {
+    if (!tab?.id) {
+      throw new Error('No valid tab ID found.');
+    }
+    await getPageContext(tab.id);
+  }
+
   if (pageContextSource === 'window') return 'online';
   if (pageContextSource === 'frame') return 'offline';
+
+  if (isEdit(tab)) return 'offline';
 
   const status = await SiteVerification.get(tab);
   if (status === SiteVerification.Status.VERIFIED) return 'neither';
   if (status === SiteVerification.Status.REJECTED) return null;
+
   return undefined;
 }
