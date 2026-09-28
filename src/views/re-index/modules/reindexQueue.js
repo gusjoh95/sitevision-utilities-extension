@@ -218,6 +218,7 @@ export async function runReindexQueue({ tabId, origin, rootNode, csrfToken, logg
   cachedPreview = null;
 
   let processedCount = 0;
+  let indexedCount = 0;
   /** @type {'completed' | 'cancelled' | 'limit'} */
   let reason;
 
@@ -234,10 +235,9 @@ export async function runReindexQueue({ tabId, origin, rootNode, csrfToken, logg
         break;
       }
 
-      if (await maybeReindexNode(tabId, origin, node, csrfToken, logger)) {
-        processedCount++;
-        setStatus('running', `Reindexed ${processedCount} subnodes...`);
-      }
+      if (await maybeReindexNode(tabId, origin, node, csrfToken, logger)) indexedCount++;
+      processedCount++;
+      setStatus('running', `Processed ${processedCount} nodes; indexed ${indexedCount}...`);
 
       await waitBetweenNodes();
     }
@@ -250,25 +250,24 @@ export async function runReindexQueue({ tabId, origin, rootNode, csrfToken, logg
       rootNode,
       logger,
       onNode: async (node) => {
-        if (await maybeReindexNode(tabId, origin, node, csrfToken, logger)) {
-          processedCount++;
-          setStatus('running', `Reindexed ${processedCount} subnodes...`);
-        }
+        if (await maybeReindexNode(tabId, origin, node, csrfToken, logger)) indexedCount++;
+        processedCount++;
+        setStatus('running', `Processed ${processedCount} nodes; indexed ${indexedCount}...`);
       },
     }));
   }
 
   if (reason === 'cancelled') {
     logger.log('warn', 'Reindex operation cancelled by user.');
-    setStatus('warn', `Cancelled. Processed ${processedCount} nodes.`);
+    setStatus('warn', `Cancelled. Processed ${processedCount} nodes; indexed ${indexedCount}.`);
     return;
   }
   if (reason === 'limit') {
     return;
   }
 
-  logger.log('success', `Finished! Successfully processed ${processedCount} subnodes.`);
-  setStatus('success', `Completed. Reindexed ${processedCount} subnodes.`);
+  logger.log('success', `Finished! Processed ${processedCount} nodes; indexed ${indexedCount}.`);
+  setStatus('success', `Completed. Processed ${processedCount} nodes; indexed ${indexedCount}.`);
 }
 
 /**
