@@ -1,3 +1,5 @@
+import { SET_ACTIVE_TARGET_MESSAGE, TARGET_LOST_MESSAGE } from '../../background/messages.js';
+
 /**
  * @typedef {'closed' | 'cross-origin'} TargetLostReason
  */
@@ -145,7 +147,7 @@ export function registerTargetPermissionListener({ tabId, origin, onLost }) {
   const targetTabId = tabId;
 
   browser.runtime.sendMessage({
-    type: 'SET_ACTIVE_TARGET',
+    type: SET_ACTIVE_TARGET_MESSAGE,
     tabId: targetTabId,
     origin,
   });
@@ -155,7 +157,7 @@ export function registerTargetPermissionListener({ tabId, origin, onLost }) {
     /** @type {{ type?: string, tabId?: number, reason?: TargetLostReason }} */
     const targetMessage = msg;
 
-    if (targetMessage.type !== 'TARGET_LOST') {
+    if (targetMessage.type !== TARGET_LOST_MESSAGE) {
       return undefined;
     }
 

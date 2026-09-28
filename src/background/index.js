@@ -1,7 +1,7 @@
 import { registerTabWatchers } from './modules/tabWatchers.js';
 import { registerChangelogOnUpdate } from './modules/openChangelogOnUpdate.js';
-import { registerBeforeUnloadGuardCleanup } from './modules/beforeUnloadGuardCleanup.js';
+import { registerBeforeUnloadGuard } from './modules/beforeUnloadGuard.js';
 
 registerTabWatchers();
 registerChangelogOnUpdate();
-registerBeforeUnloadGuardCleanup();
+registerBeforeUnloadGuard();

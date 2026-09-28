@@ -1,10 +1,5 @@
-import {
-  BEFORE_UNLOAD_GUARD_CLEANUP_MESSAGE,
-  getErrorMessage,
-  installBeforeUnloadGuard,
-  Logger,
-  removeBeforeUnloadGuard,
-} from '../../../api/index.js';
+import { getErrorMessage, Logger } from '../../../api/index.js';
+import { BEFORE_UNLOAD_GUARD_MESSAGE } from '../../../background/messages.js';
 import { setStatus } from './status.js';
 import { runReindexQueue, previewReindexQueue, cancelReindex } from './reindexQueue.js';
 
@@ -21,16 +16,27 @@ export { cancelReindex };
  */
 async function withBeforeUnloadGuard(tabId, logger, operation) {
   const guardId = crypto.randomUUID();
-  await installBeforeUnloadGuard(tabId, guardId);
+  const installResult = await browser.runtime.sendMessage({
+    type: BEFORE_UNLOAD_GUARD_MESSAGE,
+    action: 'install',
+    tabId,
+    guardId,
+  });
+  if (!installResult?.installed) {
+    throw new Error('Could not install the navigation guard in the Sitevision tab.');
+  }
+
   logger.log(
     'info',
     'Navigation guard active: leaving or reloading the Sitevision tab may show a browser confirmation.'
   );
 
+  let isViewExiting = false;
   const handleViewExit = () => {
+    isViewExiting = true;
     logger.log('info', 'Re-index view is closing; requesting navigation-guard cleanup.');
     void browser.runtime
-      .sendMessage({ type: BEFORE_UNLOAD_GUARD_CLEANUP_MESSAGE, tabId, guardId })
+      .sendMessage({ type: BEFORE_UNLOAD_GUARD_MESSAGE, action: 'remove', tabId, guardId })
       .catch(() => {});
   };
   window.addEventListener('pagehide', handleViewExit, { once: true });
@@ -39,11 +45,22 @@ async function withBeforeUnloadGuard(tabId, logger, operation) {
     return await operation();
   } finally {
     window.removeEventListener('pagehide', handleViewExit);
-    try {
-      await removeBeforeUnloadGuard(tabId, guardId);
-      logger.log('info', 'Navigation guard removed from the Sitevision tab.');
-    } catch {
-      // The target page may already have navigated, in which case its guard is gone with it.
+    if (!isViewExiting) {
+      try {
+        const result = await browser.runtime.sendMessage({
+          type: BEFORE_UNLOAD_GUARD_MESSAGE,
+          action: 'remove',
+          tabId,
+          guardId,
+        });
+        if (result?.removed) {
+          logger.log('info', 'Navigation guard removed from the Sitevision tab.');
+        } else {
+          logger.log('warn', 'Navigation guard cleanup could not find the active guard.');
+        }
+      } catch (err) {
+        logger.log('error', `Navigation guard cleanup failed: ${getErrorMessage(err)}`);
+      }
     }
   }
 }

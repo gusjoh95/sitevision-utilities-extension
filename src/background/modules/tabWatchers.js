@@ -1,3 +1,5 @@
+import { SET_ACTIVE_TARGET_MESSAGE, TARGET_LOST_MESSAGE } from '../messages.js';
+
 /**
  * @typedef {Object} ActiveTarget
  * @property {number} tabId - Target browser tab identifier.
@@ -14,7 +16,7 @@ export function registerTabWatchers() {
   const activeTargets = new Map();
 
   browser.runtime.onMessage.addListener((msg) => {
-    if (msg.type === 'SET_ACTIVE_TARGET') {
+    if (msg.type === SET_ACTIVE_TARGET_MESSAGE) {
       activeTargets.set(msg.tabId, { tabId: msg.tabId, origin: msg.origin });
     }
   });
@@ -22,7 +24,7 @@ export function registerTabWatchers() {
   // 1. Detect if the tab is completely closed
   browser.tabs.onRemoved.addListener((tabId) => {
     if (activeTargets.has(tabId)) {
-      browser.runtime.sendMessage({ type: 'TARGET_LOST', tabId, reason: 'closed' });
+      browser.runtime.sendMessage({ type: TARGET_LOST_MESSAGE, tabId, reason: 'closed' });
       activeTargets.delete(tabId);
     }
   });
@@ -40,7 +42,7 @@ export function registerTabWatchers() {
     // If Chrome hides the URL, the activeTab permission was lost (likely cross-origin)
     if (!currentUrl) {
       console.warn('ActiveTab permission lost! browser hid the URL. Likely cross-origin redirect.');
-      browser.runtime.sendMessage({ type: 'TARGET_LOST', tabId, reason: 'cross-origin' });
+      browser.runtime.sendMessage({ type: TARGET_LOST_MESSAGE, tabId, reason: 'cross-origin' });
       activeTargets.delete(tabId);
       return;
     }
@@ -53,12 +55,12 @@ export function registerTabWatchers() {
         console.warn(
           `Origin changed! Started at ${activeTarget.origin} but navigated to ${currentOrigin}`
         );
-        browser.runtime.sendMessage({ type: 'TARGET_LOST', tabId, reason: 'cross-origin' });
+        browser.runtime.sendMessage({ type: TARGET_LOST_MESSAGE, tabId, reason: 'cross-origin' });
         activeTargets.delete(tabId);
       }
     } catch {
       // If the URL cannot be parsed (e.g., chrome:// or about:blank)
-      browser.runtime.sendMessage({ type: 'TARGET_LOST', tabId, reason: 'cross-origin' });
+      browser.runtime.sendMessage({ type: TARGET_LOST_MESSAGE, tabId, reason: 'cross-origin' });
       activeTargets.delete(tabId);
     }
   });
