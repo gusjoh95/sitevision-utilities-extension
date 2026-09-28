@@ -49,34 +49,64 @@ async function withBeforeUnloadGuard(tabId, logger, operation) {
 }
 
 /**
- * Runs a recursive reindex of a Sitevision node tree, reporting progress via the
- * view's log and status badge.
+ * Creates the view logger, announces an operation, and shares its error handling.
  *
- * @param {number} tabId - ID of the tab containing the Sitevision page.
+ * @param {number} tabId - ID of the Sitevision tab.
  * @param {string} origin - Sitevision origin.
- * @param {import('./reindexQueue.js').DiscoveredNode} rootNode - Normalized root node.
- * @param {string} csrfToken - CSRF token from window.bootstrapData.
- * @param {import('./reindexQueue.js').ReindexQueueOptions} options - Queue settings.
- * @returns {Promise<void>} Resolves when the operation finishes or is cancelled.
+ * @param {import('./types.js').DiscoveredNode} rootNode - Normalized root node.
+ * @param {string} startingMessage - Operation-specific starting status.
+ * @param {string} errorPrefix - Operation-specific error message prefix.
+ * @param {(logger: import('../../../api/types.js').Logger) => Promise<unknown>} operation
+ * @returns {Promise<void>}
  */
-export async function runReindex(tabId, origin, rootNode, csrfToken, options) {
+async function runLoggedOperation(
+  tabId,
+  origin,
+  rootNode,
+  startingMessage,
+  errorPrefix,
+  operation
+) {
   const logContainer = document.getElementById('log-container');
   if (!logContainer) return;
 
   const logger = new Logger(logContainer);
   logger.clear();
-
-  setStatus('running', `Starting tree reindex from root: ${rootNode.id}`);
+  setStatus('running', startingMessage);
   logger.log('info', `Target origin: ${origin}`);
 
   try {
-    await withBeforeUnloadGuard(tabId, logger, () =>
-      runReindexQueue({ tabId, origin, rootNode, csrfToken, logger, ...options })
-    );
+    await operation(logger);
   } catch (err) {
-    logger.log('error', `Reindex failed: ${getErrorMessage(err)}`);
-    setStatus('error', `Reindex failed: ${getErrorMessage(err)}`);
+    const message = `${errorPrefix}: ${getErrorMessage(err)}`;
+    logger.log('error', message);
+    setStatus('error', message);
   }
+}
+
+/**
+ * Runs a recursive reindex of a Sitevision node tree, reporting progress via the
+ * view's log and status badge.
+ *
+ * @param {number} tabId - ID of the tab containing the Sitevision page.
+ * @param {string} origin - Sitevision origin.
+ * @param {import('./types.js').DiscoveredNode} rootNode - Normalized root node.
+ * @param {string} csrfToken - CSRF token from window.bootstrapData.
+ * @param {import('./types.js').ReindexQueueOptions} options - Queue settings.
+ * @returns {Promise<void>} Resolves when the operation finishes or is cancelled.
+ */
+export async function runReindex(tabId, origin, rootNode, csrfToken, options) {
+  await runLoggedOperation(
+    tabId,
+    origin,
+    rootNode,
+    `Starting tree reindex from root: ${rootNode.id}`,
+    'Reindex failed',
+    (logger) =>
+      withBeforeUnloadGuard(tabId, logger, () =>
+        runReindexQueue({ tabId, origin, rootNode, csrfToken, logger, ...options })
+      )
+  );
 }
 
 /**
@@ -85,26 +115,20 @@ export async function runReindex(tabId, origin, rootNode, csrfToken, options) {
  *
  * @param {number} tabId - ID of the tab containing the Sitevision page.
  * @param {string} origin - Sitevision origin.
- * @param {import('./reindexQueue.js').DiscoveredNode} rootNode - Normalized root node.
- * @param {import('./reindexQueue.js').ReindexQueueOptions} options - Queue settings.
+ * @param {import('./types.js').DiscoveredNode} rootNode - Normalized root node.
+ * @param {import('./types.js').ReindexQueueOptions} options - Queue settings.
  * @returns {Promise<void>} Resolves when the preview finishes or is cancelled.
  */
 export async function previewReindex(tabId, origin, rootNode, options) {
-  const logContainer = document.getElementById('log-container');
-  if (!logContainer) return;
-
-  const logger = new Logger(logContainer);
-  logger.clear();
-
-  setStatus('running', `Previewing tree from root: ${rootNode.id}`);
-  logger.log('info', `Target origin: ${origin}`);
-
-  try {
-    await withBeforeUnloadGuard(tabId, logger, () =>
-      previewReindexQueue({ tabId, origin, rootNode, logger, ...options })
-    );
-  } catch (err) {
-    logger.log('error', `Preview failed: ${getErrorMessage(err)}`);
-    setStatus('error', `Preview failed: ${getErrorMessage(err)}`);
-  }
+  await runLoggedOperation(
+    tabId,
+    origin,
+    rootNode,
+    `Previewing tree from root: ${rootNode.id}`,
+    'Preview failed',
+    (logger) =>
+      withBeforeUnloadGuard(tabId, logger, () =>
+        previewReindexQueue({ tabId, origin, rootNode, logger, ...options })
+      )
+  );
 }

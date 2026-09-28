@@ -2,8 +2,10 @@ import { reindexSingleNode } from './editApi.js';
 import { fetchRestSubNodes } from './restApi.js';
 import { INDEXABLE_NODE_TYPES, TRAVERSABLE_NODE_TYPES } from './nodeTypes.js';
 import { setStatus } from './status.js';
+import { walkNodeTree } from './treeWalker.js';
 
-/** @typedef {{ id: string, type: string, displayName: string, robotsIndex: boolean }} DiscoveredNode */
+/** @typedef {import('./types.js').DiscoveredNode} DiscoveredNode */
+/** @typedef {import('./types.js').ReindexQueueOptions} ReindexQueueOptions */
 
 export const DEFAULT_REINDEX_DELAY_MS = 125;
 export const DEFAULT_API_DELAY_MS = 125;
@@ -17,13 +19,6 @@ let isCancelled = false;
  * @type {{ tabId: number, origin: string, rootNodeId: string, includeRobotsIndexFalse: boolean, nodes: DiscoveredNode[] } | null}
  */
 let cachedPreview = null;
-
-/**
- * @typedef {Object} ReindexQueueOptions
- * @property {boolean} includeRobotsIndexFalse - Reindex eligible node types even when robotsIndex is false.
- * @property {number | (() => number)} reindexDelayMs - Delay between Edit API reindex calls.
- * @property {number | (() => number)} apiDelayMs - Delay between REST child-list API calls.
- */
 
 /**
  * Creates a wait function that delays every call after the first one.
@@ -157,82 +152,6 @@ async function maybeReindexNode(
 }
 
 /**
- * @typedef {Object} WalkTreeParams
- * @property {number} tabId - ID of the tab containing the Sitevision page.
- * @property {string} origin - Sitevision origin.
- * @property {DiscoveredNode} rootNode - Normalized root node.
- * @property {() => Promise<boolean>} waitBeforeApiCall - Paces REST calls and reports cancellation.
- * @property {(node: DiscoveredNode) => Promise<void> | void} onNode - Invoked once per discovered node, in traversal order.
- */
-
-/**
- * Depth-first walk of the node tree, shared by `runReindexQueue` (which reindexes indexable
- * nodes via `onNode`) and `previewReindexQueue` (which only records them via `onNode`).
- *
- * Depth-first mirrors how the Sitevision edit GUI's tree is browsed, which makes it easier for
- * a user to figure out where to restart from if they need to reposition themselves in the tree.
- *
- * @param {WalkTreeParams} params - Traversal parameters.
- * @returns {Promise<{ reason: 'completed' | 'cancelled' }>} Why the walk stopped.
- */
-async function walkReindexTree({ tabId, origin, rootNode, onNode, waitBeforeApiCall }) {
-  if (typeof rootNode.id !== 'string') {
-    throw new Error('Root node is missing an ID.');
-  }
-
-  const rootNodeId = rootNode.id;
-  const visited = new Set();
-  visited.add(rootNodeId);
-  /** @type {'cancelled' | null} */
-  let stopReason = null;
-
-  /**
-   * @param {string} nodeId - Node whose children should be visited, depth-first.
-   * @returns {Promise<void>}
-   */
-  async function visitChildren(nodeId) {
-    const children = await getChildNodes(tabId, origin, nodeId, waitBeforeApiCall);
-
-    if (children === null || isCancelled) {
-      stopReason = 'cancelled';
-      return;
-    }
-
-    for (const child of children) {
-      if (stopReason) return;
-
-      if (isCancelled) {
-        stopReason = 'cancelled';
-        return;
-      }
-
-      if (visited.has(child.id)) continue;
-
-      visited.add(child.id);
-
-      await onNode(child);
-      if (isCancelled) {
-        stopReason = 'cancelled';
-        return;
-      }
-
-      await visitChildren(child.id);
-      if (stopReason) return;
-    }
-  }
-
-  await onNode(rootNode);
-
-  if (isCancelled) {
-    return { reason: 'cancelled' };
-  }
-
-  await visitChildren(rootNodeId);
-
-  return { reason: stopReason ?? 'completed' };
-}
-
-/**
  * Runs a depth-first reindex of a Sitevision node tree.
  *
  * If a completed preview for the same tab/origin/root is cached, that discovered node list is
@@ -314,11 +233,10 @@ export async function runReindexQueue({
   } else {
     logger.log('info', `Fetching subnodes of root ${rootNodeId}...`);
 
-    ({ reason } = await walkReindexTree({
-      tabId,
-      origin,
+    ({ reason } = await walkNodeTree({
       rootNode,
-      waitBeforeApiCall,
+      getChildren: (nodeId) => getChildNodes(tabId, origin, nodeId, waitBeforeApiCall),
+      isCancelled: () => isCancelled,
       onNode: async (node) => {
         const wasIndexed = await maybeReindexNode(
           tabId,
@@ -390,11 +308,10 @@ export async function previewReindexQueue({
   const nodes = [];
   const waitBeforeApiCall = createCallDelay(apiDelayMs);
 
-  const { reason } = await walkReindexTree({
-    tabId,
-    origin,
+  const { reason } = await walkNodeTree({
     rootNode,
-    waitBeforeApiCall,
+    getChildren: (nodeId) => getChildNodes(tabId, origin, nodeId, waitBeforeApiCall),
+    isCancelled: () => isCancelled,
     onNode: (node) => {
       nodes.push(node);
       logger.log(
