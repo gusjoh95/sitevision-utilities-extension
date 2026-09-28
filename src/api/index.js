@@ -20,5 +20,10 @@ export {
   registerTargetPermissionListener,
 } from './modules/targetPermissions.js';
 export { reloadInvocationTab } from './modules/reloadInvocationTab.js';
+export {
+  BEFORE_UNLOAD_GUARD_CLEANUP_MESSAGE,
+  installBeforeUnloadGuard,
+  removeBeforeUnloadGuard,
+} from './modules/beforeUnloadGuard.js';
 export { updateSessionWithParam } from './modules/updateSessionWithParam.js';
 export { withDeferredSpinner } from './modules/spinner.js';

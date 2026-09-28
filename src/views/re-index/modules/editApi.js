@@ -7,7 +7,7 @@ import { fetchInTabContext } from '../../../api/index.js';
  * @param {string} origin - Sitevision origin.
  * @param {string} nodeId - Node to reindex.
  * @param {string} csrfToken - CSRF token required by the Edit API.
- * @returns {Promise<import('../../../api/modules/fetchInTabContext.js').FetchInTabResult>} The API response.
+ * @returns {Promise<import('../../../api/types.js').FetchInTabResult>} The API response.
  */
 export async function reindexSingleNode(tabId, origin, nodeId, csrfToken) {
   const url = `${origin}/edit-api/1/${nodeId}/${nodeId}/reindexNode/${nodeId}`;

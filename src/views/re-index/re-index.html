@@ -17,35 +17,64 @@
     <div class="controls-panel">
       <span id="current-node-label">Root node ID:</span>
       <output id="current-node-id" aria-labelledby="current-node-label">Loading...</output>
-      <div class="input-group">
-        <!-- TODO, revise tooltips/labels -->
-        <button
-          id="start-reindex-btn"
-          type="button"
-          data-tooltip
-          aria-label="Starts a depth-first reindex of the node tree. Will use a finished preview if available."
-        >
-          Start Reindex
-        </button>
-        <button
-          id="preview-reindex-btn"
-          type="button"
-          data-tooltip
-          aria-label="Generates a preview of the node tree to be reindexed."
-        >
-          Preview
-        </button>
-        <button
-          id="cancel-reindex-btn"
-          type="button"
-          data-tooltip
-          aria-label="Cancels the ongoing reindex or preview operation."
-          disabled
-        >
-          Cancel
-        </button>
+      <div class="input-groups">
+        <div class="button-collection">
+          <!-- TODO, revise tooltips/labels -->
+          <button
+            id="start-reindex-btn"
+            type="button"
+            data-tooltip
+            aria-label="Starts a depth-first reindex of the node tree. Will use a finished preview if available."
+          >
+            Start Reindex
+          </button>
+          <button
+            id="preview-reindex-btn"
+            type="button"
+            data-tooltip
+            aria-label="Generates a preview of the node tree to be reindexed."
+          >
+            Preview
+          </button>
+          <button
+            id="cancel-reindex-btn"
+            type="button"
+            data-tooltip
+            aria-label="Cancels the ongoing reindex or preview operation."
+            disabled
+          >
+            Cancel
+          </button>
+        </div>
+        <div class="input-group-inputs">
+          <label class="checkbox-setting" for="include-robots-index-false">
+            <span>Reindex nodes with robotsIndex=false:</span>
+            <input type="checkbox" id="include-robots-index-false" />
+          </label>
+          <label for="reindex-delay-ms">
+            <span>Delay between index calls (ms):</span>
+            <input id="reindex-delay-ms" type="number" min="0" max="60000" step="25" value="125" />
+          </label>
+          <label for="api-delay-ms">
+            <span>Delay between REST-API calls (ms):</span>
+            <input id="api-delay-ms" type="number" min="0" max="60000" step="25" value="125" />
+          </label>
+        </div>
       </div>
     </div>
+
+    <dialog
+      id="low-delay-warning"
+      aria-labelledby="low-delay-title"
+      aria-describedby="low-delay-message"
+    >
+      <h2 id="low-delay-title"></h2>
+      <p id="low-delay-message"></p>
+      <form method="dialog">
+        <button type="submit" value="ok"></button>
+        <button type="submit" value="cancel" autofocus></button>
+      </form>
+    </dialog>
 
     <div id="status-wrapper">
       <span class="badge badge-idle">IDLE</span>

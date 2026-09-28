@@ -5,18 +5,57 @@ import { setStatus } from './status.js';
 
 /** @typedef {{ id: string, type: string, displayName: string, robotsIndex: boolean }} DiscoveredNode */
 
-const SAFETY_LIMIT = 200;
-const NODE_DELAY_MS = 125;
+export const DEFAULT_REINDEX_DELAY_MS = 125;
+export const DEFAULT_API_DELAY_MS = 125;
 let isCancelled = false;
 
 /**
  * Cache of the last completed preview, reused by `runReindexQueue` so a real run can replay the
  * exact list the user was shown instead of re-walking the tree. Invalidated after being consumed
- * once, and whenever a preview doesn't fully complete (cancelled or safety-limited).
+ * once, and whenever a preview is cancelled.
  *
- * @type {{ tabId: number, origin: string, rootNodeId: string, nodes: DiscoveredNode[] } | null}
+ * @type {{ tabId: number, origin: string, rootNodeId: string, includeRobotsIndexFalse: boolean, nodes: DiscoveredNode[] } | null}
  */
 let cachedPreview = null;
+
+/**
+ * @typedef {Object} ReindexQueueOptions
+ * @property {boolean} includeRobotsIndexFalse - Reindex eligible node types even when robotsIndex is false.
+ * @property {number | (() => number)} reindexDelayMs - Delay between Edit API reindex calls.
+ * @property {number | (() => number)} apiDelayMs - Delay between REST child-list API calls.
+ */
+
+/**
+ * Creates a wait function that delays every call after the first one.
+ *
+ * @param {number | (() => number)} delayMs - Delay in milliseconds, or a getter for a live value.
+ * @returns {() => Promise<boolean>} Waits between calls, or returns false when cancelled.
+ */
+function createCallDelay(delayMs) {
+  let isFirstCall = true;
+
+  return async () => {
+    if (isCancelled) return false;
+
+    if (isFirstCall) {
+      isFirstCall = false;
+      return true;
+    }
+
+    const startedAt = performance.now();
+    while (!isCancelled) {
+      const currentDelayMs = typeof delayMs === 'function' ? delayMs() : delayMs;
+      const delay = Number.isFinite(currentDelayMs) ? Math.max(0, currentDelayMs) : 0;
+      const remainingMs = delay - (performance.now() - startedAt);
+
+      if (remainingMs <= 0) return true;
+
+      await new Promise((resolve) => setTimeout(resolve, Math.min(remainingMs, 50)));
+    }
+
+    return false;
+  };
+}
 
 /**
  * Requests cancellation of the active reindex operation.
@@ -28,21 +67,15 @@ export function cancelReindex() {
 }
 
 /**
- * Waits for the configured delay unless cancellation has been requested.
- *
- * @returns {Promise<void>} Resolves after the delay or immediately on cancellation.
- */
-async function waitBetweenNodes() {
-  await new Promise((resolve) => setTimeout(resolve, NODE_DELAY_MS));
-}
-
-/**
  * @typedef {Object} ReindexQueueParams
  * @property {number} tabId - ID of the tab containing the Sitevision page.
  * @property {string} origin - Sitevision origin.
  * @property {DiscoveredNode} rootNode - Normalized root node.
  * @property {string} csrfToken - CSRF token required by the Edit API.
- * @property {import('../../../api/modules/logger.js').default} logger - Logger for diagnostic output.
+ * @property {import('../../../api/types.js').Logger} logger - Logger for diagnostic output.
+ * @property {boolean} includeRobotsIndexFalse - Reindex eligible nodes even when robotsIndex is false.
+ * @property {number | (() => number)} reindexDelayMs - Delay between Edit API reindex calls.
+ * @property {number | (() => number)} apiDelayMs - Delay between REST child-list API calls.
  */
 
 /**
@@ -51,9 +84,11 @@ async function waitBetweenNodes() {
  * @param {number} tabId - ID of the tab in which the request runs.
  * @param {string} origin - Sitevision origin.
  * @param {string} nodeId - Node whose children should be resolved.
- * @returns {Promise<DiscoveredNode[]>} The direct child nodes.
+ * @param {() => Promise<boolean>} waitBeforeApiCall - Paces REST calls and reports cancellation.
+ * @returns {Promise<DiscoveredNode[] | null>} The direct child nodes, or null when cancelled.
  */
-async function getChildNodes(tabId, origin, nodeId) {
+async function getChildNodes(tabId, origin, nodeId, waitBeforeApiCall) {
+  if (!(await waitBeforeApiCall())) return null;
   const subNodes = await fetchRestSubNodes(tabId, origin, nodeId, TRAVERSABLE_NODE_TYPES);
   return subNodes.map(normalizeNode);
 }
@@ -75,13 +110,14 @@ function normalizeNode(node) {
 
 /**
  * Determines whether a node should actually be reindexed, as opposed to only traversed for
- * its children. Requires both an indexable type and `robotsIndex` not explicitly disabled.
+ * its children. Requires an indexable type and, unless overridden, `robotsIndex` not explicitly disabled.
  *
  * @param {{ type: string, robotsIndex: boolean }} node - Node to check.
+ * @param {boolean} includeRobotsIndexFalse - Whether to override a false robotsIndex value.
  * @returns {boolean} True if `reindexSingleNode` should be called for this node.
  */
-function isIndexable(node) {
-  return INDEXABLE_NODE_TYPES.includes(node.type) && node.robotsIndex;
+function isIndexable(node, includeRobotsIndexFalse = false) {
+  return INDEXABLE_NODE_TYPES.includes(node.type) && (node.robotsIndex || includeRobotsIndexFalse);
 }
 
 /**
@@ -91,11 +127,21 @@ function isIndexable(node) {
  * @param {string} origin - Sitevision origin.
  * @param {DiscoveredNode} node - Node to conditionally reindex.
  * @param {string} csrfToken - CSRF token required by the Edit API.
- * @param {import('../../../api/modules/logger.js').default} logger - Logger for diagnostic output.
+ * @param {import('../../../api/types.js').Logger} logger - Logger for diagnostic output.
+ * @param {boolean} includeRobotsIndexFalse - Whether to override a false robotsIndex value.
+ * @param {() => Promise<boolean>} waitBeforeReindexCall - Paces Edit API calls and reports cancellation.
  * @returns {Promise<boolean>} True if the node was actually reindexed.
  */
-async function maybeReindexNode(tabId, origin, node, csrfToken, logger) {
-  if (!isIndexable(node)) {
+async function maybeReindexNode(
+  tabId,
+  origin,
+  node,
+  csrfToken,
+  logger,
+  includeRobotsIndexFalse,
+  waitBeforeReindexCall
+) {
+  if (!isIndexable(node, includeRobotsIndexFalse)) {
     logger.log(
       'info',
       `Skipping ${node.displayName} (${node.id}, ${node.type}), traversing children...`
@@ -103,6 +149,7 @@ async function maybeReindexNode(tabId, origin, node, csrfToken, logger) {
     return false;
   }
 
+  if (!(await waitBeforeReindexCall())) return false;
   logger.log('info', `Reindexing ${node.displayName} (${node.id}, ${node.type})...`);
   await reindexSingleNode(tabId, origin, node.id, csrfToken);
   logger.append('-> OK');
@@ -114,7 +161,7 @@ async function maybeReindexNode(tabId, origin, node, csrfToken, logger) {
  * @property {number} tabId - ID of the tab containing the Sitevision page.
  * @property {string} origin - Sitevision origin.
  * @property {DiscoveredNode} rootNode - Normalized root node.
- * @property {import('../../../api/modules/logger.js').default} logger - Logger for diagnostic output.
+ * @property {() => Promise<boolean>} waitBeforeApiCall - Paces REST calls and reports cancellation.
  * @property {(node: DiscoveredNode) => Promise<void> | void} onNode - Invoked once per discovered node, in traversal order.
  */
 
@@ -126,9 +173,9 @@ async function maybeReindexNode(tabId, origin, node, csrfToken, logger) {
  * a user to figure out where to restart from if they need to reposition themselves in the tree.
  *
  * @param {WalkTreeParams} params - Traversal parameters.
- * @returns {Promise<{ reason: 'completed' | 'cancelled' | 'limit' }>} Why the walk stopped.
+ * @returns {Promise<{ reason: 'completed' | 'cancelled' }>} Why the walk stopped.
  */
-async function walkReindexTree({ tabId, origin, rootNode, logger, onNode }) {
+async function walkReindexTree({ tabId, origin, rootNode, onNode, waitBeforeApiCall }) {
   if (typeof rootNode.id !== 'string') {
     throw new Error('Root node is missing an ID.');
   }
@@ -136,8 +183,7 @@ async function walkReindexTree({ tabId, origin, rootNode, logger, onNode }) {
   const rootNodeId = rootNode.id;
   const visited = new Set();
   visited.add(rootNodeId);
-  let visitedCount = 1;
-  /** @type {'cancelled' | 'limit' | null} */
+  /** @type {'cancelled' | null} */
   let stopReason = null;
 
   /**
@@ -145,7 +191,12 @@ async function walkReindexTree({ tabId, origin, rootNode, logger, onNode }) {
    * @returns {Promise<void>}
    */
   async function visitChildren(nodeId) {
-    const children = await getChildNodes(tabId, origin, nodeId);
+    const children = await getChildNodes(tabId, origin, nodeId, waitBeforeApiCall);
+
+    if (children === null || isCancelled) {
+      stopReason = 'cancelled';
+      return;
+    }
 
     for (const child of children) {
       if (stopReason) return;
@@ -157,19 +208,13 @@ async function walkReindexTree({ tabId, origin, rootNode, logger, onNode }) {
 
       if (visited.has(child.id)) continue;
 
-      if (visitedCount >= SAFETY_LIMIT) {
-        const message = `Safety limit reached: stopped after ${SAFETY_LIMIT} nodes.`;
-        logger.log('error', message);
-        setStatus('error', message);
-        stopReason = 'limit';
-        return;
-      }
-
       visited.add(child.id);
-      visitedCount++;
 
       await onNode(child);
-      await waitBetweenNodes();
+      if (isCancelled) {
+        stopReason = 'cancelled';
+        return;
+      }
 
       await visitChildren(child.id);
       if (stopReason) return;
@@ -182,7 +227,6 @@ async function walkReindexTree({ tabId, origin, rootNode, logger, onNode }) {
     return { reason: 'cancelled' };
   }
 
-  await waitBetweenNodes();
   await visitChildren(rootNodeId);
 
   return { reason: stopReason ?? 'completed' };
@@ -196,12 +240,22 @@ async function walkReindexTree({ tabId, origin, rootNode, logger, onNode }) {
  * is exactly what gets reindexed. Sub nodes are otherwise listed via the REST API (online
  * version); reindexing itself still goes through the internal Edit API. Container types
  * (sv:archive, sv:folder) and nodes with `robotsIndex: false` are traversed for their children
- * but are never reindexed themselves.
+ * but are never reindexed themselves. Nodes with `robotsIndex: false` are skipped unless the
+ * caller enables the override.
  *
  * @param {ReindexQueueParams} params - Traversal parameters.
- * @returns {Promise<void>} Resolves when the operation finishes, is cancelled, or is stopped by the safety limit.
+ * @returns {Promise<void>} Resolves when the operation finishes or is cancelled.
  */
-export async function runReindexQueue({ tabId, origin, rootNode, csrfToken, logger }) {
+export async function runReindexQueue({
+  tabId,
+  origin,
+  rootNode,
+  csrfToken,
+  logger,
+  includeRobotsIndexFalse = false,
+  reindexDelayMs = DEFAULT_REINDEX_DELAY_MS,
+  apiDelayMs = DEFAULT_API_DELAY_MS,
+}) {
   if (typeof rootNode.id !== 'string') {
     throw new Error('Root node is missing an ID.');
   }
@@ -212,14 +266,17 @@ export async function runReindexQueue({ tabId, origin, rootNode, csrfToken, logg
   const preview =
     cachedPreview?.tabId === tabId &&
     cachedPreview?.origin === origin &&
-    cachedPreview?.rootNodeId === rootNodeId
+    cachedPreview?.rootNodeId === rootNodeId &&
+    cachedPreview?.includeRobotsIndexFalse === includeRobotsIndexFalse
       ? cachedPreview
       : null;
   cachedPreview = null;
 
   let processedCount = 0;
   let indexedCount = 0;
-  /** @type {'completed' | 'cancelled' | 'limit'} */
+  const waitBeforeReindexCall = createCallDelay(reindexDelayMs);
+  const waitBeforeApiCall = createCallDelay(apiDelayMs);
+  /** @type {'completed' | 'cancelled'} */
   let reason;
 
   if (preview) {
@@ -235,11 +292,24 @@ export async function runReindexQueue({ tabId, origin, rootNode, csrfToken, logg
         break;
       }
 
-      if (await maybeReindexNode(tabId, origin, node, csrfToken, logger)) indexedCount++;
+      const wasIndexed = await maybeReindexNode(
+        tabId,
+        origin,
+        node,
+        csrfToken,
+        logger,
+        includeRobotsIndexFalse,
+        waitBeforeReindexCall
+      );
+      if (isCancelled) {
+        reason = 'cancelled';
+        break;
+      }
+      if (wasIndexed) {
+        indexedCount++;
+      }
       processedCount++;
       setStatus('running', `Processed ${processedCount} nodes; indexed ${indexedCount}...`);
-
-      await waitBetweenNodes();
     }
   } else {
     logger.log('info', `Fetching subnodes of root ${rootNodeId}...`);
@@ -248,9 +318,21 @@ export async function runReindexQueue({ tabId, origin, rootNode, csrfToken, logg
       tabId,
       origin,
       rootNode,
-      logger,
+      waitBeforeApiCall,
       onNode: async (node) => {
-        if (await maybeReindexNode(tabId, origin, node, csrfToken, logger)) indexedCount++;
+        const wasIndexed = await maybeReindexNode(
+          tabId,
+          origin,
+          node,
+          csrfToken,
+          logger,
+          includeRobotsIndexFalse,
+          waitBeforeReindexCall
+        );
+        if (isCancelled) return;
+        if (wasIndexed) {
+          indexedCount++;
+        }
         processedCount++;
         setStatus('running', `Processed ${processedCount} nodes; indexed ${indexedCount}...`);
       },
@@ -262,10 +344,6 @@ export async function runReindexQueue({ tabId, origin, rootNode, csrfToken, logg
     setStatus('warn', `Cancelled. Processed ${processedCount} nodes; indexed ${indexedCount}.`);
     return;
   }
-  if (reason === 'limit') {
-    return;
-  }
-
   logger.log('success', `Finished! Processed ${processedCount} nodes; indexed ${indexedCount}.`);
   setStatus('success', `Completed. Processed ${processedCount} nodes; indexed ${indexedCount}.`);
 }
@@ -275,7 +353,9 @@ export async function runReindexQueue({ tabId, origin, rootNode, csrfToken, logg
  * @property {number} tabId - ID of the tab containing the Sitevision page.
  * @property {string} origin - Sitevision origin.
  * @property {DiscoveredNode} rootNode - Normalized root node.
- * @property {import('../../../api/modules/logger.js').default} logger - Logger for diagnostic output.
+ * @property {import('../../../api/types.js').Logger} logger - Logger for diagnostic output.
+ * @property {boolean} includeRobotsIndexFalse - Include eligible nodes with robotsIndex false.
+ * @property {number | (() => number)} apiDelayMs - Delay between REST child-list API calls.
  */
 
 /**
@@ -287,9 +367,16 @@ export async function runReindexQueue({ tabId, origin, rootNode, csrfToken, logg
  * `runReindexQueue` call for the same tab/origin/root replays it exactly instead of re-walking.
  *
  * @param {PreviewQueueParams} params - Traversal parameters.
- * @returns {Promise<{ nodes: DiscoveredNode[], reason: 'completed' | 'cancelled' | 'limit' }>} Discovered nodes and why the walk stopped.
+ * @returns {Promise<{ nodes: DiscoveredNode[], reason: 'completed' | 'cancelled' }>} Discovered nodes and why the walk stopped.
  */
-export async function previewReindexQueue({ tabId, origin, rootNode, logger }) {
+export async function previewReindexQueue({
+  tabId,
+  origin,
+  rootNode,
+  logger,
+  includeRobotsIndexFalse = false,
+  apiDelayMs = DEFAULT_API_DELAY_MS,
+}) {
   if (typeof rootNode.id !== 'string') {
     throw new Error('Root node is missing an ID.');
   }
@@ -301,28 +388,29 @@ export async function previewReindexQueue({ tabId, origin, rootNode, logger }) {
 
   /** @type {DiscoveredNode[]} */
   const nodes = [];
+  const waitBeforeApiCall = createCallDelay(apiDelayMs);
 
   const { reason } = await walkReindexTree({
     tabId,
     origin,
     rootNode,
-    logger,
+    waitBeforeApiCall,
     onNode: (node) => {
       nodes.push(node);
       logger.log(
         'info',
-        `${isIndexable(node) ? '[index]' : '[skip] '} ${node.displayName} (${node.id}, ${node.type})`
+        `${isIndexable(node, includeRobotsIndexFalse) ? '[index]' : '[skip] '} ${node.displayName} (${node.id}, ${node.type})`
       );
     },
   });
 
-  const indexableCount = nodes.filter(isIndexable).length;
+  const indexableCount = nodes.filter((node) => isIndexable(node, includeRobotsIndexFalse)).length;
 
   if (reason === 'cancelled') {
     logger.log('warn', 'Preview cancelled by user.');
     setStatus('warn', `Preview cancelled. Discovered ${nodes.length} nodes.`);
   } else if (reason === 'completed') {
-    cachedPreview = { tabId, origin, rootNodeId, nodes };
+    cachedPreview = { tabId, origin, rootNodeId, includeRobotsIndexFalse, nodes };
     logger.log(
       'success',
       `Preview complete: ${indexableCount} of ${nodes.length} discovered nodes would be reindexed.`
