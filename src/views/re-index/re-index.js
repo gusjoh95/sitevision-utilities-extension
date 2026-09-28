@@ -46,8 +46,11 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   try {
     const rootProperties = await fetchNodeProperties(Number(anchorTabId), origin, rootNodeId);
+    // Strip "_sitePage" suffix from the UUID if present.
     rootNode = {
-      id: rootProperties['jcr:uuid'],
+      id: rootProperties['jcr:uuid'].includes('_')
+        ? rootProperties['jcr:uuid'].split('_')[0]
+        : rootProperties['jcr:uuid'],
       type: rootProperties['jcr:primaryType'],
       displayName: rootProperties.displayName ?? '',
       robotsIndex: rootProperties.robotsIndex !== false,
