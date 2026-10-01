@@ -15,6 +15,26 @@ document.addEventListener('DOMContentLoaded', async () => {
   const expandable = dom.getRequiredElement('#expandable');
   /** @type {HTMLButtonElement} */
   const saveBtn = dom.getRequiredElement('#save');
+  /** @type {HTMLButtonElement} */
+  const copyButtonTemplate = dom.getRequiredElement('#json-id-copy-template');
+  /** @type {HTMLPreElement} */
+  const preview = dom.getRequiredElement('.json-holder pre');
+
+  preview.addEventListener('click', (event) => {
+    if (!(event.target instanceof Element)) {
+      return;
+    }
+
+    const copyButton = event.target.closest('.json-id-copy[data-copy-id]');
+    if (copyButton instanceof HTMLButtonElement) {
+      const nodeId = copyButton.dataset.copyId;
+      if (nodeId) {
+        void navigator.clipboard.writeText(nodeId).catch((error) => {
+          console.error('Failed to copy node ID:', errors.messageOf(error));
+        });
+      }
+    }
+  });
 
   /** @type {HTMLLinkElement} */
   const themeLink = dom.getRequiredElement('#json-theme');
@@ -95,8 +115,6 @@ document.addEventListener('DOMContentLoaded', async () => {
   expandable.addEventListener('toggle', async () => {
     try {
       if (expandable.open) {
-        /** @type {HTMLPreElement} */
-        const preview = dom.getRequiredElement('.json-holder pre');
         if (!preview.hasChildNodes()) {
           const dummyJson = await fetch(
             browser.runtime.getURL('views/options/dummydata/dummy.json')
@@ -107,6 +125,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             );
           }
           preview.replaceChildren(jsonRenderer.highlight(await dummyJson.json()));
+          dom.addNodeIdCopyButtons(preview, copyButtonTemplate);
         }
       }
     } catch (error) {

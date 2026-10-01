@@ -7,6 +7,12 @@ body {
   width: unset;
 }
 
+#copy:active:not(:disabled) {
+  background-color: var(--bg-color-dark);
+  color: var(--fg-color-light);
+  border-color: var(--fg-color-light);
+}
+
 .json-holder pre {
   .json-id {
     padding: 1px 4px;

@@ -289,9 +289,43 @@ div.button-collection {
 .json-holder pre {
   line-height: 1.25;
 
+  :is(.json-id, .json-id-copy):focus-visible {
+    position: relative;
+    z-index: 1;
+    outline: 2px solid var(--json-fg);
+    outline-offset: 2px;
+    box-shadow: 0 0 0 4px var(--json-bg);
+  }
+
   &.wrap {
     white-space: pre-wrap;
     word-break: break-word;
+  }
+}
+
+.json-id-copy {
+  display: none;
+}
+
+pre .json-id-copy {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: var(--icon-size, 1rem);
+  height: 1em;
+  margin: 0 0 0 0.25em;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  vertical-align: middle;
+  cursor: pointer;
+  user-select: none;
+
+  .icon {
+    display: block;
+    width: 0.85em;
+    height: 0.85em;
   }
 }
 

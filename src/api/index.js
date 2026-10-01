@@ -1,5 +1,6 @@
 export * as targetTab from './modules/targetTab.js';
 export * as dom from './modules/dom.js';
+export * as interaction from './modules/interaction.js';
 export * as jsonRenderer from './modules/jsonRenderer.js';
 export * as theme from './modules/theme.js';
 export * as pageContext from './modules/pageContext.js';

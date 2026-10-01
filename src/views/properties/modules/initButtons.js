@@ -2,8 +2,9 @@ import { dom, errors, options } from '../../../api/index.js';
 
 /**
  * Initializes the properties-page control buttons.
+ * @param {() => string} getPropertiesText
  */
-export async function initButtons() {
+export async function initButtons(getPropertiesText) {
   /** @type {HTMLPreElement} */
   const preElem = dom.getRequiredElement('.json-holder pre');
   /** @type {HTMLButtonElement} */
@@ -53,14 +54,8 @@ export async function initButtons() {
 
   copyBtn.addEventListener('click', async () => {
     try {
-      const text = preElem.textContent ?? '';
+      const text = getPropertiesText();
       await navigator.clipboard.writeText(text);
-      copyBtn.classList.add('copied');
-      copyBtn.title = 'Copied';
-      setTimeout(() => {
-        copyBtn.classList.remove('copied');
-        copyBtn.title = 'Copy properties to clipboard';
-      }, 1200);
     } catch (error) {
       const msg = errors.messageOf(error);
       console.error('Failed to copy properties:', msg);

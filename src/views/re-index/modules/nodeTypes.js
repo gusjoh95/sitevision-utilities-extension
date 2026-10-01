@@ -19,4 +19,4 @@ export const TRAVERSABLE_NODE_TYPES = [
  *
  * @type {string[]}
  */
-export const INDEXABLE_NODE_TYPES = ['sv:site', 'sv:sitePage', 'sv:page', 'sv:article'];
+export const INDEXABLE_NODE_TYPES = ['sv:sitePage', 'sv:page', 'sv:article'];
