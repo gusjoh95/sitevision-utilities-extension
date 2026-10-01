@@ -1,4 +1,4 @@
-import { fetchInTabContext } from '../../../api/index.js';
+import { targetTab } from '../../../api/index.js';
 
 /** Model version segment for published/online content (see Sitevision REST API docs). */
 const ONLINE_MODEL_VERSION = '1';
@@ -25,7 +25,7 @@ export async function fetchRestSubNodes(tabId, origin, nodeId, includes) {
   );
   const url = `${origin}/rest-api/1/${ONLINE_MODEL_VERSION}/${nodeId}/nodes?format=json&json=${json}`;
 
-  const res = await fetchInTabContext(tabId, url, { responseType: 'json' });
+  const res = await targetTab.fetch(tabId, url, { responseType: 'json' });
   if (!res.ok) throw new Error(`HTTP ${res.status} when fetching REST subnodes`);
 
   return Array.isArray(res.data) ? res.data : [];
@@ -46,7 +46,7 @@ export async function fetchRestSubNodes(tabId, origin, nodeId, includes) {
  */
 export async function fetchNodeProperties(tabId, origin, nodeId) {
   const url = `${origin}/rest-api/1/${ONLINE_MODEL_VERSION}/${nodeId}/properties`;
-  const res = await fetchInTabContext(tabId, url, { responseType: 'json' });
+  const res = await targetTab.fetch(tabId, url, { responseType: 'json' });
   if (!res.ok) throw new Error(`HTTP ${res.status} when fetching REST root properties`);
 
   return res.data;

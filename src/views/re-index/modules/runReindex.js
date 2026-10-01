@@ -1,4 +1,4 @@
-import { getErrorMessage, Logger } from '../../../api/index.js';
+import { errors, logger } from '../../../api/index.js';
 import { BEFORE_UNLOAD_GUARD_MESSAGE } from '../../../background/messages.js';
 import { setStatus } from './status.js';
 import { runReindexQueue, previewReindexQueue, cancelReindex } from './reindexQueue.js';
@@ -59,7 +59,7 @@ async function withBeforeUnloadGuard(tabId, logger, operation) {
           logger.log('warn', 'Navigation guard cleanup could not find the active guard.');
         }
       } catch (err) {
-        logger.log('error', `Navigation guard cleanup failed: ${getErrorMessage(err)}`);
+        logger.log('error', `Navigation guard cleanup failed: ${errors.messageOf(err)}`);
       }
     }
   }
@@ -87,16 +87,16 @@ async function runLoggedOperation(
   const logContainer = document.getElementById('log-container');
   if (!logContainer) return;
 
-  const logger = new Logger(logContainer);
-  logger.clear();
+  const loggerInstance = logger.create(logContainer);
+  loggerInstance.clear();
   setStatus('running', startingMessage);
-  logger.log('info', `Target origin: ${origin}`);
+  loggerInstance.log('info', `Target origin: ${origin}`);
 
   try {
-    await operation(logger);
+    await operation(loggerInstance);
   } catch (err) {
-    const message = `${errorPrefix}: ${getErrorMessage(err)}`;
-    logger.log('error', message);
+    const message = `${errorPrefix}: ${errors.messageOf(err)}`;
+    loggerInstance.log('error', message);
     setStatus('error', message);
   }
 }

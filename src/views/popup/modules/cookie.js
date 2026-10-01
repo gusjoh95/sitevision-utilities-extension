@@ -1,4 +1,4 @@
-import { getErrorMessage, getRequiredElement, reloadInvocationTab } from '../../../api/index.js';
+import { dom, errors, targetTab } from '../../../api/index.js';
 
 /**
  * @param {chrome.tabs.Tab} tab - The active tab.
@@ -32,19 +32,19 @@ export async function initCookieConsent(tab) {
 
         try {
           /** @type {HTMLDivElement} */
-          const infoWrapper = getRequiredElement('#cookie-consent-info');
+          const infoWrapper = dom.getRequiredElement('#cookie-consent-info');
           /** @type {HTMLParagraphElement} */
-          const acceptedLabel = getRequiredElement('#cookie-consent-accepted-label');
+          const acceptedLabel = dom.getRequiredElement('#cookie-consent-accepted-label');
           /** @type {HTMLPreElement} */
-          const acceptedValues = getRequiredElement('#cookie-consent-accepted-values');
+          const acceptedValues = dom.getRequiredElement('#cookie-consent-accepted-values');
           /** @type {HTMLParagraphElement} */
-          const deniedLabel = getRequiredElement('#cookie-consent-denied-label');
+          const deniedLabel = dom.getRequiredElement('#cookie-consent-denied-label');
           /** @type {HTMLPreElement} */
-          const deniedValues = getRequiredElement('#cookie-consent-denied-values');
+          const deniedValues = dom.getRequiredElement('#cookie-consent-denied-values');
           /** @type {HTMLParagraphElement} */
-          const missingCookieMessage = getRequiredElement('#cookie-consent-missing');
+          const missingCookieMessage = dom.getRequiredElement('#cookie-consent-missing');
           /** @type {HTMLButtonElement} */
-          const deleteConsentCookieBtn = getRequiredElement('#cookie-consent-delete-button');
+          const deleteConsentCookieBtn = dom.getRequiredElement('#cookie-consent-delete-button');
 
           infoWrapper.hidden = false;
           missingCookieMessage.hidden = true;
@@ -83,9 +83,9 @@ export async function initCookieConsent(tab) {
                     resolve(undefined);
                   });
                 });
-                await reloadInvocationTab(tab, false);
+                await targetTab.reloadInvocationTab(tab, false);
               } catch (error) {
-                getRequiredElement('#error').textContent = `Error: ${getErrorMessage(error)}`;
+                dom.getRequiredElement('#error').textContent = `Error: ${errors.messageOf(error)}`;
               }
             };
           } else {
@@ -124,7 +124,7 @@ export async function initCookieConsent(tab) {
 
   await new Promise((resolve, reject) => {
     /** @type {HTMLDivElement} */
-    const promptWrapper = getRequiredElement('#cookie-consent-prompt');
+    const promptWrapper = dom.getRequiredElement('#cookie-consent-prompt');
     browser.permissions.contains(
       { permissions: ['cookies'], origins: [origin] },
       (hasPermission) => {
@@ -138,8 +138,8 @@ export async function initCookieConsent(tab) {
           readSitevisionCookie().then(resolve, reject);
         } else {
           /** @type {HTMLButtonElement} */
-          const promptBtn = getRequiredElement('#cookie-consent-prompt-button');
-          const promptHelp = getRequiredElement('#cookie-consent-prompt-help');
+          const promptBtn = dom.getRequiredElement('#cookie-consent-prompt-button');
+          const promptHelp = dom.getRequiredElement('#cookie-consent-prompt-help');
 
           promptHelp.textContent = `Host permissions for ${origin}, is required to read cookies. Please grant permissions by clicking the button below.`;
           promptBtn.disabled = false;
@@ -149,7 +149,7 @@ export async function initCookieConsent(tab) {
                 promptWrapper.hidden = true;
               }
             } catch (error) {
-              getRequiredElement('#error').textContent = `Error: ${getErrorMessage(error)}`;
+              dom.getRequiredElement('#error').textContent = `Error: ${errors.messageOf(error)}`;
             }
           });
           resolve(undefined);

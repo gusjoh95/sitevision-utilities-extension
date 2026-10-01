@@ -1,21 +1,20 @@
 import {
-  assertTargetTabAccessible,
-  getErrorMessage,
-  getOption,
-  getRequiredElement,
-  getTargetAccessErrorMessage,
-  highlightJson,
-  withDeferredSpinner,
+  dom,
+  errors,
+  jsonRenderer,
+  options,
+  spinner,
+  targetPermissions,
+  targetTab,
 } from '../../../api/index.js';
 import { restApiPath } from '../properties.js';
-import { fetchInTabContext } from '../../../api/index.js';
 import { getCurrentState } from './getCurrentState.js';
 
-const useSyntaxHighlighting = await getOption('useSyntaxHighlighting');
+const useSyntaxHighlighting = await options.getOption('useSyntaxHighlighting');
 
 /** @type {HTMLPreElement} */
-const preElem = getRequiredElement('.json-holder pre');
-const errorElem = getRequiredElement('#error');
+const preElem = dom.getRequiredElement('.json-holder pre');
+const errorElem = dom.getRequiredElement('#error');
 
 if (useSyntaxHighlighting) {
   // Event Delegation: Set up click listener once on the parent container
@@ -27,7 +26,7 @@ if (useSyntaxHighlighting) {
     if (target) {
       const nextNode = target.textContent.replace(/"/g, '');
       void navigateToNode(nextNode, null, 'push').catch((error) => {
-        preElem.textContent = `Error: ${getErrorMessage(error)}`;
+        preElem.textContent = `Error: ${errors.messageOf(error)}`;
       });
     }
   });
@@ -57,7 +56,7 @@ export function renderUI(data, state) {
     return;
   }
 
-  preElem.replaceChildren(highlightJson(data));
+  preElem.replaceChildren(jsonRenderer.highlight(data));
 }
 
 /**
@@ -77,23 +76,19 @@ export async function navigateToNode(nextNode, cachedData = null, historyAction 
 
   if (!data) {
     try {
-      await assertTargetTabAccessible(Number(state.anchorTabId), state.origin);
+      await targetPermissions.assertTargetTabAccessible(Number(state.anchorTabId), state.origin);
       preElem.textContent = 'Loading...';
       const url = new URL(
         `${restApiPath}/${state.version}/${state.node}/properties`,
         state.origin
       ).toString();
-      const res = await withDeferredSpinner(
-        () => fetchInTabContext(Number(state.anchorTabId), url, { responseType: 'json' }),
+      const res = await spinner.withDeferredSpinner(
+        () => targetTab.fetch(Number(state.anchorTabId), url, { responseType: 'json' }),
         {
-          spinnerEl: getRequiredElement('#spinner'),
+          spinnerEl: dom.getRequiredElement('#spinner'),
           delayMs: 250,
         }
       );
-
-      if (res?.__isError) {
-        throw new Error(res.errorMessage ?? 'Unknown error during in-tab fetch');
-      }
 
       if (!res.ok) {
         const payload = res.data
@@ -104,8 +99,8 @@ export async function navigateToNode(nextNode, cachedData = null, historyAction 
 
       data = res.data;
     } catch (error) {
-      const msg = getErrorMessage(error);
-      const targetAccessErrorMessage = getTargetAccessErrorMessage(msg);
+      const msg = errors.messageOf(error);
+      const targetAccessErrorMessage = targetPermissions.getTargetAccessErrorMessage(msg);
       let errorData;
 
       if (targetAccessErrorMessage) {

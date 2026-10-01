@@ -1,9 +1,4 @@
-import {
-  executeInTab,
-  getErrorMessage,
-  getPageContext,
-  getRequiredElement,
-} from '../../api/index.js';
+import { dom, errors, pageContext, targetTab } from '../../api/index.js';
 import { getCurrentState } from './modules/getCurrentState.js'; // Getting params could be done in the API layer instead of the view layer.
 import { runReindex, previewReindex, cancelReindex } from './modules/runReindex.js';
 import { fetchNodeProperties } from './modules/restApi.js';
@@ -17,14 +12,19 @@ import { DEFAULT_API_DELAY_MS, DEFAULT_REINDEX_DELAY_MS } from './modules/reinde
  * @returns {Promise<string | null>} The CSRF token, or null when unavailable.
  */
 async function getBootstrapCsrfToken(tabId) {
-  const pageContext = await getPageContext(tabId);
-  if (pageContext?.csrfToken) {
-    return pageContext.csrfToken;
+  const context = await pageContext.getPageContext(tabId);
+  if (context?.csrfToken) {
+    return context.csrfToken;
   }
 
-  const token = await executeInTab(tabId, () => window.bootstrapData?.csrfToken ?? null, [], {
-    world: 'MAIN',
-  });
+  const token = await targetTab.executeScript(
+    tabId,
+    () => window.bootstrapData?.csrfToken ?? null,
+    [],
+    {
+      world: 'MAIN',
+    }
+  );
 
   return token ?? null;
 }
@@ -37,21 +37,25 @@ async function getBootstrapCsrfToken(tabId) {
 document.addEventListener('DOMContentLoaded', async () => {
   const { origin, anchorTabId, rootNodeId } = getCurrentState();
 
-  const startBtn = /** @type {HTMLButtonElement} */ (getRequiredElement('#start-reindex-btn'));
-  const previewBtn = /** @type {HTMLButtonElement} */ (getRequiredElement('#preview-reindex-btn'));
-  const cancelBtn = /** @type {HTMLButtonElement} */ (getRequiredElement('#cancel-reindex-btn'));
+  const startBtn = /** @type {HTMLButtonElement} */ (dom.getRequiredElement('#start-reindex-btn'));
+  const previewBtn = /** @type {HTMLButtonElement} */ (
+    dom.getRequiredElement('#preview-reindex-btn')
+  );
+  const cancelBtn = /** @type {HTMLButtonElement} */ (
+    dom.getRequiredElement('#cancel-reindex-btn')
+  );
   const includeRobotsIndexFalse = /** @type {HTMLInputElement} */ (
-    getRequiredElement('#include-robots-index-false')
+    dom.getRequiredElement('#include-robots-index-false')
   );
   const reindexDelayInput = /** @type {HTMLInputElement} */ (
-    getRequiredElement('#reindex-delay-ms')
+    dom.getRequiredElement('#reindex-delay-ms')
   );
-  const apiDelayInput = /** @type {HTMLInputElement} */ (getRequiredElement('#api-delay-ms'));
+  const apiDelayInput = /** @type {HTMLInputElement} */ (dom.getRequiredElement('#api-delay-ms'));
   const lowDelayWarning = /** @type {HTMLDialogElement} */ (
-    getRequiredElement('#low-delay-warning')
+    dom.getRequiredElement('#low-delay-warning')
   );
-  const nodeOutput = /** @type {HTMLOutputElement} */ (getRequiredElement('#current-node-id'));
-  const errorElement = getRequiredElement('#error');
+  const nodeOutput = /** @type {HTMLOutputElement} */ (dom.getRequiredElement('#current-node-id'));
+  const errorElement = dom.getRequiredElement('#error');
   let csrfToken = null;
   /** @type {import('./modules/types.js').DiscoveredNode | null} */
   let rootNode = null;
@@ -110,7 +114,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     nodeOutput.value = rootNode.id;
     nodeOutput.textContent = rootNode.id;
   } catch (err) {
-    errorElement.textContent = `Error: ${getErrorMessage(err)}`;
+    errorElement.textContent = `Error: ${errors.messageOf(err)}`;
     startBtn.disabled = true;
     previewBtn.disabled = true;
   }
@@ -123,7 +127,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       );
     }
   } catch (err) {
-    errorElement.textContent = `Error: ${getErrorMessage(err)}`;
+    errorElement.textContent = `Error: ${errors.messageOf(err)}`;
     startBtn.disabled = true;
     previewBtn.disabled = true;
   }

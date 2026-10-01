@@ -1,9 +1,4 @@
-import {
-  assignJsonTheme,
-  getErrorMessage,
-  getRequiredElement,
-  registerTargetPermissionListener,
-} from '../../../api/index.js';
+import { dom, errors, targetPermissions, theme } from '../../../api/index.js';
 import { initButtons } from './initButtons.js';
 import { getCurrentState } from './getCurrentState.js';
 import { navigateToNode, renderUI } from './renderUI.js';
@@ -15,7 +10,7 @@ window.addEventListener('popstate', (event) => {
       ? navigateToNode(event.state.node, event.state.cachedData, 'none')
       : navigateToNode(getCurrentState().node, null, 'replace')
   ).catch((error) => {
-    getRequiredElement('.json-holder pre').textContent = `Error: ${getErrorMessage(error)}`;
+    dom.getRequiredElement('.json-holder pre').textContent = `Error: ${errors.messageOf(error)}`;
   });
 });
 
@@ -23,19 +18,19 @@ window.addEventListener('popstate', (event) => {
 export async function initPropertiesView() {
   const state = getCurrentState();
   /** @type {HTMLLinkElement} */
-  const jsonLinkElement = getRequiredElement('#json-theme');
-  assignJsonTheme(jsonLinkElement);
+  const jsonLinkElement = dom.getRequiredElement('#json-theme');
+  theme.assignJsonTheme(jsonLinkElement);
 
   /** @type {HTMLPreElement} */
-  const preElement = getRequiredElement('.json-holder pre');
-  const errorElement = getRequiredElement('#error');
+  const preElement = dom.getRequiredElement('.json-holder pre');
+  const errorElement = dom.getRequiredElement('#error');
 
   if (!state.origin || !state.node || !state.anchorTabId) {
     preElement.textContent = 'Error: Missing required URL parameters (origin/node/anchorTabId).';
     return;
   }
 
-  registerTargetPermissionListener({
+  targetPermissions.registerTargetPermissionListener({
     tabId: Number(state.anchorTabId),
     origin: state.origin,
     onLost: ({ message }) => {

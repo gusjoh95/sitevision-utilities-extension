@@ -1,105 +1,79 @@
 /**
  * Log manager class for appending and updating log messages inside a dedicated container element.
  */
-export default class Logger {
-  /**
-   * Creates an instance of Logger.
-   *
-   * @param {HTMLElement} container - Target container element for log output.
-   */
+export class Logger {
+  /** @param {HTMLElement} container - Target container element for log output. */
   constructor(container) {
-    if (!container) {
-      throw new Error('Logger requires a valid HTML container element.');
-    }
+    if (!container) throw new Error('Logger requires a valid HTML container element.');
     /** @type {HTMLElement} */
     this.container = container;
     this._boundUpdate = this._updateContainerSize.bind(this);
-    // keep the container sized to the available viewport space
     window.addEventListener('resize', this._boundUpdate, { passive: true });
-    // initial sizing
     this._updateContainerSize();
   }
 
   clear() {
     this.container.textContent = '';
-    // recalc size after clearing (content may shrink)
     this._updateContainerSize();
   }
 
   /**
-   * Appends a new formatted log entry line to the container.
-   *
-   * @param {'info' | 'success' | 'warn' | 'error'} type - Severity or status type of the log entry.
-   * @param {string} message - Text message to log.
+   * @param {'info' | 'success' | 'warn' | 'error'} type
+   * @param {string} message
    */
   log(type, message) {
     this._updateWithAutoScroll(() => {
       const entry = document.createElement('div');
       entry.className = `log-entry log-${type}`;
-
-      const timestamp = new Date().toLocaleTimeString();
-      entry.textContent = `[${timestamp}] ${message}`;
-
+      entry.textContent = `[${new Date().toLocaleTimeString()}] ${message}`;
       this.container.appendChild(entry);
       this._updateContainerSize();
     });
   }
 
-  /**
-   * Appends additional text to the end of the last log entry line.
-   *
-   * @param {string} message - Text message to append to the existing log line.
-   */
+  /** @param {string} message */
   append(message) {
     const lastEntry = this.container.lastElementChild;
     if (!lastEntry) {
       this.log('info', message);
       return;
     }
-
     this._updateWithAutoScroll(() => {
       lastEntry.textContent += ` ${message}`;
     });
   }
 
-  /**
-   * Applies a log update and follows it only when the user was already near the bottom.
-   *
-   * @param {() => void} update - DOM update to apply before scrolling.
-   */
+  /** @param {() => void} update */
   _updateWithAutoScroll(update) {
     const wasNearBottom =
       this.container.scrollHeight - this.container.scrollTop - this.container.clientHeight <= 48;
-
     update();
-
-    if (wasNearBottom) {
-      this.container.scrollTop = this.container.scrollHeight;
-    }
+    if (wasNearBottom) this.container.scrollTop = this.container.scrollHeight;
   }
 
-  /**
-   * Recalculate and set the container max-height based on available viewport space.
-   * Uses the container's top offset and document body padding to compute available height.
-   */
   _updateContainerSize() {
     try {
       const rect = this.container.getBoundingClientRect();
       const bodyStyle = getComputedStyle(document.body);
       const bodyPaddingBottom = parseFloat(bodyStyle.paddingBottom) || 0;
-      // Increased safety margin to prevent window scrollbars
-      const margin = 24;
-      const available = Math.max(64, window.innerHeight - rect.top - bodyPaddingBottom - margin);
+      const available = Math.max(64, window.innerHeight - rect.top - bodyPaddingBottom - 24);
       this.container.style.maxHeight = `${available}px`;
     } catch {
-      // ignore — sizing is best-effort
+      // Sizing is best-effort.
     }
   }
 
-  /**
-   * Remove attached listeners and cleanup
-   */
   destroy() {
     window.removeEventListener('resize', this._boundUpdate);
   }
+}
+
+/**
+ * Creates an independent logger instance bound to a log container.
+ *
+ * @param {HTMLElement} container
+ * @returns {Logger}
+ */
+export function create(container) {
+  return new Logger(container);
 }

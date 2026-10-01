@@ -1,11 +1,4 @@
-import {
-  getErrorMessage,
-  fetchInTabContext,
-  getTargetAccessErrorMessage,
-  matchDOM,
-  getRequiredElement,
-  Logger,
-} from '../../../api/index.js';
+import { dom, errors, logger, targetPermissions, targetTab } from '../../../api/index.js';
 
 const LOGIN_SELECTORS = ['.sv-login-portlet', '.sv-login-form'].join(',');
 
@@ -17,9 +10,9 @@ const LOGIN_SELECTORS = ['.sv-login-portlet', '.sv-login-form'].join(',');
  * @param {string} [url=''] - Optional target URL to attach to the summary link.
  */
 export function setStatus(state, message, url = '') {
-  const summaryText = getRequiredElement('#summary-text');
-  const badge = getRequiredElement('#status-wrapper .badge');
-  const link = getRequiredElement('#summary-link');
+  const summaryText = dom.getRequiredElement('#summary-text');
+  const badge = dom.getRequiredElement('#status-wrapper .badge');
+  const link = dom.getRequiredElement('#summary-link');
 
   if (summaryText) {
     summaryText.textContent = message;
@@ -61,7 +54,7 @@ export function setStatus(state, message, url = '') {
  */
 function hasLocalLoginForm(html) {
   if (!html?.trim()) return false;
-  return matchDOM(html, { selector: LOGIN_SELECTORS });
+  return dom.matchDOM(html, { selector: LOGIN_SELECTORS });
 }
 
 /**
@@ -72,7 +65,7 @@ function hasLocalLoginForm(html) {
  */
 function hasMetaRefresh(html) {
   if (!html?.trim()) return false;
-  return matchDOM(html, { selector: 'meta[http-equiv="refresh"]' });
+  return dom.matchDOM(html, { selector: 'meta[http-equiv="refresh"]' });
 }
 
 /**
@@ -97,20 +90,20 @@ function isCrossOrigin(targetUrl, origin) {
  * @param {number} tabId - Target browser tab ID.
  * @param {string} targetUrl - Full target URL to fetch.
  * @param {string} origin - Expected target site origin.
- * @param {Logger} logger - Logger instance for status logging.
+ * @param {import('../../../api/types.js').Logger} logger - Logger instance for status logging.
  * @returns {Promise<ProbeResult>}
  */
 async function probeEndpoint(tabId, targetUrl, origin, logger) {
   let res;
   try {
-    res = await fetchInTabContext(tabId, targetUrl, {
+    res = await targetTab.fetch(tabId, targetUrl, {
       reqOptions: {
         credentials: 'omit', // Prevents native HTTP Basic Auth browser modal from popping up
       },
     });
   } catch (err) {
-    const errorMsg = getErrorMessage(err);
-    const targetAccessErrorMessage = getTargetAccessErrorMessage(errorMsg);
+    const errorMsg = errors.messageOf(err);
+    const targetAccessErrorMessage = targetPermissions.getTargetAccessErrorMessage(errorMsg);
     if (targetAccessErrorMessage) {
       logger.append(`-> ${targetAccessErrorMessage}`);
       return { outcome: 'TARGET_UNAVAILABLE', reason: targetAccessErrorMessage };
@@ -172,14 +165,14 @@ async function probeEndpoint(tabId, targetUrl, origin, logger) {
  * @returns {Promise<void>}
  */
 export async function runDiscovery(tabId, origin, customPaths = []) {
-  const logContainer = getRequiredElement('#log-container');
+  const logContainer = dom.getRequiredElement('#log-container');
   if (!logContainer) return;
 
-  const logger = new Logger(logContainer);
-  logger.clear();
+  const loggerInstance = logger.create(logContainer);
+  loggerInstance.clear();
 
   setStatus('running', 'Probing target site(s)...');
-  logger.log('info', `Starting discovery on: ${origin}`);
+  loggerInstance.log('info', `Starting discovery on: ${origin}`);
 
   const webdavTestPaths = ['/webdav/images/', '/webdav/files/'];
   const queue = [...new Set(['/edit', ...webdavTestPaths, ...customPaths])].filter(Boolean);
@@ -193,16 +186,16 @@ export async function runDiscovery(tabId, origin, customPaths = []) {
     const targetUrl = new URL(path, origin).toString();
     const paddedPath = path.padEnd(maxPathLength, ' ');
 
-    logger.log('info', `GET ${paddedPath}`);
+    loggerInstance.log('info', `GET ${paddedPath}`);
 
     try {
-      const result = await probeEndpoint(tabId, targetUrl, origin, logger);
+      const result = await probeEndpoint(tabId, targetUrl, origin, loggerInstance);
 
       if (result.outcome === 'FOUND' && result.matchUrl) {
         if (result.type === 'WEBDAV') {
           // Store WebDAV as a secondary fallback and continue searching for a primary login form
           webdavFallbackUrl = result.matchUrl;
-          logger.append('Continuing search for login form.');
+          loggerInstance.append('Continuing search for login form.');
         } else {
           // Primary login form detected — terminate search immediately
           setStatus('success', 'Login form found at:', result.matchUrl);
@@ -215,18 +208,18 @@ export async function runDiscovery(tabId, origin, customPaths = []) {
         return;
       }
     } catch (err) {
-      logger.append(`-> Error: ${getErrorMessage(err)}`);
+      loggerInstance.append(`-> Error: ${errors.messageOf(err)}`);
     }
   }
 
   // Fallback to WebDAV endpoint if no primary login form was found during queue traversal
   if (webdavFallbackUrl) {
     setStatus('success', 'Basic Auth found at:', webdavFallbackUrl);
-    logger.log('info', `Basic Auth found at: ${webdavFallbackUrl}`);
-    logger.log('warn', 'Discovery finished — only Basic Auth was found.');
+    loggerInstance.log('info', `Basic Auth found at: ${webdavFallbackUrl}`);
+    loggerInstance.log('warn', 'Discovery finished — only Basic Auth was found.');
     return;
   }
 
-  logger.log('warn', 'Discovery finished — no login found.');
+  loggerInstance.log('warn', 'Discovery finished — no login found.');
   setStatus('warn', 'No login found.');
 }

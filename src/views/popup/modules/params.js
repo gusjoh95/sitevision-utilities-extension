@@ -1,10 +1,4 @@
-import {
-  executeInTab,
-  getErrorMessage,
-  getRequiredElement,
-  reloadInvocationTab,
-  updateSessionWithParam,
-} from '../../../api/index.js';
+import { dom, errors, sessionParams, targetTab } from '../../../api/index.js';
 
 /**
  * @param {chrome.tabs.Tab} tab - The active tab.
@@ -23,11 +17,11 @@ export async function initParamButtons(tab, sitevisionMode) {
   }
 
   /** @type {HTMLInputElement} */
-  const toggleProfilingCheckbox = getRequiredElement('#toggle-profiling');
+  const toggleProfilingCheckbox = dom.getRequiredElement('#toggle-profiling');
   /** @type {HTMLInputElement} */
-  const toggleJsDebugCheckbox = getRequiredElement('#toggle-jsdebug');
+  const toggleJsDebugCheckbox = dom.getRequiredElement('#toggle-jsdebug');
   /** @type {HTMLInputElement} */
-  const toggleSlimrenderCheckbox = getRequiredElement('#toggle-slimrender');
+  const toggleSlimrenderCheckbox = dom.getRequiredElement('#toggle-slimrender');
   /** @type {HTMLParagraphElement} */
 
   /** @type {Array<{ element: HTMLInputElement, param: string, key: 'profiling' | 'jsdebug' | 'slimrender' }>} */
@@ -50,7 +44,7 @@ export async function initParamButtons(tab, sitevisionMode) {
    * @returns {Promise<{ profiling: boolean, jsdebug: boolean, slimrender: boolean }>}
    */
   async function getSessionParamStates() {
-    const result = await executeInTab(safeTabId, () => {
+    const result = await targetTab.executeScript(safeTabId, () => {
       // Profiling check
       const isProfiling = [...document.querySelectorAll('body table th')].some(
         (th) => th.textContent?.trim() === 'Profiling results'
@@ -96,17 +90,17 @@ export async function initParamButtons(tab, sitevisionMode) {
 
       const targetState = checkbox.checked;
       try {
-        const success = await updateSessionWithParam(paramKey, targetState);
+        const success = await sessionParams.updateSessionWithParam(paramKey, targetState);
 
         if (success) {
-          await reloadInvocationTab(tab);
+          await targetTab.reloadInvocationTab(tab);
         } else {
           // Revert GUI state if the network request failed
           checkbox.checked = !targetState;
         }
       } catch (error) {
         checkbox.checked = !targetState;
-        getRequiredElement('#error').textContent = `Error: ${getErrorMessage(error)}`;
+        dom.getRequiredElement('#error').textContent = `Error: ${errors.messageOf(error)}`;
       } finally {
         checkbox.indeterminate = false; // Note: This is purely a visual change.
         checkbox.disabled = false;

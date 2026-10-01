@@ -1,4 +1,4 @@
-import { getRequiredElement } from '../../../api/index.js';
+import { dom } from '../../../api/index.js';
 
 /**
  * Updates the status badge and summary text in the reindex view.
@@ -8,8 +8,8 @@ import { getRequiredElement } from '../../../api/index.js';
  * @returns {void}
  */
 export function setStatus(state, message) {
-  const summaryText = getRequiredElement('#summary-text');
-  const badge = getRequiredElement('#status-wrapper').querySelector('.badge');
+  const summaryText = dom.getRequiredElement('#summary-text');
+  const badge = dom.getRequiredElement('#status-wrapper').querySelector('.badge');
 
   if (summaryText) summaryText.textContent = message;
   if (badge) {

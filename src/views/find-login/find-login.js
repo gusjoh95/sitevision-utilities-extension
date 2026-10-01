@@ -1,22 +1,15 @@
-import {
-  assertTargetTabAccessible,
-  getErrorMessage,
-  getOption,
-  getRequiredElement,
-  registerTargetPermissionListener,
-  withDeferredSpinner,
-} from '../../api/index.js';
+import { dom, errors, options, spinner, targetPermissions } from '../../api/index.js';
 import { getCurrentState } from './modules/getCurrentState.js';
 import { runDiscovery } from './modules/runDiscovery.js';
 
 async function initFindLoginView() {
   const { origin, anchorTabId } = getCurrentState();
 
-  const spinnerEl = getRequiredElement('#spinner');
-  const errorElem = getRequiredElement('#error');
-  const summaryLink = getRequiredElement('#summary-link');
+  const spinnerEl = dom.getRequiredElement('#spinner');
+  const errorElem = dom.getRequiredElement('#error');
+  const summaryLink = dom.getRequiredElement('#summary-link');
 
-  registerTargetPermissionListener({
+  targetPermissions.registerTargetPermissionListener({
     tabId: Number(anchorTabId),
     origin,
     onLost: ({ message }) => {
@@ -33,22 +26,22 @@ async function initFindLoginView() {
 
         await browser.tabs.create({ url });
       } catch (err) {
-        errorElem.textContent = `Error: ${getErrorMessage(err)}`;
+        errorElem.textContent = `Error: ${errors.messageOf(err)}`;
       }
     });
   }
 
   try {
-    await withDeferredSpinner(
+    await spinner.withDeferredSpinner(
       async () => {
-        await assertTargetTabAccessible(Number(anchorTabId), origin);
-        const options = await getOption('customLoginPaths');
-        await runDiscovery(Number(anchorTabId), origin, options);
+        await targetPermissions.assertTargetTabAccessible(Number(anchorTabId), origin);
+        const customPaths = await options.getOption('customLoginPaths');
+        await runDiscovery(Number(anchorTabId), origin, customPaths);
       },
       { spinnerEl, delayMs: 250 }
     );
   } catch (error) {
-    const errorMsg = getErrorMessage(error);
+    const errorMsg = errors.messageOf(error);
     errorElem.textContent = `Error: ${errorMsg}`;
   }
 }

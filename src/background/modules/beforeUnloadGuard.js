@@ -1,4 +1,4 @@
-import { executeInTab } from '../../api/index.js';
+import { targetTab } from '../../api/index.js';
 import { BEFORE_UNLOAD_GUARD_MESSAGE } from '../messages.js';
 
 /**
@@ -18,7 +18,7 @@ export function registerBeforeUnloadGuard() {
     }
 
     const operation = message.action === 'install' ? addBeforeUnloadGuard : removeBeforeUnloadGuard;
-    return executeInTab(message.tabId, operation, [message.guardId]).then(
+    return targetTab.executeScript(message.tabId, operation, [message.guardId]).then(
       (result) => (message.action === 'install' ? { installed: true } : { removed: result }),
       (error) => {
         console.warn(`Failed to ${message.action} a beforeunload guard.`, error);

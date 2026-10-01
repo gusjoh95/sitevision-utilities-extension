@@ -1,4 +1,4 @@
-import { getErrorMessage, getRequiredElement } from '../../../api/index.js';
+import { dom, errors } from '../../../api/index.js';
 
 /**
  * Initializes the "Reindex node tree" feature inside the popup.
@@ -9,7 +9,7 @@ import { getErrorMessage, getRequiredElement } from '../../../api/index.js';
  */
 export async function initReindex(tab, rootNodeId) {
   /** @type {HTMLButtonElement} */
-  const reindexBtn = getRequiredElement('#reindex-tree');
+  const reindexBtn = dom.getRequiredElement('#reindex-tree');
 
   try {
     if (!tab?.url) {
@@ -29,16 +29,16 @@ export async function initReindex(tab, rootNodeId) {
           height: 600,
         });
       } catch (err) {
-        const msg = getErrorMessage(err);
+        const msg = errors.messageOf(err);
         /** @type {HTMLDivElement} */
-        const errEl = getRequiredElement('#error');
+        const errEl = dom.getRequiredElement('#error');
         errEl.textContent = `Error opening window: ${msg}`;
       }
     });
   } catch (err) {
-    const msg = getErrorMessage(err);
+    const msg = errors.messageOf(err);
     /** @type {HTMLDivElement} */
-    const errEl = getRequiredElement('#error');
+    const errEl = dom.getRequiredElement('#error');
     errEl.textContent = `Error: ${msg}`;
   }
 }

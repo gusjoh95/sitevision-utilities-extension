@@ -1,7 +1,7 @@
-import { getRequiredElement } from '../../../api/index.js';
+import { dom } from '../../../api/index.js';
 
 export async function initOpenOptions() {
-  const optionsBtn = getRequiredElement('#open-options');
+  const optionsBtn = dom.getRequiredElement('#open-options');
   optionsBtn.addEventListener('click', () => {
     if (browser.runtime.openOptionsPage) {
       browser.runtime.openOptionsPage();

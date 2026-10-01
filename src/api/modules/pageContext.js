@@ -1,5 +1,5 @@
 import * as SiteVerification from './siteVerification.js';
-import executeInTab from './executeInTab.js';
+import { executeScript } from './targetTab.js';
 import { isEdit } from './editMode.js';
 
 /** @type {'window' | 'frame' | null | undefined} */
@@ -20,35 +20,25 @@ let pageContextSource = undefined;
  */
 
 /**
- * Retrieves the Sitevision PageContext object from the active tab.
+ * Retrieves the Sitevision PageContext object from a tab.
  *
- * Executes a script in the page's MAIN world context to access the global
- * page metadata object. It first attempts to read directly from the main window,
- * falling back to the editing iframe (#content-frame) if needed.
- *
- * @remarks CSP: Running in the MAIN world means the script is subject to the page's Content Security Policy.
- *
- * @throws {Error} Throws if no active tab or valid tab ID is found.
- * @param {number} tabId - ID of the active tab to inspect.
- * @returns {Promise<PageContext | null>} Resolves to the PageContext object, or null if unavailable on the page.
+ * @param {number} tabId - ID of the tab to inspect.
+ * @returns {Promise<PageContext | null>} The page context, or null if unavailable on the page.
  */
 export async function getPageContext(tabId) {
   pageContextSource = null;
 
-  /**
-   * @typedef {Window & { sv?: { PageContext?: PageContext } }} CustomWindow
-   */
+  /** @typedef {Window & { sv?: { PageContext?: PageContext } }} CustomWindow */
 
   if (typeof tabId !== 'number') {
     throw new Error('Could not retrieve PageContext: No valid tab ID supplied.');
   }
 
-  const result = await executeInTab(
+  const result = await executeScript(
     tabId,
     () => {
       /** @type {CustomWindow} */
       const win = window;
-
       if (win.sv?.PageContext) {
         return { pageContext: win.sv.PageContext, source: 'window' };
       }
@@ -57,7 +47,6 @@ export async function getPageContext(tabId) {
       const editFrame = document.querySelector('#content-frame');
       /** @type {CustomWindow | null} */
       const frameWin = editFrame?.contentWindow ?? null;
-
       return {
         pageContext: frameWin?.sv?.PageContext ?? null,
         source: frameWin?.sv?.PageContext ? 'frame' : null,
@@ -67,11 +56,8 @@ export async function getPageContext(tabId) {
     { world: 'MAIN' }
   );
 
-  if (!result) {
-    throw new Error('Could not execute retrieval of PageContext');
-  }
-
-  pageContextSource = result.source;
+  if (!result) throw new Error('Could not execute retrieval of PageContext');
+  pageContextSource = /** @type {'window' | 'frame' | null} */ (result.source);
   return result.pageContext;
 }
 
@@ -80,31 +66,23 @@ export async function getPageContext(tabId) {
  */
 
 /**
- * Determines whether the active tab is in Sitevision online mode, offline/edit mode,
- * Sitevision without a PageContext, or has not been verified as Sitevision.
+ * Determines whether a tab is in Sitevision online, offline/edit, neither, or unknown mode.
  *
  * @param {chrome.tabs.Tab} tab
  * @returns {Promise<SitevisionMode>}
- * `null` means the tab is cached as non-Sitevision; `undefined` means verification is unknown.
  */
 export async function getSitevisionMode(tab) {
-  // TODO, figure out how to define this helper in comparison to isEdit.
-  // This helper is broad but not extensive, online mode is not evaluated enough..?
   if (pageContextSource === undefined) {
-    if (!tab?.id) {
-      throw new Error('No valid tab ID found.');
-    }
+    if (!tab?.id) throw new Error('No valid tab ID found.');
     await getPageContext(tab.id);
   }
 
   if (pageContextSource === 'window') return 'online';
   if (pageContextSource === 'frame') return 'offline';
-
   if (isEdit(tab)) return 'offline';
 
   const status = await SiteVerification.get(tab);
   if (status === SiteVerification.Status.VERIFIED) return 'neither';
   if (status === SiteVerification.Status.REJECTED) return null;
-
   return undefined;
 }

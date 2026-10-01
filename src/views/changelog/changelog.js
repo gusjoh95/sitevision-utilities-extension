@@ -1,4 +1,4 @@
-import { getErrorMessage, getRequiredElement, isFirefox } from '../../api/index.js';
+import { dom, environment, errors } from '../../api/index.js';
 import { renderMarkdown } from './modules/renderMarkdown.js';
 
 /**
@@ -22,7 +22,7 @@ async function getAvailableVersions() {
     const catalogue = await response.json();
     const releases = Array.isArray(catalogue?.releases) ? catalogue.releases : [];
 
-    const currentTarget = (await isFirefox()) ? 'firefox' : 'chrome';
+    const currentTarget = (await environment.isFirefox()) ? 'firefox' : 'chrome';
     return releases
       .filter((release) => !release.hotfixTarget || release.hotfixTarget === currentTarget)
       .map((release) => release.version);
@@ -53,14 +53,14 @@ async function renderVersion(contentEl, version) {
     const heading = document.createElement('h1');
     heading.textContent = `Sitevision Utilities has been updated to v${version}`;
     const paragraph = document.createElement('p');
-    paragraph.textContent = getErrorMessage(error);
+    paragraph.textContent = errors.messageOf(error);
     contentEl.replaceChildren(heading, paragraph);
   }
 }
 
 async function initChangelogView() {
   /** @type {HTMLDivElement} */
-  const contentEl = getRequiredElement('#content');
+  const contentEl = dom.getRequiredElement('#content');
   const { version: currentVersion } = browser.runtime.getManifest();
   const initialVersion =
     new URLSearchParams(window.location.search).get('version') || currentVersion;
@@ -72,13 +72,13 @@ async function initChangelogView() {
   let index = versions.indexOf(initialVersion);
   if (index === -1) return;
 
-  const navEl = getRequiredElement('#version-nav');
+  const navEl = dom.getRequiredElement('#version-nav');
   /** @type {HTMLButtonElement} */
-  const prevButton = getRequiredElement('#prev-version');
+  const prevButton = dom.getRequiredElement('#prev-version');
   /** @type {HTMLButtonElement} */
-  const nextButton = getRequiredElement('#next-version');
+  const nextButton = dom.getRequiredElement('#next-version');
   /** @type {HTMLSpanElement} */
-  const labelEl = getRequiredElement('#version-label');
+  const labelEl = dom.getRequiredElement('#version-label');
 
   function updateNav() {
     labelEl.textContent = versions[index];

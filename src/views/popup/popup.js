@@ -1,17 +1,13 @@
 import {
-  getInvocationTab,
-  getErrorMessage,
-  getPageContext,
-  getSitevisionMode,
-  getRequiredElement,
-  assertTargetTabAccessible,
-  isFirefox,
-  registerCurrentTabChangeListener,
-  SiteVerification,
-  matchDOM,
-  withDeferredSpinner,
-  fetchInTabContext,
-  EditMode,
+  dom,
+  editMode,
+  environment,
+  errors,
+  pageContext,
+  siteVerification,
+  spinner,
+  targetPermissions,
+  targetTab,
 } from '../../api/index.js';
 import { initCookieConsent } from './modules/cookie.js';
 import { initFindLogin } from './modules/find-login.js';
@@ -21,13 +17,13 @@ import { initProperties } from './modules/properties.js';
 import { initReindex } from './modules/re-index.js';
 
 /** @type {HTMLDivElement} */
-const appEl = getRequiredElement('#app');
+const appEl = dom.getRequiredElement('#app');
 const initialHTML = appEl.innerHTML;
 let tabReloadListenerRegistered = false;
 
 async function init() {
   try {
-    const invocationTab = await getInvocationTab();
+    const invocationTab = await targetTab.getInvocationTab();
     const activeUrl = invocationTab?.url;
     if (!activeUrl) {
       throw new Error('Unable to access active tab URL.');
@@ -42,28 +38,28 @@ async function init() {
       throw new Error('Active tab must use HTTP or HTTPS.');
     }
     // Can probably be removed without problems
-    await assertTargetTabAccessible(tabId, origin);
+    await targetPermissions.assertTargetTabAccessible(tabId, origin);
 
-    const pageContext = await getPageContext(tabId);
+    const context = await pageContext.getPageContext(tabId);
 
     // Determine if website is running Sitevision
-    if (pageContext) {
-      await SiteVerification.set(invocationTab, true);
+    if (context) {
+      await siteVerification.set(invocationTab, true);
     } else {
-      let status = await SiteVerification.get(invocationTab);
+      let status = await siteVerification.get(invocationTab);
 
-      if (status === SiteVerification.Status.UNKNOWN) {
-        const res = await fetchInTabContext(tabId, origin);
-        const isSitevision = matchDOM(res.data, {
+      if (status === siteVerification.Status.UNKNOWN) {
+        const res = await targetTab.fetch(tabId, origin);
+        const isSitevision = dom.matchDOM(res.data, {
           selector: 'script',
           pattern: /\bsv\.PageContext\s*=\s*\{/i,
         });
-        await SiteVerification.set(invocationTab, isSitevision);
-        status = isSitevision ? SiteVerification.Status.VERIFIED : SiteVerification.Status.REJECTED;
+        await siteVerification.set(invocationTab, isSitevision);
+        status = isSitevision ? siteVerification.Status.VERIFIED : siteVerification.Status.REJECTED;
       }
     }
 
-    const sitevisionMode = await getSitevisionMode(invocationTab);
+    const sitevisionMode = await pageContext.getSitevisionMode(invocationTab);
     if (sitevisionMode === null) {
       throw new Error('Active tab is not a Sitevision site.');
     }
@@ -71,17 +67,17 @@ async function init() {
     // Initialize UI tasks array for parallel execution
     const uiTasks = [
       initFindLogin(invocationTab),
-      initProperties(invocationTab, pageContext),
+      initProperties(invocationTab, context),
       initParamButtons(invocationTab, sitevisionMode),
       initCookieConsent(invocationTab),
     ];
 
     if (sitevisionMode === 'online' || sitevisionMode === 'offline') {
-      if (pageContext?.pageId) {
-        uiTasks.push(initReindex(invocationTab, pageContext.pageId));
-      } else if (await EditMode.isEdit(invocationTab)) {
-        // Added await: EditMode.isEdit interacts with the tab and is asynchronous
-        const editInfo = await EditMode.getEditInfo(invocationTab);
+      if (context?.pageId) {
+        uiTasks.push(initReindex(invocationTab, context.pageId));
+      } else if (await editMode.isEdit(invocationTab)) {
+        // Added await: editMode.isEdit interacts with the tab and is asynchronous
+        const editInfo = await editMode.getEditInfo(invocationTab);
         // Added await: Fetching edit info requires asynchronous execution in the target tab
 
         if (editInfo?.isEditMode && editInfo?.nodeId) {
@@ -102,28 +98,28 @@ async function init() {
     });
 
     if (!tabReloadListenerRegistered) {
-      registerCurrentTabChangeListener(handleTabReload);
+      targetTab.registerCurrentTabChangeListener(handleTabReload);
       tabReloadListenerRegistered = true;
     }
   } catch (error) {
-    const msg = getErrorMessage(error);
+    const msg = errors.messageOf(error);
     /** @type {HTMLDivElement} */
-    const errEl = getRequiredElement('#error');
+    const errEl = dom.getRequiredElement('#error');
     errEl.textContent = `Error: ${msg}`;
   } finally {
     try {
       await initOpenOptions();
     } catch (error) {
-      const msg = getErrorMessage(error);
+      const msg = errors.messageOf(error);
       /** @type {HTMLDivElement} */
-      const errEl = getRequiredElement('#error');
+      const errEl = dom.getRequiredElement('#error');
       errEl.textContent = `Error: ${msg}`;
     }
   }
 }
 
 async function handleTabReload() {
-  const firefox = await isFirefox();
+  const firefox = await environment.isFirefox();
 
   // Firefox drops the temporary activeTab permission when the popup page itself is reloaded or navigated.
   // Closing the popup is more reliable than resetting the DOM in that browser, while Chrome can still recover
@@ -137,6 +133,6 @@ async function handleTabReload() {
   await init();
 }
 
-const spinnerEl = getRequiredElement('#spinner');
+const spinnerEl = dom.getRequiredElement('#spinner');
 
-await withDeferredSpinner(() => init(), { spinnerEl, delayMs: 250 });
+await spinner.withDeferredSpinner(() => init(), { spinnerEl, delayMs: 250 });

@@ -1,34 +1,27 @@
-import {
-  assignJsonTheme,
-  getErrorMessage,
-  getOptions,
-  getRequiredElement,
-  highlightJson,
-  setOptions,
-} from '../../api/index.js';
+import { dom, errors, jsonRenderer, options, theme } from '../../api/index.js';
 
 document.addEventListener('DOMContentLoaded', async () => {
   /** @type {HTMLInputElement} */
-  const useSyntaxHighlighting = getRequiredElement('#use-syntax-highlighting');
+  const useSyntaxHighlighting = dom.getRequiredElement('#use-syntax-highlighting');
   /** @type {HTMLInputElement} */
-  const reloadOnChange = getRequiredElement('#reload-on-change');
+  const reloadOnChange = dom.getRequiredElement('#reload-on-change');
   /** @type {HTMLTextAreaElement} */
-  const customLoginPaths = getRequiredElement('#custom-login-paths');
+  const customLoginPaths = dom.getRequiredElement('#custom-login-paths');
   /** @type {HTMLPreElement} */
-  const errorElem = getRequiredElement('#error');
+  const errorElem = dom.getRequiredElement('#error');
   /** @type {HTMLSelectElement} */
-  const dropdown = getRequiredElement('#theme-dropdown');
+  const dropdown = dom.getRequiredElement('#theme-dropdown');
   /** @type {HTMLDetailsElement} */
-  const expandable = getRequiredElement('#expandable');
+  const expandable = dom.getRequiredElement('#expandable');
   /** @type {HTMLButtonElement} */
-  const saveBtn = getRequiredElement('#save');
+  const saveBtn = dom.getRequiredElement('#save');
 
   /** @type {HTMLLinkElement} */
-  const themeLink = getRequiredElement('#json-theme');
-  assignJsonTheme(themeLink);
+  const themeLink = dom.getRequiredElement('#json-theme');
+  theme.assignJsonTheme(themeLink);
 
   try {
-    const opts = await getOptions();
+    const opts = await options.getOptions();
     useSyntaxHighlighting.checked = Boolean(opts.useSyntaxHighlighting);
     reloadOnChange.checked = Boolean(opts.reloadOnChange);
     customLoginPaths.value = opts.customLoginPaths.join('\n');
@@ -57,7 +50,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       themes.forEach(renderTheme);
     } catch (error) {
       console.error('Failed to load themes', error);
-      errorElem.textContent = getErrorMessage(error);
+      errorElem.textContent = errors.messageOf(error);
     }
     dropdown.addEventListener('change', () => {
       const selectedTheme = dropdown.value || 'default.css';
@@ -67,7 +60,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     saveBtn.removeAttribute('disabled');
   } catch (error) {
-    errorElem.textContent = getErrorMessage(error);
+    errorElem.textContent = errors.messageOf(error);
   }
 
   async function handleSave() {
@@ -85,13 +78,13 @@ document.addEventListener('DOMContentLoaded', async () => {
         jsonTheme: String(dropdown.value),
       };
       saveBtn.setAttribute('disabled', '');
-      if (await setOptions(toStore)) {
+      if (await options.setOptions(toStore)) {
         window.close();
       }
 
       errorElem.textContent = JSON.stringify(toStore, null, 2);
     } catch (error) {
-      const msg = getErrorMessage(error);
+      const msg = errors.messageOf(error);
       errorElem.textContent = msg;
     } finally {
       saveBtn.removeAttribute('disabled');
@@ -103,7 +96,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     try {
       if (expandable.open) {
         /** @type {HTMLPreElement} */
-        const preview = getRequiredElement('.json-holder pre');
+        const preview = dom.getRequiredElement('.json-holder pre');
         if (!preview.hasChildNodes()) {
           const dummyJson = await fetch(
             browser.runtime.getURL('views/options/dummydata/dummy.json')
@@ -113,11 +106,11 @@ document.addEventListener('DOMContentLoaded', async () => {
               `Failed to load preview: HTTP ${dummyJson.status} ${dummyJson.statusText}`
             );
           }
-          preview.replaceChildren(highlightJson(await dummyJson.json()));
+          preview.replaceChildren(jsonRenderer.highlight(await dummyJson.json()));
         }
       }
     } catch (error) {
-      errorElem.textContent = getErrorMessage(error);
+      errorElem.textContent = errors.messageOf(error);
     }
   });
 });
