@@ -14,6 +14,29 @@ export function getRequiredElement(selector) {
 }
 
 /**
+ * Adds copies of the node ID button template after highlighted node IDs.
+ * @param {HTMLPreElement} preElement
+ * @param {HTMLButtonElement} buttonTemplate
+ */
+export function addNodeIdCopyButtons(preElement, buttonTemplate) {
+  for (const idElement of preElement.querySelectorAll('.json-id')) {
+    const nodeId = JSON.parse(idElement.textContent ?? '""');
+    const button = /** @type {HTMLButtonElement} */ (buttonTemplate.cloneNode(true));
+    button.removeAttribute('id');
+    button.dataset.copyId = nodeId;
+    button.setAttribute('aria-label', 'Copy node ID');
+
+    const nextNode = idElement.nextSibling;
+    if (nextNode instanceof Text && nextNode.data.startsWith(',')) {
+      const textAfterComma = nextNode.splitText(1);
+      nextNode.parentNode?.insertBefore(button, textAfterComma);
+    } else {
+      idElement.after(button);
+    }
+  }
+}
+
+/**
  * @typedef {Object} MatchOptions
  * @property {string} [selector='*'] - CSS selector to target specific elements (e.g., 'script', 'meta').
  * @property {RegExp | string} [pattern] - The regex pattern to match against element content.

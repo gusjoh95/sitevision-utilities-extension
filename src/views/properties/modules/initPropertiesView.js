@@ -1,7 +1,7 @@
 import { dom, errors, targetPermissions, theme } from '../../../api/index.js';
 import { initButtons } from './initButtons.js';
 import { getCurrentState } from './getCurrentState.js';
-import { navigateToNode, renderUI } from './renderUI.js';
+import { getCurrentPropertiesText, navigateToNode, renderUI } from './renderUI.js';
 
 // Handle Browser Back / Forward buttons instantly using the history payload
 window.addEventListener('popstate', (event) => {
@@ -45,7 +45,7 @@ export async function initPropertiesView() {
     sessionStorage.setItem('maxHistoryIndex', '0');
   }
 
-  await initButtons();
+  await initButtons(getCurrentPropertiesText);
 
   const useCacheOnReload = false;
 

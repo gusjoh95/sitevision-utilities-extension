@@ -1,4 +1,4 @@
-import { dom, errors, pageContext, targetTab } from '../../api/index.js';
+import { dom, errors, pageContext, spinner, targetTab } from '../../api/index.js';
 import { getCurrentState } from './modules/getCurrentState.js'; // Getting params could be done in the API layer instead of the view layer.
 import { runReindex, previewReindex, cancelReindex } from './modules/runReindex.js';
 import { fetchNodeProperties } from './modules/restApi.js';
@@ -44,6 +44,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   const cancelBtn = /** @type {HTMLButtonElement} */ (
     dom.getRequiredElement('#cancel-reindex-btn')
   );
+  const spinnerEl = dom.getRequiredElement('#spinner');
   const includeRobotsIndexFalse = /** @type {HTMLInputElement} */ (
     dom.getRequiredElement('#include-robots-index-false')
   );
@@ -91,7 +92,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     setIndexingOptionDisabled(true);
 
     try {
-      await operation();
+      await spinner.withDeferredSpinner(operation, { spinnerEl, delayMs: 250 });
     } finally {
       startBtn.disabled = false;
       previewBtn.disabled = false;
