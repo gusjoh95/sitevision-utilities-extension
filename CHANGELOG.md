@@ -3,19 +3,54 @@
 All notable changes to the **Sitevision Utilities Extension** project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).  
-For details on the 4-digit versioning strategy (`MAJOR.MINOR.PATCH.HOTFIX`), see the [Versioning Scheme in README.md](README.md#versioning-scheme).
+For details on the 4-digit versioning strategy (`MAJOR.MINOR.PATCH.HOTFIX`), see the [Versioning section in README.md](README.md#versioning).
 
 ## [Unreleased]
 
 ### Added
 
+- New function: `find-login` where supplied endpoints are traversed in order to find an instance of [`sv-login-portlet`](https://help.sitevision.se/en/loginHelp.html).
+  - Also checks for Basic Auth prompts on certain preconfigured WebDAV paths.
+  - Add configurable custom login paths to options.
+- Add an experimental recursive re-index view with tree preview, configurable REST/Edit API pacing, cancellation, and an opt-in override for nodes with `robotsIndex=false`.
+  - Traverses the Sitevision node tree via the Model REST API and requests re-indexing through the Edit API; a completed preview is replayed for the next matching run.
+  - Warns before accepting delays below 100 ms.
+  - Installs a temporary `beforeunload` guard in the target tab while preview or re-index is active.
+- Add quick link to the extension options in popup view.
+- Add individual node ID copy controls to the Properties view and Options theme preview; Properties node IDs are keyboard-accessible, and full JSON copying excludes UI controls.
+- Add browser-specific Chrome and Firefox manifests.
+- Add `assertTargetTabAccessible` and `registerTargetPermissionListener` helpers to standardize detection of closed tabs, origin changes, and revoked host permissions (developer-facing API).
+- Add changelog for end-user which is shown on update. See more in [README/Architecture](README.md#architecture).
+- Add hover/focus tooltips to popup and options controls (find-login, open-options, custom login paths, highlight JSON, edit-mode notices) that previously had none.
+
 ### Changed
+
+- API: Group helpers behind named namespaces, align module filenames with namespace names, and improve injected-script argument/return type inference.
+- Parameters: UI feedback and state rollback for session parameter toggles (disable checkbox + indeterminate while processing; revert state on failure).
+- Properties: Add six JSON themes (`neon-noir`, `pastel-sunset`, `matrix-glow`, `solar-flare`, `retro-wave`, `aurora-borealis`).
+- Properties: Improve key emphasis (`--json-key-fg` + bold `.json-key`) for clearer key/value separation.
+- Properties: Move `.json-id` presentation to global styles; themes now only provide color tokens.
+- Properties: Preserve rendered properties JSON when the originating tab becomes inaccessible; show a non-destructive target-access warning in `#error`.
+- Runtime: Adopt `browser` runtime namespace for Chromium (Chrome ≥148). Added `types/browser.d.ts` to map `browser` to `typeof chrome` for editor type-checking, updated `jsconfig.json` and `eslint.config.js`, and migrated runtime API calls from `chrome.*` to `browser.*` across `src/`. JSDoc/type annotations remain `chrome.*` to preserve `chrome-types` resolution. This change requires setting `minimum_chrome_version` in the Chromium manifest and may be incompatible with older Chrome versions.
+- Tooling: Add `scripts/check-theme-contrast.js` to validate theme contrast and suggest fixes; add `check:theme-contrast` npm script and README note.
+- Tooling: Development and release workflows now select a browser manifest before loading or packaging the extension (`npm run dev:ch` or `npm run dev:ff`).
+- Tooling: Update release packaging to create browser-specific archives and validate manifest differences.
+- Views: Rework tooltips to use a `data-tooltip` attribute with required `sr-only`/`aria-label` text instead of the `.tooltipped` class; add HTML lint rules (`tooltip-requires-nested-sronly`, `tooltip-text-match`) to enforce it.
+- Views: Standardize JSON spacing with `--spacing-*` variables in `resources/style/base.css`.
 
 ### Deprecated
 
+- Chromium: Extension requires Chrome 148 or newer.
+
 ### Removed
 
+- Updating parameters is no longer possible in edit mode.
+
 ### Fixed
+
+- Fix tab reload after parameter updates on 404 pages ([#1](https://github.com/gusjoh95/sitevision-utilities-extension/issues/1)).
+- The session state when populating the checkboxes is no longer evaluated in edit-mode either (the checkboxes are kept disabled). ([#2](https://github.com/gusjoh95/sitevision-utilities-extension/issues/2)).
+- Remove fixed layout width in options page and refine input element styling ([#3](https://github.com/gusjoh95/sitevision-utilities-extension/issues/3)).
 
 ### Security
 

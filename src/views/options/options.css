@@ -1,13 +1,8 @@
 :root {
-  --view-width: 600px;
+  --view-width: unset;
 }
 
-pre {
-  border-radius: var(--border-radius);
-  width: max-content;
-  padding: 8px;
-}
-
-summary:hover {
-  cursor: pointer;
+/* Wrapper sections need full width; default form shrinks to content */
+#options-form {
+  display: block;
 }

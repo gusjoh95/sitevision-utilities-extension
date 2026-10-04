@@ -1,42 +1,43 @@
-import {
-  getActiveTab,
-  getErrorMessage,
-  getPageContext,
-  getRequiredElement,
-} from '../../../api/index.js';
+import { dom, errors } from '../../../api/index.js';
 
-export async function initProperties() {
+/**
+ * @param {chrome.tabs.Tab} tab - The active tab.
+ * @param {import('../../../api/types.js').PageContext | null} pageContext
+ */
+export async function initProperties(tab, pageContext) {
   /** @type {HTMLFormElement} */
-  const form = getRequiredElement('#properties-form');
+  const form = dom.getRequiredElement('#properties-form');
   /** @type {HTMLInputElement} */
-  const propertiesIdInput = getRequiredElement('#properties-id-input');
+  const propertiesIdInput = dom.getRequiredElement('#properties-id-input');
   /** @type {HTMLInputElement} */
-  const currentPageId = getRequiredElement('#current-page-id');
+  const currentPageId = dom.getRequiredElement('#current-page-id');
   /** @type {HTMLInputElement} */
-  const currentUserId = getRequiredElement('#current-user-id');
-
-  const { pageId, userIdentityId } = await getPageContext();
+  const currentUserId = dom.getRequiredElement('#current-user-id');
+  /** @type {HTMLInputElement} */
+  const onlineModeRadioButton = dom.getRequiredElement('#properties-online-mode');
+  /** @type {HTMLInputElement} */
+  const offlineModeRadioButton = dom.getRequiredElement('#properties-offline-mode');
 
   propertiesIdInput.disabled = false;
   propertiesIdInput.focus();
+  onlineModeRadioButton.disabled = false;
+  offlineModeRadioButton.disabled = false;
 
   /** @type {HTMLButtonElement} */ (
-    getRequiredElement("button[type='submit'][value='getProperties']")
+    dom.getRequiredElement("button[type='submit'][value='getProperties']")
   ).disabled = false;
-  /** @type {HTMLInputElement} */ (getRequiredElement('#properties-online-mode')).disabled = false;
-  /** @type {HTMLInputElement} */ (getRequiredElement('#properties-offline-mode')).disabled = false;
 
-  if (pageId) {
-    currentPageId.value = pageId;
+  if (pageContext?.pageId) {
+    currentPageId.value = pageContext.pageId;
     /** @type {HTMLButtonElement} */ (
-      getRequiredElement("button[type='submit'][value='getCurrentPage']")
+      dom.getRequiredElement("button[type='submit'][value='getCurrentPage']")
     ).disabled = false;
   }
 
-  if (userIdentityId) {
-    currentUserId.value = userIdentityId;
+  if (pageContext?.userIdentityId) {
+    currentUserId.value = pageContext.userIdentityId;
     /** @type {HTMLButtonElement} */ (
-      getRequiredElement("button[type='submit'][value='getCurrentUser']")
+      dom.getRequiredElement("button[type='submit'][value='getCurrentUser']")
     ).disabled = false;
   }
 
@@ -45,7 +46,7 @@ export async function initProperties() {
     event.preventDefault();
 
     /** @type {HTMLInputElement} */
-    const checkedRadio = getRequiredElement('input[name="radio"]:checked');
+    const checkedRadio = dom.getRequiredElement('input[name="radio"]:checked');
     const version = checkedRadio.value;
 
     let node;
@@ -69,7 +70,6 @@ export async function initProperties() {
     }
 
     try {
-      const tab = await getActiveTab();
       if (!tab?.url) {
         throw new Error('No active tab URL available for properties lookup.');
       }
@@ -79,7 +79,7 @@ export async function initProperties() {
       }
       const origin = new URL(tab.url).origin;
       const anchorTabId = tab.id;
-      chrome.windows.create({
+      browser.windows.create({
         url:
           '/views/properties/properties.html?origin=' +
           origin +
@@ -94,11 +94,12 @@ export async function initProperties() {
         height: 600,
       });
     } catch (e) {
-      const msg = getErrorMessage(e);
+      const msg = errors.messageOf(e);
       /** @type {HTMLDivElement} */
-      const errEl = getRequiredElement('#error');
+      const errEl = dom.getRequiredElement('#error');
       errEl.textContent = `Error: ${msg}`;
     }
   }
+
   form.addEventListener('submit', onPropertiesSubmit);
 }

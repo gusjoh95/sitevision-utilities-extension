@@ -15,7 +15,7 @@ Prioritized ideas with one-line implementation hints and file references.
   Add option in src/views/options/options.js to choose run-in-page fetch vs extension fetch, persisted via getOptions/setOptions in src/views/api.js.
 
 - History / recent nodes sidebar  
-  Persist recent node IDs in chrome.storage and show in popup for quick access; update src/views/index.js and storage via api.js.
+  Persist recent node IDs in browser.storage and show in popup for quick access; update src/views/index.js and storage via api.js.
 
 - Copy/export JSON / download button  
   Add "Copy JSON" and "Download JSON" actions in properties view using the original data object.
@@ -25,5 +25,5 @@ Prioritized ideas with one-line implementation hints and file references.
 
 Notes:
 
-- Prefer in-page fetch to avoid CORS in Firefox (use chrome.scripting.executeScript or tabs.executeScript fallback).
+- Prefer in-page fetch to avoid CORS in Firefox (use browser.scripting.executeScript or tabs.executeScript fallback).
 - Keep UI neutral (grayscale) and accessible; reuse existing CSS and add small helpers where needed.

@@ -1,33 +1,40 @@
-import {
-  getActiveTab,
-  getRequiredElement,
-  reloadCurrentTab,
-  updateSessionWithParam,
-} from '../../../api/index.js';
+import { dom, errors, sessionParams, targetTab } from '../../../api/index.js';
 
-export async function initParamButtons() {
+/**
+ * @param {chrome.tabs.Tab} tab - The active tab.
+ * @param {import('../../../api/types.js').SitevisionMode} sitevisionMode
+ */
+export async function initParamButtons(tab, sitevisionMode) {
   const PARAMS = {
     profiling: 'profiling',
     jsdebug: 'jsdebug',
     slimrender: 'slimRender',
   };
 
-  /** @type {HTMLInputElement} */
-  const toggleProfilingCheckbox = getRequiredElement('#toggle-profiling');
-  /** @type {HTMLInputElement} */
-  const toggleJsDebugCheckbox = getRequiredElement('#toggle-jsdebug');
-  /** @type {HTMLInputElement} */
-  const toggleSlimrenderCheckbox = getRequiredElement('#toggle-slimrender');
+  if (sitevisionMode !== 'online') {
+    console.info('Skipping initalization of parameters in popup');
+    return;
+  }
 
-  const tab = await getActiveTab();
+  /** @type {HTMLInputElement} */
+  const toggleProfilingCheckbox = dom.getRequiredElement('#toggle-profiling');
+  /** @type {HTMLInputElement} */
+  const toggleJsDebugCheckbox = dom.getRequiredElement('#toggle-jsdebug');
+  /** @type {HTMLInputElement} */
+  const toggleSlimrenderCheckbox = dom.getRequiredElement('#toggle-slimrender');
+  /** @type {HTMLParagraphElement} */
+
+  /** @type {Array<{ element: HTMLInputElement, param: string, key: 'profiling' | 'jsdebug' | 'slimrender' }>} */
+  const toggles = [
+    { element: toggleProfilingCheckbox, param: PARAMS.profiling, key: 'profiling' },
+    { element: toggleJsDebugCheckbox, param: PARAMS.jsdebug, key: 'jsdebug' },
+    { element: toggleSlimrenderCheckbox, param: PARAMS.slimrender, key: 'slimrender' },
+  ];
+
   const activeTabId = tab?.id;
   if (typeof activeTabId !== 'number') {
     throw new Error('No active tab available for session parameter checks.');
   }
-
-  toggleProfilingCheckbox.disabled = false;
-  toggleJsDebugCheckbox.disabled = false;
-  toggleSlimrenderCheckbox.disabled = false;
 
   /** @type {number} */
   const safeTabId = activeTabId;
@@ -37,70 +44,75 @@ export async function initParamButtons() {
    * @returns {Promise<{ profiling: boolean, jsdebug: boolean, slimrender: boolean }>}
    */
   async function getSessionParamStates() {
-    const results = await /** @type {Promise<chrome.scripting.InjectionResult[]>} */ (
-      chrome.scripting.executeScript({
-        target: { tabId: safeTabId },
-        func: () => {
-          // Profiling check
-          const isProfiling = [...document.querySelectorAll('body table th')].some(
-            (th) => th.textContent?.trim() === 'Profiling results'
-          );
+    const result = await targetTab.executeScript(safeTabId, () => {
+      // Profiling check
+      const isProfiling = [...document.querySelectorAll('body table th')].some(
+        (th) => th.textContent?.trim() === 'Profiling results'
+      );
 
-          // TODO Improve
-          // Jsdebug check
-          const minifiedTemplateAssetsSelector =
-            'script[src$="/sv-template-asset.js"], link[href$="/sv-template-asset.css"]';
-          const minifiedWebappAssetsSelector = 'script[src$="/webapp-assets.js"]';
-          const count1 = document.querySelectorAll(minifiedTemplateAssetsSelector)?.length ?? 0;
-          const count2 = document.querySelectorAll(minifiedWebappAssetsSelector)?.length ?? 0;
-          const minifiedAssetCount = count1 + count2;
-          // Jsdebug is considered on if no minified assets
-          const isJsdebug = !minifiedAssetCount;
-          // Slimrender check
-          const isSlimrender =
-            (document.querySelectorAll('head link[as="script"][href$="slim.js"]')?.length ?? 0) > 0;
+      // Jsdebug check
+      const minifiedTemplateAssetsSelector =
+        'script[src$="/sv-template-asset.js"], link[href$="/sv-template-asset.css"]';
+      const minifiedWebappAssetsSelector = 'script[src$="/webapp-assets.js"]';
+      const count1 = document.querySelectorAll(minifiedTemplateAssetsSelector)?.length ?? 0;
+      const count2 = document.querySelectorAll(minifiedWebappAssetsSelector)?.length ?? 0;
+      const minifiedAssetCount = count1 + count2;
+      // Jsdebug is considered on if no minified assets
+      const isJsdebug = !minifiedAssetCount;
+      // Slimrender check
+      const isSlimrender =
+        (document.querySelectorAll('head link[as="script"][href$="slim.js"]')?.length ?? 0) > 0;
 
-          return {
-            profiling: isProfiling,
-            jsdebug: isJsdebug,
-            slimrender: isSlimrender,
-          };
-        },
-      })
-    );
+      return {
+        profiling: isProfiling,
+        jsdebug: isJsdebug,
+        slimrender: isSlimrender,
+      };
+    });
 
-    /** @type {{ result?: { profiling: boolean, jsdebug: boolean, slimrender: boolean } } | undefined} */
-    const res = results?.[0];
-    return res?.result ?? { profiling: false, jsdebug: false, slimrender: false };
+    if (!result) {
+      throw new Error('Session parameter check returned no result.');
+    }
+    return result;
   }
 
-  const { profiling, jsdebug, slimrender } = await getSessionParamStates();
+  /**
+   * Binds a session parameter checkbox with UI loading states,
+   * error rollback, and tab reloading.
+   *
+   * @param {HTMLInputElement} checkbox
+   * @param {string} paramKey
+   */
+  function bindSessionToggle(checkbox, paramKey) {
+    checkbox.addEventListener('click', async () => {
+      checkbox.disabled = true;
+      checkbox.indeterminate = true; // Note: This is purely a visual change.
 
-  toggleProfilingCheckbox.checked = profiling;
-  toggleJsDebugCheckbox.checked = jsdebug;
-  toggleSlimrenderCheckbox.checked = slimrender;
+      const targetState = checkbox.checked;
+      try {
+        const success = await sessionParams.updateSessionWithParam(paramKey, targetState);
 
-  toggleProfilingCheckbox.addEventListener('change', async () => {
-    const success = await updateSessionWithParam(PARAMS.profiling, toggleProfilingCheckbox.checked);
-    if (success) {
-      reloadCurrentTab();
-    }
-  });
+        if (success) {
+          await targetTab.reloadInvocationTab(tab);
+        } else {
+          // Revert GUI state if the network request failed
+          checkbox.checked = !targetState;
+        }
+      } catch (error) {
+        checkbox.checked = !targetState;
+        dom.getRequiredElement('#error').textContent = `Error: ${errors.messageOf(error)}`;
+      } finally {
+        checkbox.indeterminate = false; // Note: This is purely a visual change.
+        checkbox.disabled = false;
+      }
+    });
+  }
 
-  toggleJsDebugCheckbox.addEventListener('change', async () => {
-    const success = await updateSessionWithParam(PARAMS.jsdebug, toggleJsDebugCheckbox.checked);
-    if (success) {
-      reloadCurrentTab();
-    }
-  });
-
-  toggleSlimrenderCheckbox.addEventListener('change', async () => {
-    const success = await updateSessionWithParam(
-      PARAMS.slimrender,
-      toggleSlimrenderCheckbox.checked
-    );
-    if (success) {
-      reloadCurrentTab();
-    }
-  });
+  const sessionStates = await getSessionParamStates();
+  for (const { element, param, key } of toggles) {
+    if (!element) continue;
+    element.checked = Boolean(sessionStates[key]);
+    element.disabled = false;
+    bindSessionToggle(element, param);
+  }
 }

@@ -9,38 +9,86 @@
 
   <body>
     <div id="error"></div>
-    <div id="properties-wrapper">
-      <h2>Properties</h2>
-      <label>
-        <input type="checkbox" id="use-syntax-highlighting" />
-        Highlight JSON (also enables sitevision-node traversal in properties view)
-      </label>
-      <div>
-        <label for="theme-dropdown">JSON theme:</label>
-        <select name="Theme" id="theme-dropdown">
-          <option value="">Default</option>
-        </select>
+    <form id="options-form">
+      <div id="login-paths-wrapper">
+        <h2>Find login page</h2>
+        <div>
+          <label
+            for="custom-login-paths"
+            data-tooltip="Enter one path per line or separate them with commas (e.g., /login, /admin/login)."
+          >
+            <span>Target paths</span>
+            <span class="sr-only">
+              Enter one path per line or separate them with commas (e.g., /login, /admin/login).
+            </span>
+            <textarea
+              id="custom-login-paths"
+              rows="4"
+              placeholder="/login&#10;/system/login"
+            ></textarea>
+          </label>
+        </div>
       </div>
-      <div>
-        <details id="expandable">
-          <summary>Theme preview</summary>
-          <div class="json-holder">
-            <pre></pre>
-          </div>
-        </details>
+      <div id="properties-wrapper">
+        <h2>Node properties</h2>
+        <label
+          data-tooltip="Enables syntax highlighting and clickable node traversal in the properties view."
+        >
+          <input type="checkbox" id="use-syntax-highlighting" aria-describedby="syntax-desc" />
+          <span>Rich JSON view</span>
+          <span id="syntax-desc" class="sr-only">
+            Enables syntax highlighting and clickable node traversal in the properties view.
+          </span>
+        </label>
+        <div>
+          <label for="theme-dropdown">JSON theme:</label>
+          <select name="Theme" id="theme-dropdown">
+            <option value="">Default</option>
+          </select>
+        </div>
+        <div>
+          <details id="expandable">
+            <summary>Theme preview</summary>
+            <div class="json-holder">
+              <pre></pre>
+            </div>
+          </details>
+        </div>
       </div>
-    </div>
-    <div id="session-params-wrapper">
-      <h2>Session parameters</h2>
-      <label>
-        <input type="checkbox" id="reload-on-change" />
-        <span>Reload page when changing parameter (unless URL contains <i>/edit</i>)</span>
-      </label>
-    </div>
-    <div id="save-wrapper">
-      <button id="save" disabled>Save</button>
-      <pre id="properties"></pre>
-    </div>
+      <div id="session-params-wrapper">
+        <h2>Session parameters</h2>
+        <label data-tooltip="Not applicable in edit mode">
+          <input type="checkbox" id="reload-on-change" />
+          <span>Reload on parameter update</span>
+          <span id="param-desc" class="sr-only">Not applicable in edit mode</span>
+        </label>
+      </div>
+      <div id="save-wrapper">
+        <button id="save" type="button" disabled>Save</button>
+      </div>
+    </form>
+    <button
+      data-tooltip
+      type="button"
+      id="json-id-copy-template"
+      class="json-id-copy"
+      aria-label="Copy node ID"
+    >
+      <svg
+        class="icon"
+        aria-hidden="true"
+        focusable="false"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="2"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+      >
+        <rect x="9" y="9" width="13" height="13" rx="2" ry="2" />
+        <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" />
+      </svg>
+    </button>
     <script type="module" src="options.js"></script>
   </body>
 </html>

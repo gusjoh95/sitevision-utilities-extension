@@ -1,7 +1,17 @@
-import tooltipRequiresAttribute from './tooltip-requires-attribute.js';
+import tooltipRequiresNestedSrOnly from './tooltip-requires-sr-only.js';
+import tooltipTextMatch from './tooltip-text-match.js';
 
 export default {
   rules: {
-    'tooltip-requires-attribute': tooltipRequiresAttribute,
+    'tooltip-requires-nested-sronly': tooltipRequiresNestedSrOnly,
+    'tooltip-text-match': tooltipTextMatch,
+  },
+  configs: {
+    recommended: {
+      rules: {
+        'custom/tooltip-requires-nested-sronly': 'warn',
+        'custom/tooltip-text-match': 'warn',
+      },
+    },
   },
 };

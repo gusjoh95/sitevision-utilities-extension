@@ -1,8 +1,9 @@
 {
   "name": "Sitevision Utilities",
   "description": "Unofficial Sitevision extension to inspect JCR node properties, toggle debug parameters and streamline your development workflow.",
-  "version": "1.0.0.0",
+  "version": "1.1.0.0",
   "manifest_version": 3,
+  "minimum_chrome_version": "148",
   "action": {
     "default_popup": "views/popup/popup.html",
     "default_icon": "resources/icons/16.png"
@@ -20,12 +21,8 @@
   "permissions": ["activeTab", "scripting", "storage"],
   "optional_permissions": ["cookies"],
   "optional_host_permissions": ["https://*/*", "http://*/*"],
-  "browser_specific_settings": {
-    "gecko": {
-      "id": "gusjoh95@sitevision-utilities-extension",
-      "data_collection_permissions": {
-        "required": ["none"]
-      }
-    }
+  "background": {
+    "service_worker": "background/index.js",
+    "type": "module"
   }
 }

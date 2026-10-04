@@ -11,3 +11,6 @@ release/
 *.zip
 *.crx
 *.pem
+
+# Ignore local manifest for development
+/src/manifest.json

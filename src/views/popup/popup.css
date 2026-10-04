@@ -1,11 +1,20 @@
-form .properties-search {
+div.button-collection {
+  --icon-size: 1.5rem;
+  button {
+    padding: 4px;
+  }
+  #open-options {
+    margin-left: auto;
+  }
+}
+
+.properties-search {
   display: flex;
   align-items: stretch;
   flex-direction: row;
   width: 100%;
 
-  & input {
-    border: 0;
+  & input[type='text'] {
     border-radius: var(--border-radius) 0 0 var(--border-radius);
   }
 
@@ -13,9 +22,4 @@ form .properties-search {
     border: 0;
     border-radius: 0 var(--border-radius) var(--border-radius) 0;
   }
-}
-
-pre {
-  min-width: 100%;
-  overflow-x: auto;
 }

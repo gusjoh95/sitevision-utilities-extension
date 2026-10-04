@@ -1,36 +1,58 @@
-import {
-  assignJsonTheme,
-  getErrorMessage,
-  getOptions,
-  getRequiredElement,
-  highlightJson,
-  setOptions,
-} from '../../api/index.js';
+import { dom, errors, jsonRenderer, options, theme } from '../../api/index.js';
 
 document.addEventListener('DOMContentLoaded', async () => {
   /** @type {HTMLInputElement} */
-  const useSyntaxHighlighting = getRequiredElement('#use-syntax-highlighting');
+  const useSyntaxHighlighting = dom.getRequiredElement('#use-syntax-highlighting');
   /** @type {HTMLInputElement} */
-  const reloadOnChange = getRequiredElement('#reload-on-change');
+  const reloadOnChange = dom.getRequiredElement('#reload-on-change');
+  /** @type {HTMLTextAreaElement} */
+  const customLoginPaths = dom.getRequiredElement('#custom-login-paths');
   /** @type {HTMLPreElement} */
-  const properties = getRequiredElement('#properties');
+  const errorElem = dom.getRequiredElement('#error');
   /** @type {HTMLSelectElement} */
-  const dropdown = getRequiredElement('#theme-dropdown');
+  const dropdown = dom.getRequiredElement('#theme-dropdown');
+  /** @type {HTMLDetailsElement} */
+  const expandable = dom.getRequiredElement('#expandable');
   /** @type {HTMLButtonElement} */
-  const saveBtn = getRequiredElement('#save');
+  const saveBtn = dom.getRequiredElement('#save');
+  /** @type {HTMLButtonElement} */
+  const copyButtonTemplate = dom.getRequiredElement('#json-id-copy-template');
+  /** @type {HTMLPreElement} */
+  const preview = dom.getRequiredElement('.json-holder pre');
+
+  preview.addEventListener('click', (event) => {
+    if (!(event.target instanceof Element)) {
+      return;
+    }
+
+    const copyButton = event.target.closest('.json-id-copy[data-copy-id]');
+    if (copyButton instanceof HTMLButtonElement) {
+      const nodeId = copyButton.dataset.copyId;
+      if (nodeId) {
+        void navigator.clipboard.writeText(nodeId).catch((error) => {
+          console.error('Failed to copy node ID:', errors.messageOf(error));
+        });
+      }
+    }
+  });
 
   /** @type {HTMLLinkElement} */
-  const themeLink = getRequiredElement('#json-theme');
-  assignJsonTheme(themeLink);
+  const themeLink = dom.getRequiredElement('#json-theme');
+  theme.assignJsonTheme(themeLink);
 
   try {
-    const opts = await getOptions();
+    const opts = await options.getOptions();
     useSyntaxHighlighting.checked = Boolean(opts.useSyntaxHighlighting);
     reloadOnChange.checked = Boolean(opts.reloadOnChange);
+    customLoginPaths.value = opts.customLoginPaths.join('\n');
+
     const jsonTheme = opts?.jsonTheme || '';
     try {
-      const jsonUrl = chrome.runtime.getURL('resources/style/json-themes/themes.json');
+      const jsonUrl = browser.runtime.getURL('resources/style/json-themes/themes.json');
       const response = await fetch(jsonUrl);
+      if (!response.ok) {
+        throw new Error(`Failed to load themes: HTTP ${response.status} ${response.statusText}`);
+      }
       /** @type {{ file: string, name: string }[]} */
       const themes = await response.json();
 
@@ -48,47 +70,66 @@ document.addEventListener('DOMContentLoaded', async () => {
       themes.forEach(renderTheme);
     } catch (error) {
       console.error('Failed to load themes', error);
+      errorElem.textContent = errors.messageOf(error);
     }
     dropdown.addEventListener('change', () => {
       const selectedTheme = dropdown.value || 'default.css';
-      themeLink.href = chrome.runtime.getURL(`resources/style/json-themes/${selectedTheme}`);
+      themeLink.href = browser.runtime.getURL(`resources/style/json-themes/${selectedTheme}`);
+      expandable.open = true;
     });
 
     saveBtn.removeAttribute('disabled');
-  } catch {
-    properties.textContent = 'Failed to load options';
+  } catch (error) {
+    errorElem.textContent = errors.messageOf(error);
   }
 
   async function handleSave() {
     try {
+      const parsedPaths = customLoginPaths.value
+        .split(/[\n,]+/)
+        .map((p) => p.trim())
+        .filter(Boolean)
+        .map((p) => (p.startsWith('/') ? p : `/${p}`));
+
       const toStore = {
+        customLoginPaths: parsedPaths,
         useSyntaxHighlighting: Boolean(useSyntaxHighlighting?.checked),
         reloadOnChange: Boolean(reloadOnChange?.checked),
         jsonTheme: String(dropdown.value),
       };
       saveBtn.setAttribute('disabled', '');
-      await setOptions(toStore);
+      if (await options.setOptions(toStore)) {
+        window.close();
+      }
 
-      properties.textContent = JSON.stringify(toStore, null, 2);
+      errorElem.textContent = JSON.stringify(toStore, null, 2);
     } catch (error) {
-      const msg = getErrorMessage(error);
-      properties.textContent = msg;
+      const msg = errors.messageOf(error);
+      errorElem.textContent = msg;
     } finally {
       saveBtn.removeAttribute('disabled');
     }
   }
   saveBtn.addEventListener('click', handleSave);
 
-  /** @type {HTMLDetailsElement} */
-  const expandable = getRequiredElement('#expandable');
   expandable.addEventListener('toggle', async () => {
-    if (expandable.open) {
-      /** @type {HTMLPreElement} */
-      const preview = getRequiredElement('.json-holder pre');
-      if (!preview.hasChildNodes()) {
-        const dummyJson = await fetch(chrome.runtime.getURL('views/options/dummydata/dummy.json'));
-        preview.replaceChildren(highlightJson(await dummyJson.json()));
+    try {
+      if (expandable.open) {
+        if (!preview.hasChildNodes()) {
+          const dummyJson = await fetch(
+            browser.runtime.getURL('views/options/dummydata/dummy.json')
+          );
+          if (!dummyJson.ok) {
+            throw new Error(
+              `Failed to load preview: HTTP ${dummyJson.status} ${dummyJson.statusText}`
+            );
+          }
+          preview.replaceChildren(jsonRenderer.highlight(await dummyJson.json()));
+          dom.addNodeIdCopyButtons(preview, copyButtonTemplate);
+        }
       }
+    } catch (error) {
+      errorElem.textContent = errors.messageOf(error);
     }
   });
 });

@@ -1,0 +1,5 @@
+{
+  "_comment": "Ordered oldest-first. 'hotfixTarget' is optional: set it to 'chrome' or 'firefox' to hide a platform-specific hotfix release from the changelog nav on the other browser. Omit it for releases that apply to both.",
+  "releases": [{ "version": "1.0.0.0" }, { "version": "1.1.0.0" }]
+}
+

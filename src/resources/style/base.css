@@ -1,3 +1,5 @@
+/* 1. Variables & Design Tokens */
+
 :root {
   --color-black-dark: #0f1115;
   --color-black: #333;
@@ -5,6 +7,15 @@
   --color-white: #e6e6e6;
   --view-width: 320px;
   --border-radius: 8px;
+  --font-family: sans-serif;
+  --mono-font-family: monospace;
+  --base-font-size: 14px;
+  --base-line-height: 1.45;
+  --spacing-xs: 4px;
+  --spacing-sm: 6px;
+  --spacing-md: 8px;
+  --spacing-lg: 12px;
+  --spacing-xl: 16px;
 }
 
 @media (prefers-color-scheme: light) {
@@ -25,10 +36,29 @@
   }
 }
 
+/* 2. Reset & Base Styles */
+
 *,
 *::before,
 *::after {
   box-sizing: border-box;
+}
+
+html,
+body {
+  width: var(--view-width);
+  margin: 0;
+  font-family: var(--font-family);
+  font-size: var(--base-font-size);
+  line-height: var(--base-line-height);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+body {
+  padding: var(--spacing-md) 14px;
+  background-color: var(--bg-color);
+  color: var(--fg-color);
 }
 
 *:disabled,
@@ -37,25 +67,20 @@ label:has([disabled]) {
   cursor: not-allowed !important;
 }
 
-html,
-body {
-  width: var(--view-width);
-  margin: 0;
-  font-family:
-    system-ui,
-    -apple-system,
-    'Segoe UI',
-    Roboto,
-    'Helvetica Neue',
-    Arial;
-  line-height: 1.4;
+/* Global Focus States (Native element) */
+a,
+button,
+input,
+select,
+textarea,
+summary {
+  &:focus-visible {
+    outline: 2px solid var(--fg-color);
+    outline-offset: 2px;
+  }
 }
 
-body {
-  padding: 14px;
-  background-color: var(--bg-color);
-  color: var(--fg-color);
-}
+/* 3. Typography & Text Elements */
 
 h1 {
   margin: 0 0 8px;
@@ -66,13 +91,44 @@ h2 {
   margin: 20px 0 8px;
 }
 
+a {
+  color: var(--color-black-light);
+}
+
+p:empty {
+  display: none;
+}
+
+pre {
+  background-color: var(--bg-color-dark);
+  color: var(--fg-color-light);
+  font-family: var(--mono-font-family);
+  font-size: 0.8rem;
+  padding: var(--spacing-lg);
+  border-radius: var(--border-radius);
+  width: 100%;
+  overflow-x: auto;
+  margin: 0 0 6px;
+
+  &:empty {
+    display: none;
+  }
+}
+
+summary {
+  width: max-content;
+  cursor: pointer;
+}
+
+/* 4. Form Controls & Inputs */
+
 form {
   align-items: start;
   display: flex;
   flex-direction: column;
 
   & fieldset {
-    margin: 4px 0;
+    margin: 0 0 var(--spacing-xs);
     padding: 0;
     border-radius: 0;
     display: flex;
@@ -81,13 +137,13 @@ form {
     border: 0;
 
     & label {
-      padding: 0 6px;
+      padding: 0 var(--spacing-sm);
     }
   }
 
   & input[type='text'] {
-    margin: 4px 0;
-    padding: 10px 12px;
+    margin: var(--spacing-xs) 0;
+    padding: 10px var(--spacing-lg);
     width: 100%;
     border: 1px solid var(--fg-color);
     border-radius: var(--border-radius);
@@ -99,78 +155,63 @@ legend {
   font-weight: 600;
 }
 
-button,
-input[type='checkbox'],
-input[type='radio'] {
-  margin: 4px 0;
-  padding: 0;
-}
-
-button {
-  padding: 8px 10px;
-  border: 1px solid var(--fg-color);
-  cursor: pointer;
-  font-weight: 600;
-  font-size: 0.95rem;
-  transition:
-    transform 0.08s ease,
-    box-shadow 0.12s ease;
-  background-color: var(--fg-color);
-  color: var(--bg-color);
-}
-
 label {
-  font-size: 0.95rem;
+  font-size: 1rem;
   display: flex;
   flex-direction: row;
-  gap: 8px;
+  gap: var(--spacing-xs);
   align-items: center;
   cursor: pointer;
   max-width: fit-content;
-}
 
-select {
-  padding: 4px;
-}
-
-button,
-input[type='text'],
-select {
-  border-radius: var(--border-radius);
-}
-
-button,
-input,
-select,
-summary {
-  &:focus-visible {
-    outline: 2px solid var(--fg-color);
-    outline-offset: 2px;
+  &:has(textarea) {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+    max-width: unset;
+    pointer-events: none; /* Disable clicks on empty layout space */
+    & > span,
+    & > textarea {
+      pointer-events: auto; /* Re-enable clicks strictly on text and textarea */
+    }
   }
 }
 
 input[type='checkbox'],
 input[type='radio'] {
-  width: 16px;
-  height: 16px;
+  padding: 0;
   margin: 0;
   cursor: pointer;
+  height: 1rem;
+  width: 1rem;
 }
 
-.bordered-container {
-  border: 1px solid var(--fg-color);
+select {
+  padding: 4px;
   border-radius: var(--border-radius);
-  padding: 8px;
 }
 
-pre {
-  background-color: var(--bg-color-dark);
-  color: var(--fg-color-light);
-  padding: 12px;
-  border-radius: var(--border-radius);
+textarea {
+  width: 100%;
+}
 
-  &:empty {
-    display: none;
+/* 5. Structural Layout & Utilities */
+
+[id$='-wrapper'] {
+  padding: var(--spacing-md) 0 var(--spacing-md);
+
+  & h2,
+  & h3,
+  & p {
+    margin: 0 0 var(--spacing-sm);
+  }
+
+  & > div {
+    margin: var(--spacing-sm) 0;
+  }
+
+  & ~ [id$='-wrapper'] {
+    border-top: 1px solid var(--fg-color);
   }
 }
 
@@ -178,7 +219,180 @@ pre {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  gap: 8px;
+  gap: var(--spacing-md);
+}
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+.bordered-container {
+  border: 1px solid var(--fg-color);
+  border-radius: var(--border-radius);
+  padding: var(--spacing-md);
+}
+
+/* 6. Components & Interactive UI */
+
+/* All styles for buttons are strictly consolidated here */
+button {
+  margin: var(--spacing-xs) 0;
+  padding: var(--spacing-md) 10px;
+  border: 1px solid var(--fg-color);
+  border-radius: var(--border-radius);
+  background-color: var(--fg-color);
+  color: var(--bg-color);
+  font-weight: 600;
+  font-size: 1rem;
+  cursor: pointer;
+  transition:
+    transform 0.08s ease,
+    box-shadow 0.12s ease;
+}
+
+div.button-collection {
+  display: flex;
+  gap: var(--spacing-md);
+  flex-direction: row;
+
+  button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+
+    .icon {
+      width: var(--icon-size, 1rem);
+      height: var(--icon-size, 1rem);
+      display: block;
+    }
+
+    &.active {
+      background-color: var(--bg-color-dark);
+      color: var(--fg-color-light);
+      border-color: var(--fg-color-light);
+    }
+
+    &:active:not(:disabled) {
+      box-shadow: inset 0 2px 4px 0 rgba(0, 0, 0, 0.2);
+    }
+  }
+}
+
+.json-holder pre {
+  line-height: 1.25;
+
+  :is(.json-id, .json-id-copy):focus-visible {
+    position: relative;
+    z-index: 1;
+    outline: 2px solid var(--json-fg);
+    outline-offset: 2px;
+    box-shadow: 0 0 0 4px var(--json-bg);
+  }
+
+  &.wrap {
+    white-space: pre-wrap;
+    word-break: break-word;
+  }
+}
+
+.json-id-copy {
+  display: none;
+}
+
+pre .json-id-copy {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: var(--icon-size, 1rem);
+  height: 1em;
+  margin: 0 0 0 0.25em;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  vertical-align: middle;
+  cursor: pointer;
+  user-select: none;
+
+  .icon {
+    display: block;
+    width: 0.85em;
+    height: 0.85em;
+  }
+}
+
+[data-tooltip] {
+  anchor-name: --tooltip-anchor;
+  anchor-scope: --tooltip-anchor;
+
+  &::before {
+    content: attr(data-tooltip);
+  }
+
+  &:is([data-tooltip='']) {
+    &::before {
+      content: attr(aria-label);
+    }
+  }
+
+  &::before {
+    position: fixed;
+    position-anchor: --tooltip-anchor;
+    position-area: top;
+    position-try-fallbacks: flip-block, flip-inline;
+    margin-bottom: var(--spacing-sm);
+
+    background-color: var(--bg-color-dark);
+    color: var(--fg-color-light);
+    font-size: 0.875rem;
+    padding: 0.25rem 0.5rem;
+    border-radius: calc(var(--border-radius) / 2);
+    pointer-events: none;
+    z-index: 1000;
+
+    opacity: 0;
+    visibility: hidden;
+    transition-delay: 0.15s;
+  }
+
+  &:hover::before,
+  &:focus-visible::before,
+  &:has(> :is(input, textarea):focus-visible)::before {
+    opacity: 1;
+    visibility: visible;
+    transition-delay: 0.4s;
+  }
+
+  &:not([data-tooltip]):not([aria-label]),
+  &:not(:has(::before)) {
+    outline: 3px solid red;
+    outline-offset: 2px;
+  }
+
+  &:is(label) span::after {
+    content: '?';
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 1.125rem;
+    height: 1.125rem;
+    border: 1px solid var(--fg-color-light);
+    border-radius: 50%;
+    background-color: var(--bg-color-dark);
+    color: var(--fg-color-light);
+    font-size: 0.75rem;
+    margin-left: var(--spacing-xs);
+    flex-shrink: 0;
+    vertical-align: baseline;
+  }
 }
 
 #error {
@@ -190,67 +404,36 @@ pre {
   }
 }
 
-[id$='-wrapper'] {
-  padding: 6px 0 12px;
+#spinner.bar {
+  width: 100%;
+  height: var(--spacing-xs);
+  background-color: var(--bg-color-dark);
+  position: relative;
+  overflow: hidden;
+  transition: opacity 0.2s ease-in-out;
 
-  & h2 {
-    margin: 6px 0;
+  &::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, var(--fg-color-light), transparent);
+    animation: spinner-loading 1.5s infinite linear;
   }
 
-  & > div {
-    margin: 6px 0 0;
-  }
-
-  & ~ [id$='-wrapper'] {
-    border-top: 1px solid var(--fg-color);
+  &.hidden {
+    opacity: 0;
+    pointer-events: none;
   }
 }
 
-/* Custom tooltips */
-.tooltipped {
-  display: inline-flex;
-
-  /* 1. Define anchor on parent */
-  anchor-name: --tooltip-anchor;
-  /* Scope, multiple tooltips should not interfere */
-  anchor-scope: --tooltip-anchor;
-
-  &::after {
-    content: attr(aria-label, attr(data-tooltip));
-
-    /* 2. Position fixed relative to viewport anchor */
-    position: fixed;
-    position-anchor: --tooltip-anchor;
-    position-area: top;
-
-    /* 3. Automatic viewport collision handling (Y-axis: flip-block, X-axis: flip-inline) */
-    position-try-fallbacks: flip-block, flip-inline;
-    margin-bottom: 6px;
-
-    background-color: var(--bg-color-dark);
-    color: var(--fg-color-light);
-    font-size: 0.75rem;
-    padding: 0.25rem 0.5rem;
-    border-radius: calc(var(--border-radius) / 2);
-    white-space: nowrap;
-    pointer-events: none;
-    z-index: 1000;
-
-    opacity: 0;
-    visibility: hidden;
-
-    /* Reset delay on hide */
-    transition-delay: 0.15s;
+@keyframes spinner-loading {
+  0% {
+    left: -100%;
   }
-
-  &:hover::after,
-  &:focus-visible::after {
-    opacity: 1;
-    visibility: visible;
-    transition-delay: 0.4s;
-  }
-
-  &:not([aria-label]):not([data-tooltip]) {
-    outline: 2px dashed red;
+  100% {
+    left: 100%;
   }
 }

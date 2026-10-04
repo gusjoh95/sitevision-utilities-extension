@@ -1,6 +1,8 @@
 {
   "files.eol": "\n",
   "files.insertFinalNewline": true,
+  "js/ts.preferences.importModuleSpecifier": "shortest",
+  "js/ts.preferences.importModuleSpecifierEnding": "js",
   "js/ts.tsserver.experimental.enableProjectDiagnostics": true,
   "editor.detectIndentation": false,
   "eslint.enable": true,

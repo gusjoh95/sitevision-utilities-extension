@@ -1,17 +1,27 @@
 import {
-  getErrorMessage,
-  getOption,
-  getRequiredElement,
-  highlightJson,
+  dom,
+  errors,
+  jsonRenderer,
+  options,
+  spinner,
+  targetPermissions,
+  targetTab,
 } from '../../../api/index.js';
 import { restApiPath } from '../properties.js';
-import { fetchFromTab } from './fetchFromTab.js';
 import { getCurrentState } from './getCurrentState.js';
 
-const useSyntaxHighlighting = await getOption('useSyntaxHighlighting');
+const useSyntaxHighlighting = await options.getOption('useSyntaxHighlighting');
 
 /** @type {HTMLPreElement} */
-const preElem = getRequiredElement('.json-holder pre');
+const preElem = dom.getRequiredElement('.json-holder pre');
+/** @type {HTMLButtonElement} */
+const copyButtonTemplate = dom.getRequiredElement('#json-id-copy-template');
+const errorElem = dom.getRequiredElement('#error');
+let currentPropertiesText = '';
+
+export function getCurrentPropertiesText() {
+  return currentPropertiesText;
+}
 
 if (useSyntaxHighlighting) {
   // Event Delegation: Set up click listener once on the parent container
@@ -19,37 +29,77 @@ if (useSyntaxHighlighting) {
     if (!(event.target instanceof Element)) {
       return;
     }
+
+    const copyButton = event.target.closest('.json-id-copy[data-copy-id]');
+    if (copyButton instanceof HTMLButtonElement) {
+      const nodeId = copyButton.dataset.copyId;
+      if (nodeId) {
+        void navigator.clipboard.writeText(nodeId).catch((error) => {
+          console.error('Failed to copy node ID:', errors.messageOf(error));
+        });
+      }
+      return;
+    }
+
     const target = event.target.closest('.json-id');
     if (target) {
       const nextNode = target.textContent.replace(/"/g, '');
-      navigateToNode(nextNode, null, 'push');
+      void navigateToNode(nextNode, null, 'push').catch((error) => {
+        currentPropertiesText = `Error: ${errors.messageOf(error)}`;
+        preElem.textContent = currentPropertiesText;
+      });
+    }
+  });
+
+  preElem.addEventListener('keydown', (event) => {
+    if (event.key !== 'Enter' || !(event.target instanceof Element)) {
+      return;
+    }
+
+    const target = /** @type {HTMLElement | null} */ (
+      event.target.closest('.json-id[role="link"]')
+    );
+    if (target) {
+      event.preventDefault();
+      target.click();
     }
   });
 }
 
 /**
  * @param {any} data
- * @param {{ origin: string, version: string, node: string }} state
+ * @param {{ origin: string, version: string, node: string, anchorTabId: string }} state
  */
 export function renderUI(data, state) {
   document.title = `${state.origin}${restApiPath}/${state.version}/${state.node}/properties`;
 
   if (!data) {
-    preElem.textContent = 'Error: No data available to render';
+    currentPropertiesText = 'Error: No data available to render';
+    preElem.textContent = currentPropertiesText;
     return;
   }
 
   if (data.error) {
-    preElem.textContent = `Error: ${data.message}`;
+    currentPropertiesText = `${data.error}: ${data.message}`;
+    preElem.textContent = currentPropertiesText;
     return;
   }
+
+  errorElem.textContent = '';
+  currentPropertiesText = JSON.stringify(data, null, 2) ?? '';
 
   if (!useSyntaxHighlighting) {
-    preElem.textContent = JSON.stringify(data, null, 2);
+    preElem.textContent = currentPropertiesText;
     return;
   }
 
-  preElem.replaceChildren(highlightJson(data));
+  preElem.replaceChildren(jsonRenderer.highlight(data));
+  const nodeIds = /** @type {NodeListOf<HTMLSpanElement>} */ (preElem.querySelectorAll('.json-id'));
+  for (const nodeId of nodeIds) {
+    nodeId.setAttribute('role', 'link');
+    nodeId.tabIndex = 0;
+  }
+  dom.addNodeIdCopyButtons(preElem, copyButtonTemplate);
 }
 
 /**
@@ -65,21 +115,44 @@ export async function navigateToNode(nextNode, cachedData = null, historyAction 
   const newUrlString = `${window.location.pathname}?${params.toString()}`;
 
   let data = cachedData;
+  const previousPreContent = preElem.cloneNode(true);
+  const previousPropertiesText = currentPropertiesText;
 
   if (!data) {
-    preElem.textContent = 'Loading...';
     try {
-      data = await fetchFromTab(state);
+      await targetPermissions.assertTargetTabAccessible(Number(state.anchorTabId), state.origin);
+      preElem.textContent = 'Loading...';
+      currentPropertiesText = 'Loading...';
+      const url = new URL(
+        `${restApiPath}/${state.version}/${state.node}/properties`,
+        state.origin
+      ).toString();
+      const res = await spinner.withDeferredSpinner(
+        () => targetTab.fetch(Number(state.anchorTabId), url, { responseType: 'json' }),
+        {
+          spinnerEl: dom.getRequiredElement('#spinner'),
+          delayMs: 250,
+        }
+      );
+
+      if (!res.ok) {
+        const payload = res.data
+          ? JSON.stringify(res.data)
+          : `HTTP ${res.status} ${res.statusText}`;
+        throw new Error(payload);
+      }
+
+      data = res.data;
     } catch (error) {
-      const msg = getErrorMessage(error);
+      const msg = errors.messageOf(error);
+      const targetAccessErrorMessage = targetPermissions.getTargetAccessErrorMessage(msg);
       let errorData;
 
-      if (msg.includes('No tab with id') || msg.includes('is not a valid tab ID')) {
-        errorData = {
-          error: 'Tab Disconnected',
-          message:
-            'The original website tab was closed. Please open this view again from an active page.',
-        };
+      if (targetAccessErrorMessage) {
+        preElem.replaceChildren(...previousPreContent.childNodes);
+        currentPropertiesText = previousPropertiesText;
+        errorElem.textContent = `Warning: ${targetAccessErrorMessage}`;
+        return;
       } else {
         // Safely check if the thrown error message is a JSON payload from the API
         try {

@@ -1,21 +1,22 @@
-import { getErrorMessage, getOption, getRequiredElement, setOptions } from '../../../api/index.js';
+import { dom, errors, options } from '../../../api/index.js';
 
 /**
  * Initializes the properties-page control buttons.
+ * @param {() => string} getPropertiesText
  */
-export async function initButtons() {
+export async function initButtons(getPropertiesText) {
   /** @type {HTMLPreElement} */
-  const preElem = getRequiredElement('.json-holder pre');
+  const preElem = dom.getRequiredElement('.json-holder pre');
   /** @type {HTMLButtonElement} */
-  const backBtn = getRequiredElement('#back');
+  const backBtn = dom.getRequiredElement('#back');
   /** @type {HTMLButtonElement} */
-  const forwardBtn = getRequiredElement('#forward');
+  const forwardBtn = dom.getRequiredElement('#forward');
   /** @type {HTMLButtonElement} */
-  const copyBtn = getRequiredElement('#copy');
+  const copyBtn = dom.getRequiredElement('#copy');
   /** @type {HTMLButtonElement} */
-  const wrapBtn = getRequiredElement('#wrap');
+  const wrapBtn = dom.getRequiredElement('#wrap');
 
-  const propertiesWordWrap = await getOption('propertiesWordWrap');
+  const propertiesWordWrap = await options.getOption('propertiesWordWrap');
 
   /**
    * Applies the word-wrap state to the rendered JSON area and the wrap button.
@@ -53,16 +54,10 @@ export async function initButtons() {
 
   copyBtn.addEventListener('click', async () => {
     try {
-      const text = preElem.textContent ?? '';
+      const text = getPropertiesText();
       await navigator.clipboard.writeText(text);
-      copyBtn.classList.add('copied');
-      copyBtn.title = 'Copied';
-      setTimeout(() => {
-        copyBtn.classList.remove('copied');
-        copyBtn.title = 'Copy properties to clipboard';
-      }, 1200);
     } catch (error) {
-      const msg = getErrorMessage(error);
+      const msg = errors.messageOf(error);
       console.error('Failed to copy properties:', msg);
     }
   });
@@ -72,9 +67,9 @@ export async function initButtons() {
     applyWrapState(isActive);
 
     try {
-      await setOptions({ propertiesWordWrap: isActive });
+      await options.setOptions({ propertiesWordWrap: isActive });
     } catch (error) {
-      const msg = getErrorMessage(error);
+      const msg = errors.messageOf(error);
       console.error('Failed to save propertiesWordWrap option:', msg);
       applyWrapState(!isActive);
     }

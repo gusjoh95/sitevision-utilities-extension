@@ -1,32 +1,42 @@
-import { assignJsonTheme, getRequiredElement } from '../../../api/index.js';
+import { dom, errors, targetPermissions, theme } from '../../../api/index.js';
 import { initButtons } from './initButtons.js';
 import { getCurrentState } from './getCurrentState.js';
-import { navigateToNode, renderUI } from './renderUI.js';
+import { getCurrentPropertiesText, navigateToNode, renderUI } from './renderUI.js';
 
 // Handle Browser Back / Forward buttons instantly using the history payload
 window.addEventListener('popstate', (event) => {
-  if (event.state && event.state.cachedData) {
-    navigateToNode(event.state.node, event.state.cachedData, 'none');
-  } else {
-    const state = getCurrentState();
-    navigateToNode(state.node, null, 'replace');
-  }
+  void (
+    event.state && event.state.cachedData
+      ? navigateToNode(event.state.node, event.state.cachedData, 'none')
+      : navigateToNode(getCurrentState().node, null, 'replace')
+  ).catch((error) => {
+    dom.getRequiredElement('.json-holder pre').textContent = `Error: ${errors.messageOf(error)}`;
+  });
 });
 
 // Entrypoint
 export async function initPropertiesView() {
   const state = getCurrentState();
   /** @type {HTMLLinkElement} */
-  const jsonLinkElement = getRequiredElement('#json-theme');
-  assignJsonTheme(jsonLinkElement);
+  const jsonLinkElement = dom.getRequiredElement('#json-theme');
+  theme.assignJsonTheme(jsonLinkElement);
 
   /** @type {HTMLPreElement} */
-  const preElement = getRequiredElement('.json-holder pre');
+  const preElement = dom.getRequiredElement('.json-holder pre');
+  const errorElement = dom.getRequiredElement('#error');
 
-  if (!state.origin || !state.node) {
-    preElement.textContent = 'Error: Missing required URL parameters (origin/node).';
+  if (!state.origin || !state.node || !state.anchorTabId) {
+    preElement.textContent = 'Error: Missing required URL parameters (origin/node/anchorTabId).';
     return;
   }
+
+  targetPermissions.registerTargetPermissionListener({
+    tabId: Number(state.anchorTabId),
+    origin: state.origin,
+    onLost: ({ message }) => {
+      errorElement.textContent = `Warning: ${message}`;
+    },
+  });
 
   // Ensure initial history state has an index tracker
   if (!window.history.state || typeof window.history.state.index !== 'number') {
@@ -35,13 +45,13 @@ export async function initPropertiesView() {
     sessionStorage.setItem('maxHistoryIndex', '0');
   }
 
-  await initButtons();
+  await initButtons(getCurrentPropertiesText);
 
   const useCacheOnReload = false;
 
   if (useCacheOnReload && window.history.state && window.history.state.cachedData) {
     renderUI(window.history.state.cachedData, state);
   } else {
-    navigateToNode(state.node, null, 'replace');
+    await navigateToNode(state.node, null, 'replace');
   }
 }

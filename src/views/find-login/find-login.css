@@ -1,0 +1,13 @@
+html,
+body {
+  width: unset;
+}
+
+#status-wrapper {
+  span,
+  a {
+    &:empty {
+      display: none;
+    }
+  }
+}

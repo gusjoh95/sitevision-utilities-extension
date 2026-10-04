@@ -3,6 +3,8 @@ const DEFAULT_OPTIONS = {
   reloadOnChange: true,
   propertiesWordWrap: false, // TODO: Easily accessed/changed through GUI, should be stored in unsynced settings
   jsonTheme: '',
+  /** @type {string[]} */
+  customLoginPaths: [],
 };
 
 /**
@@ -14,7 +16,7 @@ const DEFAULT_OPTIONS = {
  * Retrieves a single option value by key.
  *
  * @template {OptionKey} K
- * @param {K} key - The option key to retrieve ('useSyntaxHighlighting' | 'reloadOnChange' | 'propertiesWordWrap' | 'jsonTheme').
+ * @param {K} key - The option key to retrieve.
  * @returns {Promise<Options[K]>} A promise that resolves to the value of the specified option key.
  * @throws {TypeError} Throws synchronously if an invalid key is provided.
  */
@@ -26,8 +28,8 @@ export async function getOption(key) {
   }
 
   const defaultValue = DEFAULT_OPTIONS[key];
-  const items = await chrome.storage.sync.get({ [key]: defaultValue });
-  return items[key];
+  const items = await browser.storage.sync.get({ [key]: defaultValue });
+  return /** @type {Options[K]} */ (items[key]);
 }
 
 /**
@@ -36,13 +38,14 @@ export async function getOption(key) {
  * @returns {Promise<Options>} A promise that resolves to the full options object.
  */
 export async function getOptions() {
-  const items = await chrome.storage.sync.get(DEFAULT_OPTIONS);
+  const items = await browser.storage.sync.get(DEFAULT_OPTIONS);
 
   return {
     useSyntaxHighlighting: Boolean(items?.useSyntaxHighlighting),
     reloadOnChange: Boolean(items?.reloadOnChange),
     propertiesWordWrap: Boolean(items?.propertiesWordWrap),
     jsonTheme: String(items?.jsonTheme ?? DEFAULT_OPTIONS.jsonTheme),
+    customLoginPaths: Array.isArray(items?.customLoginPaths) ? items.customLoginPaths : [],
   };
 }
 
@@ -66,7 +69,6 @@ export async function setOptions(options = {}) {
     throw new Error('Invalid option key(s): ' + invalid.join(', '));
   }
 
-  // Only store the provided keys (do not write defaults)
-  await chrome.storage.sync.set(options);
+  await browser.storage.sync.set(options);
   return true;
 }
