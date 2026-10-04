@@ -5,7 +5,7 @@ All notable changes to the **Sitevision Utilities Extension** project will be do
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).  
 For details on the 4-digit versioning strategy (`MAJOR.MINOR.PATCH.HOTFIX`), see the [Versioning section in README.md](README.md#versioning).
 
-## [Unreleased]
+## [2026-10-01]
 
 ### Added
 
@@ -51,8 +51,6 @@ For details on the 4-digit versioning strategy (`MAJOR.MINOR.PATCH.HOTFIX`), see
 - Fix tab reload after parameter updates on 404 pages ([#1](https://github.com/gusjoh95/sitevision-utilities-extension/issues/1)).
 - The session state when populating the checkboxes is no longer evaluated in edit-mode either (the checkboxes are kept disabled). ([#2](https://github.com/gusjoh95/sitevision-utilities-extension/issues/2)).
 - Remove fixed layout width in options page and refine input element styling ([#3](https://github.com/gusjoh95/sitevision-utilities-extension/issues/3)).
-
-### Security
 
 ## [1.0.0.0] - 2026-09-02
 
