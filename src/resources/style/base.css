@@ -1,3 +1,5 @@
+@import url('./icons.css');
+
 /* 1. Variables & Design Tokens */
 
 :root {
@@ -256,6 +258,13 @@ button {
   transition:
     transform 0.08s ease,
     box-shadow 0.12s ease;
+}
+
+.icon,
+.icon-button::before {
+  display: inline-block;
+  width: var(--icon-size, 1rem);
+  height: var(--icon-size, 1rem);
 }
 
 div.button-collection {

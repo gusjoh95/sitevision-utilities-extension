@@ -2,7 +2,9 @@
 
 Thanks for your interest in improving this project!
 
-This project is licensed under the **GNU General Public License v3.0 (GPL-3)**. Contributions are welcome, and by submitting changes you agree that your work will be distributed under the same terms. See [COPYING](COPYING) for the full license text.
+The project's own code is licensed under the **GNU General Public License v3.0 (GPL-3)**; see [COPYING](COPYING). Third-party assets retain their respective licenses. For example, the Bootstrap Icons in `src/resources/icons/bootstrap/` are MIT-licensed and include their own license notice.
+
+Contributions are welcome. By submitting original contributions, you agree that they will be distributed under GPL-3.
 
 For the project overview, see [README.md](README.md).
 

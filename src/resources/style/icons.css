@@ -1,0 +1,45 @@
+.icon,
+.icon-button::before {
+  background-color: currentColor;
+  mask: var(--icon-source) center / contain no-repeat;
+}
+
+.icon-button::before {
+  content: '';
+}
+
+.icon--arrow-left {
+  --icon-source: url('../icons/bootstrap/arrow-left.svg');
+}
+
+.icon--arrow-repeat {
+  --icon-source: url('../icons/bootstrap/arrow-repeat.svg');
+}
+
+.icon--arrow-right {
+  --icon-source: url('../icons/bootstrap/arrow-right.svg');
+}
+
+.icon--crosshair {
+  --icon-source: url('../icons/bootstrap/crosshair.svg');
+}
+
+.icon--copy {
+  --icon-source: url('../icons/bootstrap/copy.svg');
+}
+
+.icon--gear {
+  --icon-source: url('../icons/bootstrap/gear.svg');
+}
+
+.icon--github {
+  --icon-source: url('../icons/bootstrap/github.svg');
+}
+
+.icon--search {
+  --icon-source: url('../icons/bootstrap/search.svg');
+}
+
+.icon--text-wrap {
+  --icon-source: url('../icons/bootstrap/text-wrap.svg');
+}

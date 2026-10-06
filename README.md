@@ -183,3 +183,7 @@ X . X . X . X
 │   └────────── Minor (new feature)
 └────────────── Major (breaking change or complete overhaul)
 ```
+
+## Licensing
+
+The project's own code is licensed under GNU GPL v3; see [COPYING](COPYING). Third-party assets retain their respective licenses. The Bootstrap Icons SVGs in [src/resources/icons/bootstrap](src/resources/icons/bootstrap/) are MIT-licensed; see their [license](src/resources/icons/bootstrap/LICENSE) and [directory notes](src/resources/icons/bootstrap/README.md).
