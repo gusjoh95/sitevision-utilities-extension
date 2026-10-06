@@ -61,9 +61,19 @@ async function renderVersion(contentEl, version) {
 async function initChangelogView() {
   /** @type {HTMLDivElement} */
   const contentEl = dom.getRequiredElement('#content');
+  const searchParams = new URLSearchParams(window.location.search);
+  const backButton = document.getElementById('back-button');
+  if (
+    backButton instanceof HTMLButtonElement &&
+    searchParams.get('returnTo') === 'options' &&
+    window.history.length > 1
+  ) {
+    backButton.hidden = false;
+    backButton.addEventListener('click', () => window.history.back());
+  }
+
   const { version: currentVersion } = browser.runtime.getManifest();
-  const initialVersion =
-    new URLSearchParams(window.location.search).get('version') || currentVersion;
+  const initialVersion = searchParams.get('version') || currentVersion;
 
   await renderVersion(contentEl, initialVersion);
 

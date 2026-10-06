@@ -5,6 +5,25 @@ body {
   margin: 0 auto;
 }
 
+#back-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 2rem;
+  height: 2rem;
+  margin: 0 0 0 auto;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: var(--fg-color);
+  font-size: 1.5rem;
+  line-height: 1;
+}
+
+#back-button[hidden] {
+  display: none;
+}
+
 #content {
   h1 {
     border-bottom: 1px solid var(--bg-color-dark);

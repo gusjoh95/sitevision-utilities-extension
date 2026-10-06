@@ -6,3 +6,15 @@
 #options-form {
   display: block;
 }
+
+#footer-wrapper {
+  display: flex;
+  justify-content: space-between;
+  width: 100%;
+  padding-inline: var(--spacing-md);
+  background-color: var(--bg-color-dark);
+}
+
+#footer-wrapper a {
+  color: var(--fg-color);
+}

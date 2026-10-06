@@ -132,4 +132,24 @@ document.addEventListener('DOMContentLoaded', async () => {
       errorElem.textContent = errors.messageOf(error);
     }
   });
+
+  try {
+    const releaseNotesLink = dom.getRequiredElement('#release-notes-link');
+    const version = browser.runtime.getManifest().version;
+
+    if (
+      releaseNotesLink instanceof HTMLAnchorElement &&
+      typeof version === 'string' &&
+      version.length > 0
+    ) {
+      const changelogUrl = new URL(browser.runtime.getURL('views/changelog/changelog.html'));
+      changelogUrl.searchParams.set('version', version);
+      changelogUrl.searchParams.set('returnTo', 'options');
+      releaseNotesLink.href = changelogUrl.href;
+      releaseNotesLink.textContent = version;
+      releaseNotesLink.hidden = false;
+    }
+  } catch (error) {
+    console.warn('Failed to initialize release notes link:', error);
+  }
 });
