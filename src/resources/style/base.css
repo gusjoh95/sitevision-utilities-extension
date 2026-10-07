@@ -260,6 +260,12 @@ button {
     box-shadow 0.12s ease;
 }
 
+button:active:not(:disabled) {
+  background-color: var(--bg-color-dark);
+  color: var(--fg-color-light);
+  border-color: var(--fg-color-light);
+}
+
 .icon,
 .icon-button::before {
   display: inline-block;
@@ -287,10 +293,6 @@ div.button-collection {
       background-color: var(--bg-color-dark);
       color: var(--fg-color-light);
       border-color: var(--fg-color-light);
-    }
-
-    &:active:not(:disabled) {
-      box-shadow: inset 0 2px 4px 0 rgba(0, 0, 0, 0.2);
     }
   }
 }
@@ -326,16 +328,21 @@ pre .json-id-copy {
   padding: 0;
   border: 0;
   background: transparent;
-  color: inherit;
+  color: var(--json-fg);
   vertical-align: middle;
   cursor: pointer;
   user-select: none;
 
   .icon {
     display: block;
-    width: 0.85em;
-    height: 0.85em;
+    width: 0.7em;
+    height: 0.7em;
   }
+}
+
+pre .json-id-copy:active:not(:disabled) {
+  background-color: var(--json-fg);
+  color: var(--json-bg);
 }
 
 [data-tooltip] {
