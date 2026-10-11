@@ -1,22 +1,37 @@
-/**
- * Node types requested from the REST API when listing a node's children during reindex.
- * Extend this list as more content types need to be reachable during traversal.
- *
- * @type {string[]}
- */
+/** @type {string[]} */
 export const TRAVERSABLE_NODE_TYPES = [
   'sv:site',
   'sv:sitePage',
   'sv:page',
+  'sv:structurePage',
+  'sv:collaborationGroupPage',
   'sv:archive',
   'sv:article',
   'sv:folder',
+  'sv:imageRepository',
+  'sv:fileRepository',
 ];
 
 /**
- * Node types that can actually be reindexed. sv:archive and sv:folder are pure containers -
- * they must be traversed to reach their children, but reindexNode can't be called on them.
+ * Node types that can actually be reindexed. Container and repository types are traversal-only.
  *
  * @type {string[]}
  */
-export const INDEXABLE_NODE_TYPES = ['sv:sitePage', 'sv:page', 'sv:article'];
+export const INDEXABLE_NODE_TYPES = [
+  'sv:sitePage',
+  'sv:page',
+  'sv:structurePage',
+  'sv:collaborationGroupPage',
+  'sv:article',
+  'sv:image',
+  'sv:file',
+];
+
+/**
+ * Node types requested from the REST API when listing a node's children.
+ *
+ * @type {string[]}
+ */
+export const DISCOVERABLE_NODE_TYPES = [
+  ...new Set([...TRAVERSABLE_NODE_TYPES, ...INDEXABLE_NODE_TYPES]),
+];

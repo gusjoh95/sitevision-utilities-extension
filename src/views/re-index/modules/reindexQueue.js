@@ -1,6 +1,10 @@
 import { reindexSingleNode } from './editApi.js';
 import { fetchRestSubNodes } from './restApi.js';
-import { INDEXABLE_NODE_TYPES, TRAVERSABLE_NODE_TYPES } from './nodeTypes.js';
+import {
+  DISCOVERABLE_NODE_TYPES,
+  INDEXABLE_NODE_TYPES,
+  TRAVERSABLE_NODE_TYPES,
+} from './nodeTypes.js';
 import { setStatus } from './status.js';
 import { walkNodeTree } from './treeWalker.js';
 
@@ -16,7 +20,7 @@ let isCancelled = false;
  * exact list the user was shown instead of re-walking the tree. Invalidated after being consumed
  * once, and whenever a preview is cancelled.
  *
- * @type {{ tabId: number, origin: string, rootNodeId: string, includeRobotsIndexFalse: boolean, nodes: DiscoveredNode[] } | null}
+ * @type {{ tabId: number, origin: string, rootNodeId: string, nodes: DiscoveredNode[], logger: import('../../../api/types.js').Logger } | null}
  */
 let cachedPreview = null;
 
@@ -74,7 +78,7 @@ export function cancelReindex() {
  */
 
 /**
- * Fetches a node's children (restricted to `TRAVERSABLE_NODE_TYPES`) as `{ id, type, displayName, robotsIndex }`.
+ * Fetches a node's children (restricted to `DISCOVERABLE_NODE_TYPES`) as `{ id, type, displayName, robotsIndex }`.
  *
  * @param {number} tabId - ID of the tab in which the request runs.
  * @param {string} origin - Sitevision origin.
@@ -84,7 +88,7 @@ export function cancelReindex() {
  */
 async function getChildNodes(tabId, origin, nodeId, waitBeforeApiCall) {
   if (!(await waitBeforeApiCall())) return null;
-  const subNodes = await fetchRestSubNodes(tabId, origin, nodeId, TRAVERSABLE_NODE_TYPES);
+  const subNodes = await fetchRestSubNodes(tabId, origin, nodeId, DISCOVERABLE_NODE_TYPES);
   return subNodes.map(normalizeNode);
 }
 
@@ -104,15 +108,50 @@ function normalizeNode(node) {
 }
 
 /**
- * Determines whether a node should actually be reindexed, as opposed to only traversed for
- * its children. Requires an indexable type and, unless overridden, `robotsIndex` not explicitly disabled.
- *
- * @param {{ type: string, robotsIndex: boolean }} node - Node to check.
- * @param {boolean} includeRobotsIndexFalse - Whether to override a false robotsIndex value.
- * @returns {boolean} True if `reindexSingleNode` should be called for this node.
+ * Determines why a discovered node will or will not be reindexed.
+ * @param {{ type: string, robotsIndex: boolean }} node
+ * @param {boolean} includeRobotsIndexFalse
+ * @returns {'index' | 'robotsIndex' | 'not-indexable'}
  */
-function isIndexable(node, includeRobotsIndexFalse = false) {
-  return INDEXABLE_NODE_TYPES.includes(node.type) && (node.robotsIndex || includeRobotsIndexFalse);
+function getIndexingDecision(node, includeRobotsIndexFalse = false) {
+  if (!INDEXABLE_NODE_TYPES.includes(node.type)) return 'not-indexable';
+  if (!node.robotsIndex && !includeRobotsIndexFalse) return 'robotsIndex';
+  return 'index';
+}
+
+/**
+ * Formats a one-line preview summary using the current robotsIndex option.
+ * @param {DiscoveredNode[]} nodes
+ * @param {boolean} includeRobotsIndexFalse
+ * @returns {string}
+ */
+function formatPreviewSummary(nodes, includeRobotsIndexFalse) {
+  const robotsIndexSkippedCount = nodes.filter(
+    (node) => getIndexingDecision(node, includeRobotsIndexFalse) === 'robotsIndex'
+  ).length;
+  const notIndexableCount = nodes.filter(
+    (node) => getIndexingDecision(node, includeRobotsIndexFalse) === 'not-indexable'
+  ).length;
+  const willReindexCount = nodes.length - robotsIndexSkippedCount - notIndexableCount;
+  const robotsIndexMode = includeRobotsIndexFalse
+    ? 'Including robotsIndex=false.'
+    : 'Respecting robotsIndex.';
+
+  return `${nodes.length} discovered; ${willReindexCount} to reindex; ${robotsIndexSkippedCount} skipped by robotsIndex=false; ${notIndexableCount} not indexable. ${robotsIndexMode}`;
+}
+
+/**
+ * Re-logs the cached preview summary after its robotsIndex option changes.
+ * @param {boolean} includeRobotsIndexFalse
+ * @returns {boolean} Whether a cached preview was available.
+ */
+export function updateCachedPreviewSummary(includeRobotsIndexFalse) {
+  if (!cachedPreview) return false;
+
+  const summary = formatPreviewSummary(cachedPreview.nodes, includeRobotsIndexFalse);
+  cachedPreview.logger.log('info', `Preview updated from cached discovery: ${summary}`);
+  setStatus('idle', `Preview: ${summary}`);
+  return true;
 }
 
 /**
@@ -136,10 +175,16 @@ async function maybeReindexNode(
   includeRobotsIndexFalse,
   waitBeforeReindexCall
 ) {
-  if (!isIndexable(node, includeRobotsIndexFalse)) {
+  const decision = getIndexingDecision(node, includeRobotsIndexFalse);
+  if (decision !== 'index') {
+    const reason =
+      decision === 'not-indexable' ? 'node type is not indexable' : 'robotsIndex=false';
+    const traversal = TRAVERSABLE_NODE_TYPES.includes(node.type)
+      ? 'traversing children...'
+      : 'not traversing children.';
     logger.log(
       'info',
-      `Skipping ${node.displayName} (${node.id}, ${node.type}), traversing children...`
+      `Not reindexing ${node.displayName} (${node.id}, ${node.type}): ${reason}; ${traversal}`
     );
     return false;
   }
@@ -157,10 +202,9 @@ async function maybeReindexNode(
  * If a completed preview for the same tab/origin/root is cached, that discovered node list is
  * replayed directly instead of re-walking the tree, so a user can trust that what they previewed
  * is exactly what gets reindexed. Sub nodes are otherwise listed via the REST API (online
- * version); reindexing itself still goes through the internal Edit API. Container types
- * (sv:archive, sv:folder) and nodes with `robotsIndex: false` are traversed for their children
- * but are never reindexed themselves. Nodes with `robotsIndex: false` are skipped unless the
- * caller enables the override.
+ * version); reindexing itself still goes through the internal Edit API. Traversable node types
+ * that are not indexable are visited to reach their children. Indexable nodes with
+ * `robotsIndex: false` are skipped unless the caller enables the override.
  *
  * @param {ReindexQueueParams} params - Traversal parameters.
  * @returns {Promise<void>} Resolves when the operation finishes or is cancelled.
@@ -185,8 +229,7 @@ export async function runReindexQueue({
   const preview =
     cachedPreview?.tabId === tabId &&
     cachedPreview?.origin === origin &&
-    cachedPreview?.rootNodeId === rootNodeId &&
-    cachedPreview?.includeRobotsIndexFalse === includeRobotsIndexFalse
+    cachedPreview?.rootNodeId === rootNodeId
       ? cachedPreview
       : null;
   cachedPreview = null;
@@ -236,6 +279,7 @@ export async function runReindexQueue({
     ({ reason } = await walkNodeTree({
       rootNode,
       getChildren: (nodeId) => getChildNodes(tabId, origin, nodeId, waitBeforeApiCall),
+      shouldTraverse: (node) => TRAVERSABLE_NODE_TYPES.includes(node.type),
       isCancelled: () => isCancelled,
       onNode: async (node) => {
         const wasIndexed = await maybeReindexNode(
@@ -311,28 +355,29 @@ export async function previewReindexQueue({
   const { reason } = await walkNodeTree({
     rootNode,
     getChildren: (nodeId) => getChildNodes(tabId, origin, nodeId, waitBeforeApiCall),
+    shouldTraverse: (node) => TRAVERSABLE_NODE_TYPES.includes(node.type),
     isCancelled: () => isCancelled,
     onNode: (node) => {
+      const decision = getIndexingDecision(node, includeRobotsIndexFalse);
+      const label =
+        decision === 'index'
+          ? '[index]'
+          : decision === 'robotsIndex'
+            ? '[robotsIndex=false]'
+            : '[not-indexable]';
       nodes.push(node);
-      logger.log(
-        'info',
-        `${isIndexable(node, includeRobotsIndexFalse) ? '[index]' : '[skip] '} ${node.displayName} (${node.id}, ${node.type})`
-      );
+      logger.log('info', `${label} ${node.displayName} (${node.id}, ${node.type})`);
     },
   });
-
-  const indexableCount = nodes.filter((node) => isIndexable(node, includeRobotsIndexFalse)).length;
 
   if (reason === 'cancelled') {
     logger.log('warn', 'Preview cancelled by user.');
     setStatus('warn', `Preview cancelled. Discovered ${nodes.length} nodes.`);
   } else if (reason === 'completed') {
-    cachedPreview = { tabId, origin, rootNodeId, includeRobotsIndexFalse, nodes };
-    logger.log(
-      'success',
-      `Preview complete: ${indexableCount} of ${nodes.length} discovered nodes would be reindexed.`
-    );
-    setStatus('idle', `Preview: ${indexableCount} of ${nodes.length} nodes would be reindexed.`);
+    cachedPreview = { tabId, origin, rootNodeId, nodes, logger };
+    const summary = formatPreviewSummary(nodes, includeRobotsIndexFalse);
+    logger.log('success', `Discovery complete: ${summary}`);
+    setStatus('idle', `Preview: ${summary}`);
   }
 
   return { nodes, reason };

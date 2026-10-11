@@ -19,7 +19,8 @@ const EDIT_PATH_REGEX = /^\/edit\/(\d{1,3}\.[a-fA-F0-9]+)(?:\/(.*))?$/;
  * @property {boolean} isEditMode - True if the URL pathname starts with /edit/.
  * @property {string|null} nodeId - The primary node ID if present immediately after /edit/.
  * @property {boolean} hasNodeId - Indicates whether a primary node ID was successfully extracted.
- * @property {'page'|'unknown'} viewType - 'page' if strictly on the main node path, otherwise 'unknown'.
+ * @property {string} viewType - The first path segment after the primary node ID, or 'page' when absent.
+ * @property {string|null} viewNodeId - The node ID immediately following the view type, if present.
  * @property {string|null} subPath - Any additional trailing path following the primary node ID.
  */
 
@@ -53,6 +54,7 @@ export function getEditInfo(tab) {
     nodeId: null,
     hasNodeId: false,
     viewType: 'unknown',
+    viewNodeId: null,
     subPath: null,
   };
 
@@ -76,13 +78,15 @@ export function getEditInfo(tab) {
       result.hasNodeId = true;
 
       const rawSubPath = match[2];
-
-      // Set viewType to 'page' ONLY if no trailing sub-path exists
-      if (rawSubPath && rawSubPath.trim() !== '') {
-        result.subPath = rawSubPath;
-        result.viewType = 'unknown';
-      } else {
+      if (!rawSubPath) {
         result.viewType = 'page';
+      } else {
+        result.subPath = rawSubPath;
+        result.viewType = rawSubPath.split('/')[0] || 'unknown';
+        const viewNodeMatch = rawSubPath.match(/^[^/]+\/(\d{1,3}\.[a-fA-F0-9]+)(?:\/|$)/);
+        if (viewNodeMatch) {
+          result.viewNodeId = viewNodeMatch[1];
+        }
       }
     }
 

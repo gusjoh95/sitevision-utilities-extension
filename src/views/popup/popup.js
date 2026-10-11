@@ -73,16 +73,14 @@ async function init() {
     ];
 
     if (sitevisionMode === 'online' || sitevisionMode === 'offline') {
-      if (context?.pageId) {
-        uiTasks.push(initReindex(invocationTab, context.pageId));
-      } else if (await editMode.isEdit(invocationTab)) {
-        // Added await: editMode.isEdit interacts with the tab and is asynchronous
-        const editInfo = await editMode.getEditInfo(invocationTab);
-        // Added await: Fetching edit info requires asynchronous execution in the target tab
+      const editInfo = editMode.isEdit(invocationTab) ? editMode.getEditInfo(invocationTab) : null;
+      const rootNodeId =
+        editInfo?.viewType === 'file' || editInfo?.viewType === 'image'
+          ? editInfo.viewNodeId
+          : context?.pageId || editInfo?.nodeId;
 
-        if (editInfo?.isEditMode && editInfo?.nodeId) {
-          uiTasks.push(initReindex(invocationTab, editInfo.nodeId));
-        }
+      if (rootNodeId) {
+        uiTasks.push(initReindex(invocationTab, rootNodeId));
       }
     }
 

@@ -4,6 +4,7 @@
  * @typedef {Object} TreeWalkerParams
  * @property {DiscoveredNode} rootNode - Root node to visit first.
  * @property {(nodeId: string) => Promise<DiscoveredNode[] | null>} getChildren - Resolves direct children, or null when cancelled.
+ * @property {(node: DiscoveredNode) => boolean} [shouldTraverse] - Whether to fetch a node's children.
  * @property {() => boolean} isCancelled - Checks whether traversal should stop.
  * @property {(node: DiscoveredNode) => Promise<void> | void} onNode - Handles each node in depth-first order.
  */
@@ -14,7 +15,13 @@
  * @param {TreeWalkerParams} params - Traversal callbacks and root node.
  * @returns {Promise<{ reason: 'completed' | 'cancelled' }>} Why the walk stopped.
  */
-export async function walkNodeTree({ rootNode, getChildren, isCancelled, onNode }) {
+export async function walkNodeTree({
+  rootNode,
+  getChildren,
+  shouldTraverse = () => true,
+  isCancelled,
+  onNode,
+}) {
   if (typeof rootNode.id !== 'string') {
     throw new Error('Root node is missing an ID.');
   }
@@ -22,6 +29,8 @@ export async function walkNodeTree({ rootNode, getChildren, isCancelled, onNode 
   const visited = new Set([rootNode.id]);
   await onNode(rootNode);
   if (isCancelled()) return { reason: 'cancelled' };
+
+  if (!shouldTraverse(rootNode)) return { reason: 'completed' };
 
   const rootChildren = await getChildren(rootNode.id);
   if (rootChildren === null || isCancelled()) return { reason: 'cancelled' };
@@ -44,6 +53,8 @@ export async function walkNodeTree({ rootNode, getChildren, isCancelled, onNode 
 
     await onNode(child);
     if (isCancelled()) return { reason: 'cancelled' };
+
+    if (!shouldTraverse(child)) continue;
 
     const children = await getChildren(child.id);
     if (children === null || isCancelled()) return { reason: 'cancelled' };

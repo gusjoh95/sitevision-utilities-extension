@@ -3,7 +3,11 @@ import { getCurrentState } from './modules/getCurrentState.js'; // Getting param
 import { runReindex, previewReindex, cancelReindex } from './modules/runReindex.js';
 import { fetchNodeProperties } from './modules/restApi.js';
 import { bindDelaySettings } from './modules/delaySettings.js';
-import { DEFAULT_API_DELAY_MS, DEFAULT_REINDEX_DELAY_MS } from './modules/reindexQueue.js';
+import {
+  DEFAULT_API_DELAY_MS,
+  DEFAULT_REINDEX_DELAY_MS,
+  updateCachedPreviewSummary,
+} from './modules/reindexQueue.js';
 
 /**
  * Retrieves the CSRF token from PageContext, falling back to edit-mode bootstrap data.
@@ -83,6 +87,10 @@ document.addEventListener('DOMContentLoaded', async () => {
   function setIndexingOptionDisabled(disabled) {
     includeRobotsIndexFalse.disabled = disabled;
   }
+
+  includeRobotsIndexFalse.addEventListener('change', () => {
+    updateCachedPreviewSummary(includeRobotsIndexFalse.checked);
+  });
 
   /** @param {() => Promise<void>} operation */
   async function runWithQueueControls(operation) {
