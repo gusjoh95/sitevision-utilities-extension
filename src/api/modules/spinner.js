@@ -1,3 +1,5 @@
+const spinnerStates = new WeakMap();
+
 /**
  * Executes an asynchronous task and shows a spinner element only if the task
  * execution time exceeds the specified threshold delay.
@@ -10,10 +12,18 @@
  * @returns {Promise<T>} Resolves with the result of taskFn.
  */
 export async function withDeferredSpinner(taskFn, { spinnerEl, delayMs = 200 }) {
-  let isCompleted = false;
+  let state = spinnerStates.get(spinnerEl);
+  if (!state) {
+    state = { pending: new Set(), visible: new Set() };
+    spinnerStates.set(spinnerEl, state);
+  }
+
+  const request = {};
+  state.pending.add(request);
 
   const timerId = setTimeout(() => {
-    if (!isCompleted && spinnerEl) {
+    if (state.pending.has(request)) {
+      state.visible.add(request);
       spinnerEl.classList.remove('hidden');
     }
   }, delayMs);
@@ -21,9 +31,10 @@ export async function withDeferredSpinner(taskFn, { spinnerEl, delayMs = 200 }) 
   try {
     return await taskFn();
   } finally {
-    isCompleted = true;
     clearTimeout(timerId);
-    if (spinnerEl) {
+    state.pending.delete(request);
+    state.visible.delete(request);
+    if (state.visible.size === 0) {
       spinnerEl.classList.add('hidden');
     }
   }

@@ -36,6 +36,10 @@
   --icon-source: url('../icons/bootstrap/github.svg');
 }
 
+.icon--globe2 {
+  --icon-source: url('../icons/bootstrap/globe2.svg');
+}
+
 .icon--search {
   --icon-source: url('../icons/bootstrap/search.svg');
 }

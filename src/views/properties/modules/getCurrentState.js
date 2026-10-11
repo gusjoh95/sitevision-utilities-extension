@@ -8,7 +8,7 @@ export function getCurrentState() {
   const params = new URLSearchParams(window.location.search);
   return {
     origin: params.get('origin') || '',
-    version: params.get('version') || '',
+    version: params.get('version') === '0' ? '0' : '1',
     node: params.get('node') || '',
     anchorTabId: params.get('anchorTabId') || '',
   };

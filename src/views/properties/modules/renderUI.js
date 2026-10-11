@@ -18,6 +18,7 @@ const preElem = dom.getRequiredElement('.json-holder pre');
 const copyButtonTemplate = dom.getRequiredElement('#json-id-copy-template');
 const errorElem = dom.getRequiredElement('#error');
 let currentPropertiesText = '';
+let activeNavigationId = 0;
 
 export function getCurrentPropertiesText() {
   return currentPropertiesText;
@@ -44,7 +45,7 @@ if (useSyntaxHighlighting) {
     const target = event.target.closest('.json-id');
     if (target) {
       const nextNode = target.textContent.replace(/"/g, '');
-      void navigateToNode(nextNode, null, 'push').catch((error) => {
+      void navigateToNode(nextNode).catch((error) => {
         currentPropertiesText = `Error: ${errors.messageOf(error)}`;
         preElem.textContent = currentPropertiesText;
       });
@@ -104,91 +105,101 @@ export function renderUI(data, state) {
 
 /**
  * @param {string} nextNode
- * @param {any} [cachedData=null]
- * @param {"push" | "replace" | "none"} [historyAction="push"]
+ * @param {{ version?: string, historyAction?: "push" | "replace" | "none" }} [navigationOptions={}]
+ * @returns {Promise<boolean>} Whether this navigation remained current and completed.
  */
-export async function navigateToNode(nextNode, cachedData = null, historyAction = 'push') {
+export async function navigateToNode(nextNode, navigationOptions = {}) {
+  const navigationId = ++activeNavigationId;
+  const { version, historyAction = 'push' } = navigationOptions;
   const state = getCurrentState();
   state.node = nextNode;
+  state.version = version ?? state.version;
 
   const params = new URLSearchParams(state);
   const newUrlString = `${window.location.pathname}?${params.toString()}`;
 
-  let data = cachedData;
-  const previousPreContent = preElem.cloneNode(true);
-  const previousPropertiesText = currentPropertiesText;
+  const currentIndex = window.history.state?.index ?? 0;
+  let historyIndex = currentIndex;
+  if (historyAction === 'push') {
+    historyIndex += 1;
+    sessionStorage.setItem('maxHistoryIndex', String(historyIndex));
+    window.history.pushState(
+      { index: historyIndex, node: state.node, version: state.version },
+      '',
+      newUrlString
+    );
+  } else {
+    window.history.replaceState(
+      { index: historyIndex, node: state.node, version: state.version },
+      '',
+      newUrlString
+    );
+  }
+  window.dispatchEvent(new CustomEvent('nodeChanged'));
 
-  if (!data) {
+  errorElem.textContent = '';
+  preElem.style.minHeight = `${preElem.getBoundingClientRect().height}px`;
+  preElem.textContent = 'Loading...';
+  currentPropertiesText = 'Loading...';
+
+  try {
+    await targetPermissions.assertTargetTabAccessible(Number(state.anchorTabId), state.origin);
+    if (navigationId !== activeNavigationId) {
+      return false;
+    }
+
+    const url = new URL(
+      `${restApiPath}/${state.version}/${state.node}/properties`,
+      state.origin
+    ).toString();
+    const res = await spinner.withDeferredSpinner(
+      () => targetTab.fetch(Number(state.anchorTabId), url, { responseType: 'json' }),
+      {
+        spinnerEl: dom.getRequiredElement('#spinner'),
+        delayMs: 250,
+      }
+    );
+
+    if (navigationId !== activeNavigationId) {
+      return false;
+    }
+
+    if (!res.ok) {
+      const payload = res.data ? JSON.stringify(res.data) : `HTTP ${res.status} ${res.statusText}`;
+      throw new Error(payload);
+    }
+    renderUI(res.data, state);
+  } catch (error) {
+    if (navigationId !== activeNavigationId) {
+      return false;
+    }
+
+    const msg = errors.messageOf(error);
+    const targetAccessErrorMessage = targetPermissions.getTargetAccessErrorMessage(msg);
+
+    if (targetAccessErrorMessage) {
+      errorElem.textContent = `Warning: ${targetAccessErrorMessage}`;
+      renderUI({ error: 'Target access unavailable', message: targetAccessErrorMessage }, state);
+      return true;
+    }
+
+    // Safely check if the thrown error message is a JSON payload from the API.
+    let errorData;
     try {
-      await targetPermissions.assertTargetTabAccessible(Number(state.anchorTabId), state.origin);
-      preElem.textContent = 'Loading...';
-      currentPropertiesText = 'Loading...';
-      const url = new URL(
-        `${restApiPath}/${state.version}/${state.node}/properties`,
-        state.origin
-      ).toString();
-      const res = await spinner.withDeferredSpinner(
-        () => targetTab.fetch(Number(state.anchorTabId), url, { responseType: 'json' }),
-        {
-          spinnerEl: dom.getRequiredElement('#spinner'),
-          delayMs: 250,
-        }
-      );
-
-      if (!res.ok) {
-        const payload = res.data
-          ? JSON.stringify(res.data)
-          : `HTTP ${res.status} ${res.statusText}`;
-        throw new Error(payload);
-      }
-
-      data = res.data;
-    } catch (error) {
-      const msg = errors.messageOf(error);
-      const targetAccessErrorMessage = targetPermissions.getTargetAccessErrorMessage(msg);
-      let errorData;
-
-      if (targetAccessErrorMessage) {
-        preElem.replaceChildren(...previousPreContent.childNodes);
-        currentPropertiesText = previousPropertiesText;
-        errorElem.textContent = `Warning: ${targetAccessErrorMessage}`;
-        return;
-      } else {
-        // Safely check if the thrown error message is a JSON payload from the API
-        try {
-          const parsed = JSON.parse(msg);
-          errorData = {
-            error: 'API Error',
-            message: JSON.stringify(parsed, null, 2),
-          };
-        } catch {
-          errorData = { error: 'Fetch failed', message: msg };
-        }
-      }
-      data = errorData;
+      const parsed = JSON.parse(msg);
+      errorData = {
+        error: 'API Error',
+        message: JSON.stringify(parsed, null, 2),
+      };
+    } catch {
+      errorData = { error: 'Fetch failed', message: msg };
+    }
+    renderUI(errorData, state);
+  } finally {
+    if (navigationId === activeNavigationId) {
+      preElem.style.removeProperty('min-height');
     }
   }
 
-  renderUI(data, state);
-
-  const currentIndex = window.history.state?.index ?? 0;
-
-  if (historyAction === 'push') {
-    const nextIndex = currentIndex + 1;
-    sessionStorage.setItem('maxHistoryIndex', String(nextIndex));
-    window.history.pushState(
-      { node: nextNode, cachedData: data, index: nextIndex },
-      '',
-      newUrlString
-    );
-  } else if (historyAction === 'replace') {
-    window.history.replaceState(
-      { node: nextNode, cachedData: data, index: currentIndex },
-      '',
-      newUrlString
-    );
-  }
-
-  // Dispatch event AFTER history state has been updated
-  window.dispatchEvent(new CustomEvent('nodeChanged'));
+  return navigationId === activeNavigationId;
 }

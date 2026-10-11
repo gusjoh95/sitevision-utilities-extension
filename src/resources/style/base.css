@@ -266,6 +266,12 @@ button:active:not(:disabled) {
   border-color: var(--fg-color-light);
 }
 
+button[aria-pressed='true']:active:not(:disabled) {
+  background-color: var(--fg-color);
+  color: var(--bg-color);
+  border-color: var(--fg-color);
+}
+
 .icon,
 .icon-button::before {
   display: inline-block;

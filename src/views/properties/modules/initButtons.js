@@ -1,10 +1,12 @@
 import { dom, errors, options } from '../../../api/index.js';
+import { getCurrentState } from './getCurrentState.js';
 
 /**
  * Initializes the properties-page control buttons.
  * @param {() => string} getPropertiesText
+ * @param {(node: string, navigationOptions?: { version?: string, historyAction?: 'push' | 'replace' | 'none' }) => Promise<boolean>} navigateToNode
  */
-export async function initButtons(getPropertiesText) {
+export async function initButtons(getPropertiesText, navigateToNode) {
   /** @type {HTMLPreElement} */
   const preElem = dom.getRequiredElement('.json-holder pre');
   /** @type {HTMLButtonElement} */
@@ -15,8 +17,10 @@ export async function initButtons(getPropertiesText) {
   const copyBtn = dom.getRequiredElement('#copy');
   /** @type {HTMLButtonElement} */
   const wrapBtn = dom.getRequiredElement('#wrap');
+  /** @type {HTMLButtonElement} */
+  const versionToggleBtn = dom.getRequiredElement('#version-toggle');
 
-  const propertiesWordWrap = await options.getOption('propertiesWordWrap');
+  const propertiesWordWrapPromise = options.getOption('propertiesWordWrap');
 
   /**
    * Applies the word-wrap state to the rendered JSON area and the wrap button.
@@ -27,6 +31,18 @@ export async function initButtons(getPropertiesText) {
     wrapBtn.setAttribute('aria-pressed', String(isActive));
     preElem.classList.toggle('wrap', isActive);
   }
+
+  /**
+   * Applies the selected REST API version to the mode toggle.
+   * @param {string} version
+   */
+  function applyVersionState(version) {
+    const isOnline = version === '1';
+    versionToggleBtn.setAttribute('aria-pressed', String(isOnline));
+    versionToggleBtn.classList.toggle('active', isOnline);
+  }
+
+  applyVersionState(getCurrentState().version);
 
   /**
    * Updates disabled status for back and forward buttons based on history index.
@@ -47,8 +63,15 @@ export async function initButtons(getPropertiesText) {
     window.history.forward();
   });
 
-  window.addEventListener('popstate', updateHistoryButtons);
-  window.addEventListener('nodeChanged', updateHistoryButtons);
+  window.addEventListener('popstate', (event) => {
+    const version = event.state?.version ?? getCurrentState().version;
+    applyVersionState(version);
+    updateHistoryButtons();
+  });
+  window.addEventListener('nodeChanged', () => {
+    applyVersionState(getCurrentState().version);
+    updateHistoryButtons();
+  });
 
   updateHistoryButtons();
 
@@ -75,6 +98,23 @@ export async function initButtons(getPropertiesText) {
     }
   });
 
+  versionToggleBtn.addEventListener('click', async () => {
+    const currentState = getCurrentState();
+    const nextVersion = currentState.version === '1' ? '0' : '1';
+    applyVersionState(nextVersion);
+
+    try {
+      const navigated = await navigateToNode(currentState.node, { version: nextVersion });
+      if (!navigated) {
+        applyVersionState(getCurrentState().version);
+      }
+    } catch (error) {
+      console.error('Failed to switch properties version:', errors.messageOf(error));
+      applyVersionState(getCurrentState().version);
+    }
+  });
+
+  const propertiesWordWrap = await propertiesWordWrapPromise;
   applyWrapState(Boolean(propertiesWordWrap));
   updateHistoryButtons();
 }

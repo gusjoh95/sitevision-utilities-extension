@@ -1,15 +1,19 @@
 import { dom, errors, targetPermissions, theme } from '../../../api/index.js';
 import { initButtons } from './initButtons.js';
 import { getCurrentState } from './getCurrentState.js';
-import { getCurrentPropertiesText, navigateToNode, renderUI } from './renderUI.js';
+import { getCurrentPropertiesText, navigateToNode } from './renderUI.js';
 
-// Handle Browser Back / Forward buttons instantly using the history payload
+// Re-fetch the state represented by the restored URL on browser Back / Forward.
 window.addEventListener('popstate', (event) => {
-  void (
-    event.state && event.state.cachedData
-      ? navigateToNode(event.state.node, event.state.cachedData, 'none')
-      : navigateToNode(getCurrentState().node, null, 'replace')
-  ).catch((error) => {
+  const urlState = getCurrentState();
+  const historyState = event.state;
+  const node = typeof historyState?.node === 'string' ? historyState.node : urlState.node;
+  const version =
+    historyState?.version === '0' || historyState?.version === '1'
+      ? historyState.version
+      : urlState.version;
+
+  void navigateToNode(node, { version, historyAction: 'none' }).catch((error) => {
     dom.getRequiredElement('.json-holder pre').textContent = `Error: ${errors.messageOf(error)}`;
   });
 });
@@ -38,20 +42,19 @@ export async function initPropertiesView() {
     },
   });
 
-  // Ensure initial history state has an index tracker
-  if (!window.history.state || typeof window.history.state.index !== 'number') {
-    const initialState = window.history.state ?? {};
-    window.history.replaceState({ ...initialState, index: 0 }, '');
+  // Keep route state in history, but never store cached response data.
+  const currentHistoryState = window.history.state;
+  const historyIndex =
+    typeof currentHistoryState?.index === 'number' ? currentHistoryState.index : 0;
+  window.history.replaceState(
+    { index: historyIndex, node: state.node, version: state.version },
+    ''
+  );
+
+  if (typeof currentHistoryState?.index !== 'number') {
     sessionStorage.setItem('maxHistoryIndex', '0');
   }
 
-  await initButtons(getCurrentPropertiesText);
-
-  const useCacheOnReload = false;
-
-  if (useCacheOnReload && window.history.state && window.history.state.cachedData) {
-    renderUI(window.history.state.cachedData, state);
-  } else {
-    await navigateToNode(state.node, null, 'replace');
-  }
+  await initButtons(getCurrentPropertiesText, navigateToNode);
+  await navigateToNode(state.node, { version: state.version, historyAction: 'replace' });
 }
