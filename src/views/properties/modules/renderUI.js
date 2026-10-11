@@ -3,9 +3,9 @@ import {
   errors,
   jsonRenderer,
   options,
+  sitevisionRest,
   spinner,
   targetPermissions,
-  targetTab,
 } from '../../../api/index.js';
 import { restApiPath } from '../properties.js';
 import { getCurrentState } from './getCurrentState.js';
@@ -148,12 +148,11 @@ export async function navigateToNode(nextNode, navigationOptions = {}) {
       return false;
     }
 
-    const url = new URL(
-      `${restApiPath}/${state.version}/${state.node}/properties`,
-      state.origin
-    ).toString();
     const res = await spinner.withDeferredSpinner(
-      () => targetTab.fetch(Number(state.anchorTabId), url, { responseType: 'json' }),
+      () =>
+        sitevisionRest.fetchNodeProperties(Number(state.anchorTabId), state.origin, state.node, {
+          modelVersion: state.version,
+        }),
       {
         spinnerEl: dom.getRequiredElement('#spinner'),
         delayMs: 250,
@@ -164,11 +163,7 @@ export async function navigateToNode(nextNode, navigationOptions = {}) {
       return false;
     }
 
-    if (!res.ok) {
-      const payload = res.data ? JSON.stringify(res.data) : `HTTP ${res.status} ${res.statusText}`;
-      throw new Error(payload);
-    }
-    renderUI(res.data, state);
+    renderUI(res, state);
   } catch (error) {
     if (navigationId !== activeNavigationId) {
       return false;

@@ -1,5 +1,5 @@
+import { sitevisionRest } from '../../../api/index.js';
 import { reindexSingleNode } from './editApi.js';
-import { fetchRestSubNodes } from './restApi.js';
 import {
   DISCOVERABLE_NODE_TYPES,
   INDEXABLE_NODE_TYPES,
@@ -13,6 +13,7 @@ import { walkNodeTree } from './treeWalker.js';
 
 export const DEFAULT_REINDEX_DELAY_MS = 125;
 export const DEFAULT_API_DELAY_MS = 125;
+const NODE_PROPERTIES = ['robotsIndex', 'displayName'];
 let isCancelled = false;
 
 /**
@@ -88,14 +89,17 @@ export function cancelReindex() {
  */
 async function getChildNodes(tabId, origin, nodeId, waitBeforeApiCall) {
   if (!(await waitBeforeApiCall())) return null;
-  const subNodes = await fetchRestSubNodes(tabId, origin, nodeId, DISCOVERABLE_NODE_TYPES);
+  const subNodes = await sitevisionRest.fetchNodeChildren(tabId, origin, nodeId, {
+    includes: DISCOVERABLE_NODE_TYPES,
+    properties: NODE_PROPERTIES,
+  });
   return subNodes.map(normalizeNode);
 }
 
 /**
  * Converts REST node data into the metadata used by the re-index queue.
  *
- * @param {import('./restApi.js').RestNode} node - Raw child node data from the REST API.
+ * @param {import('../../../api/modules/sitevisionRest.js').RestNode} node - Raw child node data from the REST API.
  * @returns {DiscoveredNode} Normalized queue node.
  */
 function normalizeNode(node) {

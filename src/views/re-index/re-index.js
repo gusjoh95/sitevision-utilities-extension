@@ -1,7 +1,6 @@
-import { dom, errors, pageContext, spinner, targetTab } from '../../api/index.js';
+import { dom, errors, pageContext, sitevisionRest, spinner, targetTab } from '../../api/index.js';
 import { getCurrentState } from './modules/getCurrentState.js'; // Getting params could be done in the API layer instead of the view layer.
 import { runReindex, previewReindex, cancelReindex } from './modules/runReindex.js';
-import { fetchNodeProperties } from './modules/restApi.js';
 import { bindDelaySettings } from './modules/delaySettings.js';
 import {
   DEFAULT_API_DELAY_MS,
@@ -110,7 +109,11 @@ document.addEventListener('DOMContentLoaded', async () => {
   }
 
   try {
-    const rootProperties = await fetchNodeProperties(Number(anchorTabId), origin, rootNodeId);
+    const rootProperties = await sitevisionRest.fetchNodeProperties(
+      Number(anchorTabId),
+      origin,
+      rootNodeId
+    );
     // Strip "_sitePage" suffix from the UUID if present.
     rootNode = {
       id: rootProperties['jcr:uuid'].includes('_')
@@ -122,23 +125,17 @@ document.addEventListener('DOMContentLoaded', async () => {
     };
     nodeOutput.value = rootNode.id;
     nodeOutput.textContent = rootNode.id;
-  } catch (err) {
-    errorElement.textContent = `Error: ${errors.messageOf(err)}`;
-    startBtn.disabled = true;
-    previewBtn.disabled = true;
-  }
-
-  try {
     csrfToken = await getBootstrapCsrfToken(Number(anchorTabId));
     if (!csrfToken) {
       throw new Error(
         `No CSRF token found – ensure that you're logged in. Reindexing will not be possible.`
       );
     }
+
+    startBtn.disabled = false;
+    previewBtn.disabled = false;
   } catch (err) {
     errorElement.textContent = `Error: ${errors.messageOf(err)}`;
-    startBtn.disabled = true;
-    previewBtn.disabled = true;
   }
 
   startBtn?.addEventListener('click', () => {

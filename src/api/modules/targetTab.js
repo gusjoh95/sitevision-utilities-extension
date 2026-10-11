@@ -68,7 +68,7 @@ export async function executeScript(tabId, func, args = [], options = {}) {
  * @property {number} status - HTTP status code.
  * @property {string} statusText - HTTP status text.
  * @property {Record<string, string>} headers - Normalized response headers (lowercase keys).
- * @property {any} data - Parsed response body (string, parsed JSON object, or null).
+ * @property {any} data - Parsed response body, or raw text when a non-2xx JSON response is not valid JSON.
  * @property {string} finalUrl - Final URL after any redirects.
  */
 
@@ -118,7 +118,14 @@ export async function fetch(tabId, url, options = {}) {
       if (response.status !== 204) {
         if (parsingType === 'json') {
           const rawText = await response.text();
-          parsedData = rawText ? JSON.parse(rawText) : null;
+          if (rawText) {
+            try {
+              parsedData = JSON.parse(rawText);
+            } catch (error) {
+              if (response.ok) throw error;
+              parsedData = rawText;
+            }
+          }
         } else {
           parsedData = await response.text();
         }
