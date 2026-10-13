@@ -28,10 +28,10 @@ export async function updateSessionWithParam(param, value) {
           method: 'GET',
           headers: { Accept: 'text/plain' },
         });
-        if (response.status >= 500) {
+        if (!response.ok && response.status !== 404) {
           return {
             ok: false,
-            error: `Server error HTTP ${response.status} ${response.statusText}`.trim(),
+            error: `HTTP ${response.status} ${response.statusText}`.trim(),
           };
         }
         return { ok: true };

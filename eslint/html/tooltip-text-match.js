@@ -11,6 +11,8 @@ export default {
   },
 
   create(context) {
+    const normalizeText = (text) => text.replace(/\s+/g, ' ').trim();
+
     const getSrOnlyNodeAndText = (tagNode) => {
       if (!tagNode.children) return null;
 
@@ -46,7 +48,7 @@ export default {
 
         const tooltipText = activeTooltipAttr.value?.value ?? '';
 
-        if (tooltipText !== srOnlyResult.text) {
+        if (normalizeText(tooltipText) !== normalizeText(srOnlyResult.text)) {
           context.report({
             node: activeTooltipAttr,
             messageId: 'tooltipMismatch',

@@ -75,9 +75,14 @@
             <input type="checkbox" disabled id="toggle-profiling" />
             ?profiling=true
           </label>
-          <label>
+          <label
+            data-tooltip="jsdebug state is inferred from asset files in the DOM and may be inaccurate."
+          >
             <input type="checkbox" disabled id="toggle-jsdebug" />
             ?jsdebug=true
+            <span class="sr-only">
+              jsdebug state is inferred from asset files in the DOM and may be inaccurate.
+            </span>
           </label>
           <label>
             <input type="checkbox" disabled id="toggle-slimrender" />
