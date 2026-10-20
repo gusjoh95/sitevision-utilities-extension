@@ -10,8 +10,9 @@
 #footer-wrapper {
   display: flex;
   justify-content: space-between;
-  width: 100%;
-  padding-inline: var(--spacing-md);
+  margin-inline: calc(0px - var(--view-padding-inline));
+  margin-block-end: calc(0px - var(--spacing-md));
+  padding-inline: var(--view-padding-inline);
   background-color: var(--bg-color-dark);
 }
 
