@@ -8,6 +8,7 @@
   --color-white-light: #fff;
   --color-white: #e6e6e6;
   --view-width: 320px;
+  --view-padding-inline: var(--spacing-lg);
   --border-radius: 8px;
   --font-family: sans-serif;
   --mono-font-family: monospace;
@@ -58,7 +59,7 @@ body {
 }
 
 body {
-  padding: var(--spacing-md) 14px;
+  padding: var(--spacing-md) var(--view-padding-inline);
   background-color: var(--bg-color);
   color: var(--fg-color);
 }
@@ -370,7 +371,8 @@ pre .json-id-copy:active:not(:disabled) {
     position-anchor: --tooltip-anchor;
     position-area: top;
     position-try-fallbacks: flip-block, flip-inline;
-    margin-bottom: var(--spacing-sm);
+    max-inline-size: calc(100vw - var(--view-padding-inline) - var(--view-padding-inline));
+    margin: 0 var(--view-padding-inline) var(--spacing-sm);
 
     background-color: var(--bg-color-dark);
     color: var(--fg-color-light);
