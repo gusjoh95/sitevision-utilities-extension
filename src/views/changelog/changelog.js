@@ -1,43 +1,13 @@
-import { dom, environment, errors } from '../../api/index.js';
-import { renderMarkdown } from './modules/renderMarkdown.js';
-
-/**
- * @typedef {Object} ReleaseEntry
- * @property {string} version
- * @property {'chrome' | 'firefox'} [hotfixTarget] - Restricts this entry to a single browser's changelog nav.
- */
-
-/**
- * Fetches the ordered catalogue of versions that have release notes, filtered to exclude
- * platform-specific hotfixes targeting the other browser.
- * @returns {Promise<string[]>}
- */
-async function getAvailableVersions() {
-  try {
-    const url = browser.runtime.getURL('resources/releases/versions.json');
-    const response = await fetch(url);
-    if (!response.ok) return [];
-
-    /** @type {{ releases?: ReleaseEntry[] }} */
-    const catalogue = await response.json();
-    const releases = Array.isArray(catalogue?.releases) ? catalogue.releases : [];
-
-    const currentTarget = (await environment.isFirefox()) ? 'firefox' : 'chrome';
-    return releases
-      .filter((release) => !release.hotfixTarget || release.hotfixTarget === currentTarget)
-      .map((release) => release.version);
-  } catch {
-    return [];
-  }
-}
+import { dom, errors, markdownRenderer, releaseNotes } from '../../api/index.js';
 
 /**
  * Renders the release notes for a given version into `#content`.
  * @param {HTMLElement} contentEl
+ * @param {HTMLHeadingElement} pageTitleEl
  * @param {string} version
  * @returns {Promise<void>}
  */
-async function renderVersion(contentEl, version) {
+async function renderVersion(contentEl, pageTitleEl, version) {
   document.title = `What's new - v${version}`;
 
   try {
@@ -48,36 +18,42 @@ async function renderVersion(contentEl, version) {
     }
 
     const markdown = await response.text();
-    contentEl.replaceChildren(renderMarkdown(markdown));
+    const renderedMarkdown = markdownRenderer.renderMarkdown(markdown);
+    const firstHeading = renderedMarkdown.firstElementChild;
+    if (firstHeading instanceof HTMLHeadingElement && firstHeading.tagName === 'H1') {
+      pageTitleEl.replaceChildren(...firstHeading.childNodes);
+      firstHeading.remove();
+    } else {
+      pageTitleEl.textContent = `What's new - v${version}`;
+    }
+    contentEl.replaceChildren(renderedMarkdown);
   } catch (error) {
     const heading = document.createElement('h1');
     heading.textContent = `Sitevision Utilities has been updated to v${version}`;
     const paragraph = document.createElement('p');
     paragraph.textContent = errors.messageOf(error);
-    contentEl.replaceChildren(heading, paragraph);
+    pageTitleEl.replaceChildren(...heading.childNodes);
+    contentEl.replaceChildren(paragraph);
   }
 }
 
 async function initChangelogView() {
   /** @type {HTMLDivElement} */
   const contentEl = dom.getRequiredElement('#content');
+  /** @type {HTMLHeadingElement} */
+  const pageTitleEl = dom.getRequiredElement('#page-title');
   const searchParams = new URLSearchParams(window.location.search);
-  const backButton = document.getElementById('back-button');
-  if (
-    backButton instanceof HTMLButtonElement &&
-    searchParams.get('returnTo') === 'options' &&
-    window.history.length > 1
-  ) {
-    backButton.hidden = false;
-    backButton.addEventListener('click', () => window.history.back());
-  }
+  /** @type {HTMLAnchorElement} */
+  const documentationLink = dom.getRequiredElement('#documentation-link');
+  const documentationUrl = browser.runtime.getURL('views/docs/docs.html');
+  documentationLink.href = documentationUrl;
 
   const { version: currentVersion } = browser.runtime.getManifest();
   const initialVersion = searchParams.get('version') || currentVersion;
 
-  await renderVersion(contentEl, initialVersion);
+  await renderVersion(contentEl, pageTitleEl, initialVersion);
 
-  const versions = await getAvailableVersions();
+  const versions = await releaseNotes.getAvailableVersions();
   // Oldest first; the initially requested version may not be in the catalogue (e.g. no notes yet).
   let index = versions.indexOf(initialVersion);
   if (index === -1) return;
@@ -100,14 +76,14 @@ async function initChangelogView() {
     if (index <= 0) return;
     index -= 1;
     updateNav();
-    await renderVersion(contentEl, versions[index]);
+    await renderVersion(contentEl, pageTitleEl, versions[index]);
   });
 
   nextButton.addEventListener('click', async () => {
     if (index >= versions.length - 1) return;
     index += 1;
     updateNav();
-    await renderVersion(contentEl, versions[index]);
+    await renderVersion(contentEl, pageTitleEl, versions[index]);
   });
 
   navEl.classList.remove('hidden');

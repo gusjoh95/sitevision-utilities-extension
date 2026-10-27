@@ -20,6 +20,10 @@
   --icon-source: url('../icons/bootstrap/arrow-right.svg');
 }
 
+.icon--book {
+  --icon-source: url('../icons/bootstrap/book.svg');
+}
+
 .icon--crosshair {
   --icon-source: url('../icons/bootstrap/crosshair.svg');
 }

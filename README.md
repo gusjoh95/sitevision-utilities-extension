@@ -100,22 +100,26 @@ src/
 │   ├── index.js                  <-- Registers background listeners (tab watchers, changelog-on-update)
 │   └── modules/
 ├── api/                          <-- Shared extension API modules
-├── resources/                    <-- Icons, shared CSS, and JSON themes
+├── resources/                    <-- Icons, shared CSS, JSON themes, and Markdown content
+│   ├── docs/                     <-- End-user documentation
+│   │   └── user-guide.md
 │   └── releases/                 <-- Per-version release notes shown by the changelog view
 │       └── 1.0.0.0.md
 └── views/
     ├── popup/                    <-- Main extension control panel
     ├── find-login/               <-- Login discovery window
+    ├── re-index/                 <-- Recursive node-tree reindex view
     ├── options/                  <-- Extension settings
     ├── properties/               <-- JSON node-property viewer
-    └── changelog/                <-- "What's new" view shown after an update
+      ├── changelog/                <-- "What's new" view shown after an update
+    └── docs/                     <-- End-user documentation view
 ```
 
 `src/api/index.js` is the public API facade. Views use native browser modules directly, while background services handle work that doesnt necessitate running in a "scripting context" (to keep required permissions to a minimum).
 
 ### Changelog view ("what's new" on update)
 
-When the extension is updated (not on first install), `background/modules/openChangelogOnUpdate.js` opens `views/changelog/changelog.html` in a new tab. That page fetches `resources/releases/<version>.md` — where `<version>` is the new `chrome.runtime.getManifest().version` — and renders it with a small built-in Markdown renderer (`views/changelog/modules/renderMarkdown.js`). No external Markdown library is bundled; only a safe subset of Markdown is supported (headings, bullet lists, paragraphs, and inline `**bold**`, `` `code` ``, and `[text](url)`), rendered directly to DOM nodes so release notes can never inject arbitrary markup.
+When the extension is updated (not on first install), `background/modules/openChangelogOnUpdate.js` opens `views/changelog/changelog.html` in a new tab. That page fetches `resources/releases/<version>.md` — where `<version>` is the new `browser.runtime.getManifest().version` — and renders it with the shared Markdown renderer in `src/api/modules/markdownRenderer.js`. No external Markdown library is bundled; only a safe subset of Markdown is supported (headings, bullet lists, paragraphs, and inline `**bold**`, `` `code` ``, and `[text](url)`), rendered directly to DOM nodes.
 
 `resources/releases/versions.json` is an ordered (oldest-first) catalogue of every version that has release notes:
 
@@ -154,6 +158,10 @@ The changelog view uses this catalogue to enable **Older**/**Newer** navigation 
 If no matching file exists for the installed version, the changelog view falls back to a generic "has been updated" message instead of failing.
 
 `npm run create-release` enforces this catalogue: before building, it checks that every version being built (per active target) has both a matching `<version>.md` file and a `versions.json` entry, and that the entry's `hotfixTarget` (if any) matches the browser being built for. The build aborts with an error if any of these checks fail.
+
+### Documentation view
+
+The popup's **Docs** button opens `views/docs/docs.html`, which renders the bundled `resources/docs/user-guide.md` using the shared Markdown renderer. The documentation links to the changelog for the installed version when release notes exist, otherwise to the latest available release notes for that browser.
 
 ### Cross-browser manifests
 

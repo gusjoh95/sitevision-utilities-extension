@@ -144,10 +144,13 @@ document.addEventListener('DOMContentLoaded', async () => {
     ) {
       const changelogUrl = new URL(browser.runtime.getURL('views/changelog/changelog.html'));
       changelogUrl.searchParams.set('version', version);
-      changelogUrl.searchParams.set('returnTo', 'options');
       releaseNotesLink.href = changelogUrl.href;
       releaseNotesLink.textContent = version;
       releaseNotesLink.hidden = false;
+      releaseNotesLink.addEventListener('click', (clickEvent) => {
+        clickEvent.preventDefault();
+        void browser.tabs.create({ url: changelogUrl.href });
+      });
     }
   } catch (error) {
     console.warn('Failed to initialize release notes link:', error);

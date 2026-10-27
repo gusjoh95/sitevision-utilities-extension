@@ -1,10 +1,8 @@
 /**
- * Minimal Markdown-to-DOM renderer for release notes.
+ * Minimal Markdown-to-DOM renderer for release notes and documentation.
  * @description
- * Supports the subset of Markdown used in `src/resources/releases/*.md`: headings (`#`-`######`),
- * bullet lists (`-`/`*`), paragraphs, and inline `**bold**`, `` `code` ``, and `[text](url)` spans.
- * Nodes are built directly via the DOM API (never `innerHTML`), so release note content can never
- * inject arbitrary markup.
+ * Supports headings (`#`-`######`), bullet lists (`-`/`*`), paragraphs, and inline
+ * `**bold**`, `` `code` ``, and `[text](url)` spans. Nodes are built directly via the DOM API.
  * @param {string} markdown
  * @returns {DocumentFragment}
  */
@@ -92,12 +90,29 @@ function parseInline(text) {
       code.textContent = match[2];
       nodes.push(code);
     } else if (match[3] !== undefined) {
-      const a = document.createElement('a');
-      a.href = match[4];
-      a.target = '_blank';
-      a.rel = 'noopener noreferrer';
-      a.textContent = match[3];
-      nodes.push(a);
+      let url;
+      try {
+        url = new URL(match[4], document.baseURI);
+      } catch {
+        nodes.push(document.createTextNode(match[3]));
+        lastIndex = pattern.lastIndex;
+        continue;
+      }
+
+      const isWebUrl = url.protocol === 'http:' || url.protocol === 'https:';
+      const isSameOriginUrl = url.origin === window.location.origin;
+      if (!isWebUrl && !isSameOriginUrl) {
+        nodes.push(document.createTextNode(match[3]));
+        lastIndex = pattern.lastIndex;
+        continue;
+      }
+
+      const anchor = document.createElement('a');
+      anchor.href = url.href;
+      anchor.target = '_blank';
+      anchor.rel = 'noopener noreferrer';
+      anchor.textContent = match[3];
+      nodes.push(anchor);
     }
 
     lastIndex = pattern.lastIndex;

@@ -3,6 +3,8 @@ export * as sitevisionRest from './modules/sitevisionRest.js';
 export * as dom from './modules/dom.js';
 export * as interaction from './modules/interaction.js';
 export * as jsonRenderer from './modules/jsonRenderer.js';
+export * as markdownRenderer from './modules/markdownRenderer.js';
+export * as releaseNotes from './modules/releaseNotes.js';
 export * as theme from './modules/theme.js';
 export * as pageContext from './modules/pageContext.js';
 export * as siteVerification from './modules/siteVerification.js';

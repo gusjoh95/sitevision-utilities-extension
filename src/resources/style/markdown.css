@@ -1,0 +1,50 @@
+html.markdown-page {
+  --view-width: min(640px, 100vw);
+  margin-inline: auto;
+}
+
+body.markdown-page {
+  margin-inline: auto;
+}
+
+.view-header {
+  display: flex;
+  align-items: baseline;
+  gap: var(--spacing-md);
+  flex-wrap: wrap;
+  border-bottom: 1px solid var(--bg-color-dark);
+  padding-bottom: var(--spacing-sm);
+  margin-bottom: var(--spacing-xl);
+
+  h1 {
+    margin: 0;
+    border: 0;
+    padding: 0;
+  }
+
+  > a {
+    margin-left: auto;
+  }
+}
+
+.markdown-content {
+  > :first-child {
+    margin-top: 0;
+  }
+
+  h1 {
+    border-bottom: 1px solid var(--bg-color-dark);
+    padding-bottom: var(--spacing-sm);
+  }
+
+  ul {
+    padding-left: var(--spacing-xl);
+  }
+
+  code {
+    font-family: var(--mono-font-family);
+    background-color: var(--bg-color-dark);
+    padding: 0 var(--spacing-xs);
+    border-radius: calc(var(--border-radius) / 2);
+  }
+}

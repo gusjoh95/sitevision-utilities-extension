@@ -11,6 +11,7 @@ import {
 } from '../../api/index.js';
 import { initCookieConsent } from './modules/cookie.js';
 import { initFindLogin } from './modules/find-login.js';
+import { initOpenDocs } from './modules/open-docs.js';
 import { initOpenOptions } from './modules/open-options.js';
 import { initParamButtons } from './modules/params.js';
 import { initProperties } from './modules/properties.js';
@@ -110,7 +111,7 @@ async function init() {
     errEl.textContent = `Error: ${msg}`;
   } finally {
     try {
-      await initOpenOptions();
+      await Promise.all([initOpenDocs(), initOpenOptions()]);
     } catch (error) {
       const msg = errors.messageOf(error);
       /** @type {HTMLDivElement} */
