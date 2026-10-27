@@ -3,8 +3,9 @@ import { dom, errors } from '../../../api/index.js';
 /**
  * @param {chrome.tabs.Tab} tab - The active tab.
  * @param {import('../../../api/types.js').PageContext | null} pageContext
+ * @param {string|null} [currentNodeId=pageContext?.pageId]
  */
-export async function initProperties(tab, pageContext) {
+export async function initProperties(tab, pageContext, currentNodeId = pageContext?.pageId) {
   /** @type {HTMLFormElement} */
   const form = dom.getRequiredElement('#properties-form');
   /** @type {HTMLInputElement} */
@@ -27,8 +28,8 @@ export async function initProperties(tab, pageContext) {
     dom.getRequiredElement("button[type='submit'][value='getProperties']")
   ).disabled = false;
 
-  if (pageContext?.pageId) {
-    currentPageId.value = pageContext.pageId;
+  if (currentNodeId) {
+    currentPageId.value = currentNodeId;
     /** @type {HTMLButtonElement} */ (
       dom.getRequiredElement("button[type='submit'][value='getCurrentPage']")
     ).disabled = false;

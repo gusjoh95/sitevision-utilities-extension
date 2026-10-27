@@ -64,20 +64,24 @@ async function init() {
       throw new Error('Active tab is not a Sitevision site.');
     }
 
+    const editInfo = await editMode.getEditInfo(invocationTab);
+    const currentPageNodeId = editInfo.isEditMode
+      ? (editInfo.nodes[0] ?? null)
+      : (context?.pageId ?? null);
+
     // Initialize UI tasks array for parallel execution
     const uiTasks = [
       initFindLogin(invocationTab),
-      initProperties(invocationTab, context),
+      initProperties(invocationTab, context, currentPageNodeId),
       initParamButtons(invocationTab, sitevisionMode),
       initCookieConsent(invocationTab),
     ];
 
     if (sitevisionMode === 'online' || sitevisionMode === 'offline') {
-      const editInfo = editMode.isEdit(invocationTab) ? editMode.getEditInfo(invocationTab) : null;
       const rootNodeId =
-        editInfo?.viewType === 'file' || editInfo?.viewType === 'image'
+        editInfo.viewType === 'file' || editInfo.viewType === 'image'
           ? editInfo.viewNodeId
-          : context?.pageId || editInfo?.nodeId;
+          : context?.pageId || editInfo.nodeId;
 
       if (rootNodeId) {
         uiTasks.push(initReindex(invocationTab, rootNodeId));
