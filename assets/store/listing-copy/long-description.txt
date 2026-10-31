@@ -1,0 +1,19 @@
+NODE PROPERTIES
+Inspect properties for the current node, current user, or any node ID. Switch between Online and Offline data and follow referenced node IDs.
+
+LOGIN DISCOVERY
+Find Sitevision login forms and Basic Auth endpoints on common WebDAV paths. Add site-relative paths for custom checks.
+
+REINDEXING
+Preview a node tree before reindexing. See which nodes are eligible, skipped because robotsIndex=false, or unsupported. Reindex supported pages, articles, files, and images.
+
+SESSION PARAMETERS
+Toggle profiling, jsdebug, and slimRender on online pages, with optional automatic reload.
+
+CONSENT COOKIE
+Inspect accepted and denied entries in the sv-cookie-consent cookie, or delete it. This feature requires optional cookie and site permissions.
+
+PERMISSIONS
+Most features use temporary access to the active tab. Features that need more access ask for optional permissions for the active site when you use them.
+
+Fully open source. Visit the support page for issue tracking and source code.
