@@ -11,6 +11,19 @@
 - Treat `src/manifest.chrome.json` and `src/manifest.firefox.json` as the source manifests. `src/manifest.json` is generated locally; select the target with `npm run dev:ch` or `npm run dev:ff` instead of editing the generated file.
 - Preserve compatibility across both browser targets unless a change is intentionally browser-specific.
 
+## Documentation
+
+- The user-facing feature guide is `src/resources/docs/user-guide.md`. Keep it concise and verify behavioral claims against the implementation.
+- Release notes are versioned in `src/resources/releases/<version>.md`; `src/resources/releases/versions.json` is their navigation catalogue. Do not recreate a root changelog or suggestions file.
+- These Markdown files are rendered by `src/api/modules/markdownRenderer.js`, which supports a limited syntax: headings, paragraphs, nested bullet lists, bold, strikethrough, code, and links. Use two spaces for each nested list level; do not rely on unsupported Markdown or embedded HTML.
+
+## Edit mode and reindexing
+
+- Edit mode is detected from the tab URL path with `pathname.startsWith('/edit')`; do not infer it from whether a node ID was resolved.
+- When resolving Current node, prefer the deepest node ID in the edit URL. A bare `/edit` resolves `window.editor.appContext.lastNode.page`; other view contexts without a URL node ID use the matching `lastNode` entry. If that entry is unavailable, return no node rather than falling back to the base page ID.
+- Keep traversable and indexable reindex node types distinct. Containers and repositories may be traversed to reach children without being reindexed. `robotsIndex=false` skips an otherwise eligible node, not its children; the override must not mutate the node property.
+- A completed reindex preview is reusable only for the same tab, origin, and root. If preview options change, keep its displayed summary consistent with the option that will be used by Start Reindex.
+
 ## Tooltips and accessible controls
 
 - Use the shared `data-tooltip` attribute for in-app hover and focus tooltips; do not use `title` for tooltips. Its styling and behavior are defined in `src/resources/style/base.css`.

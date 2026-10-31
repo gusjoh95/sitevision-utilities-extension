@@ -73,7 +73,7 @@ async function init() {
     // Initialize UI tasks array for parallel execution
     const uiTasks = [
       initFindLogin(invocationTab),
-      initProperties(invocationTab, context, currentPageNodeId),
+      initProperties(invocationTab, context, currentPageNodeId, editInfo.isEditMode),
       initParamButtons(invocationTab, sitevisionMode),
       initCookieConsent(invocationTab),
     ];

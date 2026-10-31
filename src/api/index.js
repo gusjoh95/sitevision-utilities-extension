@@ -1,7 +1,6 @@
 export * as targetTab from './modules/targetTab.js';
 export * as sitevisionRest from './modules/sitevisionRest.js';
 export * as dom from './modules/dom.js';
-export * as interaction from './modules/interaction.js';
 export * as jsonRenderer from './modules/jsonRenderer.js';
 export * as markdownRenderer from './modules/markdownRenderer.js';
 export * as releaseNotes from './modules/releaseNotes.js';

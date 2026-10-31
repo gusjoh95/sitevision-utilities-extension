@@ -16,17 +16,10 @@ import { executeScript } from './targetTab.js';
 const EDIT_PATH_REGEX = /^\/edit\/(\d{1,3}\.[a-fA-F0-9]+)(?:\/(.*))?$/;
 const NODE_ID_REGEX = /^\d{1,3}\.[a-fA-F0-9]+$/;
 
-const VIEW_TYPE_ALIASES = /** @type {Record<string, string>} */ ({
-  files: 'file',
-  images: 'image',
-  pages: 'page',
-  templates: 'template',
-});
-
 /**
  * Information regarding the current tab's edit mode state.
  * @typedef {Object} EditInfo
- * @property {boolean} isEditMode - True if the URL pathname starts with /edit/.
+ * @property {boolean} isEditMode - True if the URL pathname is /edit or starts with /edit/.
  * @property {string|null} nodeId - The primary node ID if present immediately after /edit/.
  * @property {boolean} hasNodeId - Indicates whether a primary node ID was successfully extracted.
  * @property {string} viewType - The first path segment after the primary node ID, or 'page' when absent.
@@ -39,14 +32,14 @@ const VIEW_TYPE_ALIASES = /** @type {Record<string, string>} */ ({
  * Determines whether the given tab is currently in edit mode.
  *
  * @param {chrome.tabs.Tab} tab - The Chrome tab object to evaluate.
- * @returns {boolean} True if the tab URL pathname starts with /edit/, false otherwise.
+ * @returns {boolean} True if the tab URL pathname starts with /edit, false otherwise.
  */
 export function isEdit(tab) {
   if (!tab?.url) return false;
 
   try {
     const url = new URL(tab.url);
-    return url.pathname.startsWith('/edit/');
+    return url.pathname.startsWith('/edit');
   } catch {
     return false;
   }
@@ -72,99 +65,129 @@ function parseEditInfo(tab) {
 
   if (!tab?.url) return result;
 
+  /** @type {URL} */
+  let url;
   try {
-    const url = new URL(tab.url);
-
-    // Verify root /edit/ path requirement
-    if (!url.pathname.startsWith('/edit/')) {
-      return result;
-    }
-
-    result.isEditMode = true;
-
-    // Match node ID located STRICTLY directly after /edit/
-    const match = url.pathname.match(EDIT_PATH_REGEX);
-
-    if (match) {
-      result.nodeId = match[1];
-      result.hasNodeId = true;
-
-      const rawSubPath = match[2];
-      if (!rawSubPath) {
-        result.viewType = 'page';
-      } else {
-        result.subPath = rawSubPath;
-        result.viewType = rawSubPath.split('/')[0] || 'unknown';
-        const viewNodeMatch = rawSubPath.match(/^[^/]+\/(\d{1,3}\.[a-fA-F0-9]+)(?:\/|$)/);
-        if (viewNodeMatch) {
-          result.viewNodeId = viewNodeMatch[1];
-        }
-      }
-    }
-
-    return result;
+    url = new URL(tab.url);
   } catch {
     return result;
+  }
+
+  if (!url.pathname.startsWith('/edit')) return result;
+
+  result.isEditMode = true;
+  if (url.pathname === '/edit' || url.pathname === '/edit/') {
+    result.viewType = 'page';
+    return result;
+  }
+
+  const match = url.pathname.match(EDIT_PATH_REGEX);
+  if (!match) return result;
+
+  result.nodeId = match[1];
+  result.hasNodeId = true;
+
+  const rawSubPath = match[2];
+  if (!rawSubPath) {
+    result.viewType = 'page';
+    return result;
+  }
+
+  result.subPath = rawSubPath;
+  result.viewType = rawSubPath.split('/')[0] || 'unknown';
+  const viewNodeMatch = rawSubPath.match(/^[^/]+\/(\d{1,3}\.[a-fA-F0-9]+)(?:\/|$)/);
+  result.viewNodeId = viewNodeMatch?.[1] ?? null;
+
+  return result;
+}
+
+/**
+ * Reads the current node for a view context from the editor's lastNode state.
+ * @param {number} tabId
+ * @param {string} viewType
+ * @returns {Promise<string|null>}
+ */
+async function getEditorStateNodeId(tabId, viewType) {
+  try {
+    return (
+      (await executeScript(
+        tabId,
+        (contextType) => {
+          /** @type {Window & { editor?: { appContext?: { lastNode?: Record<string, unknown> } } }} */
+          const targetWindow = window;
+          const nodeId = targetWindow.editor?.appContext?.lastNode?.[contextType];
+          return typeof nodeId === 'string' && /^\d{1,3}\.[a-f\d]+$/i.test(nodeId) ? nodeId : null;
+        },
+        [viewType],
+        { world: 'MAIN' }
+      )) ?? null
+    );
+  } catch {
+    return null;
   }
 }
 
 /**
- * Extracts edit URL details and resolves unique node IDs by priority: trailing URL IDs
- * from deepest to shallowest, the editor-state node when no trailing URL ID exists, and
- * finally the primary node immediately after /edit/. Outside edit mode, editor state is
- * never inspected.
+ * Returns node IDs encoded in the URL, ordered from most to least specific.
+ * @param {string|null} subPath
+ * @returns {string[]}
+ */
+function getUrlNodeIds(subPath) {
+  return (
+    subPath
+      ?.split('/')
+      .filter((segment) => NODE_ID_REGEX.test(segment))
+      .reverse() ?? []
+  );
+}
+
+/**
+ * Removes missing and duplicate node IDs while preserving their priority order.
+ * @param {(string|null)[]} nodeIds
+ * @returns {string[]}
+ */
+function uniqueNodeIds(nodeIds) {
+  return [...new Set(nodeIds.filter((nodeId) => typeof nodeId === 'string'))];
+}
+
+/**
+ * Resolves node IDs for the parsed edit context.
+ * URL IDs take precedence. Page URLs use their base ID, while a bare `/edit` uses
+ * `lastNode.page`. Other contexts use their matching editor-state entry and do not
+ * fall back to the base page ID if that entry is unavailable.
+ * @param {chrome.tabs.Tab} tab
+ * @param {EditInfo} editInfo
+ * @returns {Promise<string[]>}
+ */
+async function resolveNodeIds(tab, editInfo) {
+  if (!editInfo.isEditMode) return [];
+
+  const urlNodeIds = getUrlNodeIds(editInfo.subPath);
+  if (urlNodeIds.length > 0) {
+    return uniqueNodeIds([...urlNodeIds, editInfo.nodeId]);
+  }
+
+  if (editInfo.viewType === 'page' && editInfo.nodeId) {
+    return [editInfo.nodeId];
+  }
+
+  if (editInfo.viewType === 'unknown' || typeof tab?.id !== 'number') {
+    return [];
+  }
+
+  const editorStateNodeId = await getEditorStateNodeId(tab.id, editInfo.viewType);
+  return editorStateNodeId ? uniqueNodeIds([editorStateNodeId, editInfo.nodeId]) : [];
+}
+
+/**
+ * Extracts edit URL details and resolves node IDs. The returned object retains the
+ * parsed edit fields and adds node IDs ordered from most to least specific.
  *
  * @param {chrome.tabs.Tab} tab - The active tab.
  * @returns {Promise<EditInfo>} Edit URL details with nodes ordered from most to least specific.
  */
 export async function getEditInfo(tab) {
   const parsedEditInfo = parseEditInfo(tab);
-  /** @type {string[]} */
-  // URL node IDs are ordered from the deepest sub-path segment to the shallowest.
-  const urlPathNodeIdsByPriority =
-    parsedEditInfo.subPath
-      ?.split('/')
-      .filter((segment) => NODE_ID_REGEX.test(segment))
-      .reverse() ?? [];
-
-  if (!parsedEditInfo.isEditMode) {
-    return { ...parsedEditInfo, nodes: [] };
-  }
-
-  /** @type {string|null} */
-  let editorStateNodeId = null;
-  if (
-    urlPathNodeIdsByPriority.length === 0 &&
-    parsedEditInfo.viewType !== 'page' &&
-    typeof tab?.id === 'number'
-  ) {
-    const viewType = VIEW_TYPE_ALIASES[parsedEditInfo.viewType] || parsedEditInfo.viewType;
-    try {
-      editorStateNodeId =
-        (await executeScript(
-          tab.id,
-          (viewType) => {
-            /** @type {Window & { editor?: { appContext?: { lastNode?: Record<string, unknown> } } }} */
-            const targetWindow = window;
-            const nodeId = targetWindow.editor?.appContext?.lastNode?.[viewType];
-            return typeof nodeId === 'string' && /^\d{1,3}\.[a-f\d]+$/i.test(nodeId)
-              ? nodeId
-              : null;
-          },
-          [viewType],
-          { world: 'MAIN' }
-        )) ?? null;
-    } catch {
-      editorStateNodeId = null;
-    }
-  }
-
-  const candidateNodeIdsByPriority = [
-    ...urlPathNodeIdsByPriority, // Specific nodes encoded in the edit URL.
-    editorStateNodeId, // Last node selected in the editor when the URL has no node IDs.
-    parsedEditInfo.nodeId, // Base node directly after /edit/; broadest fallback.
-  ];
-  // Set removes duplicates while preserving the candidate priority order.
-  const nodes = [...new Set(candidateNodeIdsByPriority.filter((nodeId) => nodeId !== null))];
+  const nodes = await resolveNodeIds(tab, parsedEditInfo);
   return { ...parsedEditInfo, nodes };
 }

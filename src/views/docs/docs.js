@@ -17,13 +17,13 @@ async function initDocsView() {
   try {
     const response = await fetch(browser.runtime.getURL('resources/docs/user-guide.md'));
     if (!response.ok) {
-      throw new Error('Documentation could not be loaded.');
+      throw new Error('User guide could not be loaded.');
     }
 
     contentEl.replaceChildren(markdownRenderer.renderMarkdown(await response.text()));
   } catch (error) {
     const heading = document.createElement('h2');
-    heading.textContent = 'Documentation unavailable';
+    heading.textContent = 'User guide unavailable';
     const paragraph = document.createElement('p');
     paragraph.textContent = errors.messageOf(error);
     contentEl.replaceChildren(heading, paragraph);

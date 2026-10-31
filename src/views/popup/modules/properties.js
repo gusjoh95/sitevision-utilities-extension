@@ -4,8 +4,14 @@ import { dom, errors } from '../../../api/index.js';
  * @param {chrome.tabs.Tab} tab - The active tab.
  * @param {import('../../../api/types.js').PageContext | null} pageContext
  * @param {string|null} [currentNodeId=pageContext?.pageId]
+ * @param {boolean} [isEditMode=false]
  */
-export async function initProperties(tab, pageContext, currentNodeId = pageContext?.pageId) {
+export async function initProperties(
+  tab,
+  pageContext,
+  currentNodeId = pageContext?.pageId,
+  isEditMode = false
+) {
   /** @type {HTMLFormElement} */
   const form = dom.getRequiredElement('#properties-form');
   /** @type {HTMLInputElement} */
@@ -23,6 +29,8 @@ export async function initProperties(tab, pageContext, currentNodeId = pageConte
   propertiesIdInput.focus();
   onlineModeRadioButton.disabled = false;
   offlineModeRadioButton.disabled = false;
+  onlineModeRadioButton.checked = !isEditMode;
+  offlineModeRadioButton.checked = isEditMode;
 
   /** @type {HTMLButtonElement} */ (
     dom.getRequiredElement("button[type='submit'][value='getProperties']")

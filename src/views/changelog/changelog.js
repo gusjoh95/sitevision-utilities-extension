@@ -44,9 +44,9 @@ async function initChangelogView() {
   const pageTitleEl = dom.getRequiredElement('#page-title');
   const searchParams = new URLSearchParams(window.location.search);
   /** @type {HTMLAnchorElement} */
-  const documentationLink = dom.getRequiredElement('#documentation-link');
-  const documentationUrl = browser.runtime.getURL('views/docs/docs.html');
-  documentationLink.href = documentationUrl;
+  const userGuideLink = dom.getRequiredElement('#user-guide-link');
+  const userGuideUrl = browser.runtime.getURL('views/docs/docs.html');
+  userGuideLink.href = userGuideUrl;
 
   const { version: currentVersion } = browser.runtime.getManifest();
   const initialVersion = searchParams.get('version') || currentVersion;
