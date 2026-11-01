@@ -1,7 +1,7 @@
 <!doctype html>
-<html>
+<html lang="sv">
   <head>
-    <title>Options</title>
+    <title data-i18n="optionsTitle"></title>
     <link rel="stylesheet" href="../../resources/style/base.css" />
     <link rel="stylesheet" type="text/css" href="options.css" />
     <link id="json-theme" href="../../resources/style/json-themes/default.css" rel="stylesheet" />
@@ -11,14 +11,15 @@
     <div id="error"></div>
     <form id="options-form">
       <div id="login-paths-wrapper">
-        <h2>Find login page</h2>
+        <h2 data-i18n="findLoginPage"></h2>
         <div>
           <label
             for="custom-login-paths"
+            data-i18n-tooltip="loginPathsHelp"
             data-tooltip="Enter one path per line or separate them with commas (e.g., /login, /admin/login)."
           >
-            <span>Target paths</span>
-            <span class="sr-only">
+            <span data-i18n="targetPaths"></span>
+            <span class="sr-only" data-i18n="loginPathsHelp">
               Enter one path per line or separate them with commas (e.g., /login, /admin/login).
             </span>
             <textarea
@@ -30,25 +31,26 @@
         </div>
       </div>
       <div id="properties-wrapper">
-        <h2>Node properties</h2>
+        <h2 data-i18n="nodeProperties"></h2>
         <label
+          data-i18n-tooltip="richJsonViewHelp"
           data-tooltip="Enables syntax highlighting and clickable node traversal in the properties view."
         >
           <input type="checkbox" id="use-syntax-highlighting" aria-describedby="syntax-desc" />
-          <span>Rich JSON view</span>
-          <span id="syntax-desc" class="sr-only">
+          <span data-i18n="richJsonView"></span>
+          <span id="syntax-desc" class="sr-only" data-i18n="richJsonViewHelp">
             Enables syntax highlighting and clickable node traversal in the properties view.
           </span>
         </label>
         <div>
-          <label for="theme-dropdown">JSON theme:</label>
+          <label for="theme-dropdown" data-i18n="jsonTheme"></label>
           <select name="Theme" id="theme-dropdown">
-            <option value="">Default</option>
+            <option value="" data-i18n="default"></option>
           </select>
         </div>
         <div>
           <details id="expandable">
-            <summary>Theme preview</summary>
+            <summary data-i18n="themePreview"></summary>
             <div class="json-holder">
               <pre></pre>
             </div>
@@ -56,15 +58,28 @@
         </div>
       </div>
       <div id="session-params-wrapper">
-        <h2>Session parameters</h2>
-        <label data-tooltip="Not applicable in edit mode">
+        <h2 data-i18n="sessionParameters"></h2>
+        <label
+          data-tooltip="Not applicable in edit mode"
+          data-i18n-tooltip="notApplicableInEditMode"
+        >
           <input type="checkbox" id="reload-on-change" />
-          <span>Reload on parameter update</span>
-          <span id="param-desc" class="sr-only">Not applicable in edit mode</span>
+          <span data-i18n="reloadOnParameterUpdate"></span>
+          <span id="param-desc" class="sr-only" data-i18n="notApplicableInEditMode">
+            Not applicable in edit mode
+          </span>
         </label>
       </div>
+      <div id="language-wrapper">
+        <label for="locale-select" data-i18n="language"></label>
+        <select id="locale-select" name="locale">
+          <option value="auto" data-i18n="automaticBrowserLanguage"></option>
+          <option value="en" data-i18n="english"></option>
+          <option value="sv" data-i18n="swedish"></option>
+        </select>
+      </div>
       <div id="save-wrapper">
-        <button id="save" type="button" disabled>Save</button>
+        <button id="save" type="button" disabled data-i18n="save"></button>
       </div>
     </form>
     <div id="footer-wrapper">
@@ -83,6 +98,7 @@
       id="json-id-copy-template"
       class="json-id-copy"
       aria-label="Copy node ID"
+      data-i18n-aria-label="copyNodeId"
     >
       <span class="icon icon--copy" aria-hidden="true"></span>
     </button>

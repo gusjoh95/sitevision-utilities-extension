@@ -1,4 +1,4 @@
-import { dom, errors } from '../../../api/index.js';
+import { dom, errors, i18n } from '../../../api/index.js';
 
 /**
  * @param {chrome.tabs.Tab} tab - The active tab.
@@ -80,7 +80,7 @@ export async function initProperties(
 
     try {
       if (!tab?.url) {
-        throw new Error('No active tab URL available for properties lookup.');
+        throw new Error(i18n.getMessage('noActiveTabPropertiesUrl'));
       }
       if (!node) {
         propertiesIdInput.focus();
@@ -106,7 +106,7 @@ export async function initProperties(
       const msg = errors.messageOf(e);
       /** @type {HTMLDivElement} */
       const errEl = dom.getRequiredElement('#error');
-      errEl.textContent = `Error: ${msg}`;
+      errEl.textContent = i18n.getMessage('errorPrefix', [msg]);
     }
   }
 

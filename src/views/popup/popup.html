@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="en">
+<html lang="sv">
   <head>
     <title>SV-Utilities</title>
     <link rel="stylesheet" type="text/css" href="../../resources/style/base.css" />
@@ -9,7 +9,14 @@
   <body>
     <div id="app">
       <div id="header-buttons-wrapper" class="button-collection">
-        <button id="find-login" type="button" data-tooltip aria-label="Find login page" disabled>
+        <button
+          id="find-login"
+          type="button"
+          data-tooltip
+          aria-label="Find login page"
+          data-i18n-aria-label="findLoginPage"
+          disabled
+        >
           <span class="icon icon--crosshair" aria-hidden="true"></span>
         </button>
         <button
@@ -17,24 +24,37 @@
           type="button"
           data-tooltip
           aria-label="Reindex node tree"
+          data-i18n-aria-label="reindexNodeTree"
           disabled
         >
           <span class="icon icon--arrow-repeat" aria-hidden="true"></span>
         </button>
-        <button id="open-docs" type="button" data-tooltip aria-label="Open user guide">
+        <button
+          id="open-docs"
+          type="button"
+          data-tooltip
+          aria-label="Open user guide"
+          data-i18n-aria-label="openUserGuide"
+        >
           <span class="icon icon--book" aria-hidden="true"></span>
         </button>
-        <button id="open-options" type="button" data-tooltip aria-label="Open extension options">
+        <button
+          id="open-options"
+          type="button"
+          data-tooltip
+          aria-label="Open extension options"
+          data-i18n-aria-label="openExtensionOptions"
+        >
           <span class="icon icon--gear" aria-hidden="true"></span>
         </button>
       </div>
       <div id="error"></div>
       <div id="spinner" class="bar hidden"></div>
       <div id="properties-wrapper">
-        <h2>Node properties</h2>
+        <h2 data-i18n="nodeProperties"></h2>
         <form id="properties-form">
           <fieldset>
-            <legend>Version</legend>
+            <legend data-i18n="version"></legend>
             <label>
               <input
                 type="radio"
@@ -44,47 +64,46 @@
                 value="1"
                 checked
               />
-              Online
+              <span data-i18n="online"></span>
             </label>
             <label>
               <input type="radio" id="properties-offline-mode" disabled name="radio" value="0" />
-              Offline
+              <span data-i18n="offline"></span>
             </label>
           </fieldset>
           <div class="properties-search">
-            <input type="text" id="properties-id-input" disabled placeholder="Node-id" />
+            <input type="text" id="properties-id-input" disabled data-i18n-placeholder="nodeId" />
             <button
               type="submit"
               disabled
               value="getProperties"
               data-tooltip
               aria-label="Get node properties"
+              data-i18n-aria-label="getNodeProperties"
             >
               <span class="icon icon--search" aria-hidden="true"></span>
             </button>
           </div>
           <div class="flex-row">
             <input type="hidden" id="current-page-id" value="" />
-            <button type="submit" disabled value="getCurrentPage">Current node</button>
+            <button type="submit" disabled value="getCurrentPage" data-i18n="currentNode"></button>
             <input type="hidden" id="current-user-id" value="" />
-            <button type="submit" disabled value="getCurrentUser">Current user</button>
+            <button type="submit" disabled value="getCurrentUser" data-i18n="currentUser"></button>
           </div>
         </form>
       </div>
       <div id="session-params-wrapper">
-        <h2>Session parameters</h2>
+        <h2 data-i18n="sessionParameters"></h2>
         <form id="session-params-form">
           <label>
             <input type="checkbox" disabled id="toggle-profiling" />
             ?profiling=true
           </label>
-          <label
-            data-tooltip="jsdebug state is inferred from asset files in the DOM and may be inaccurate."
-          >
+          <label data-i18n-tooltip="jsdebugTooltip">
             <input type="checkbox" disabled id="toggle-jsdebug" />
             ?jsdebug=true
             <span class="sr-only">
-              jsdebug state is inferred from asset files in the DOM and may be inaccurate.
+              <span data-i18n="jsdebugTooltip"></span>
             </span>
           </label>
           <label>
@@ -94,23 +113,26 @@
         </form>
       </div>
       <div id="cookie-consent-wrapper">
-        <h2>Consent cookie</h2>
+        <h2 data-i18n="consentCookie"></h2>
         <div id="cookie-consent-prompt">
           <p id="cookie-consent-prompt-help">
-            Host permissions is required to read cookies. Please grant permissions by clicking the
-            button below.
+            <span data-i18n="cookiePermissionPrompt"></span>
           </p>
           <button id="cookie-consent-prompt-button" type="button" disabled>
-            Grant permissions
+            <span data-i18n="grantPermissions"></span>
           </button>
         </div>
         <div id="cookie-consent-info" hidden>
-          <p id="cookie-consent-accepted-label">Accepted cookies (0):</p>
+          <p id="cookie-consent-accepted-label" data-i18n="acceptedCookies"></p>
           <pre id="cookie-consent-accepted-values"></pre>
 
-          <p id="cookie-consent-denied-label">Denied cookies (0):</p>
+          <p id="cookie-consent-denied-label" data-i18n="deniedCookies"></p>
           <pre id="cookie-consent-denied-values"></pre>
-          <button id="cookie-consent-delete-button" type="button">Delete consent cookie</button>
+          <button
+            id="cookie-consent-delete-button"
+            type="button"
+            data-i18n="deleteConsentCookie"
+          ></button>
 
           <p id="cookie-consent-missing" hidden></p>
         </div>

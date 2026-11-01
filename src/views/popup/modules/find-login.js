@@ -1,4 +1,4 @@
-import { dom, errors } from '../../../api/index.js';
+import { dom, errors, i18n } from '../../../api/index.js';
 
 /**
  * Initializes the "Find login page" feature inside the popup.
@@ -13,7 +13,7 @@ export async function initFindLogin(tab) {
 
   try {
     if (!tab?.url) {
-      throw new Error('No active tab URL found.');
+      throw new Error(i18n.getMessage('noActiveTabUrlFound'));
     }
 
     const origin = new URL(tab.url).origin;
@@ -33,13 +33,13 @@ export async function initFindLogin(tab) {
         const msg = errors.messageOf(err);
         /** @type {HTMLDivElement} */
         const errEl = dom.getRequiredElement('#error');
-        errEl.textContent = `Error opening window: ${msg}`;
+        errEl.textContent = i18n.getMessage('errorOpeningWindow', [msg]);
       }
     });
   } catch (err) {
     const msg = errors.messageOf(err);
     /** @type {HTMLDivElement} */
     const errEl = dom.getRequiredElement('#error');
-    errEl.textContent = `Error: ${msg}`;
+    errEl.textContent = i18n.getMessage('errorPrefix', [msg]);
   }
 }

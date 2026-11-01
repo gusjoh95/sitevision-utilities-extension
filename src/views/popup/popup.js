@@ -3,6 +3,7 @@ import {
   editMode,
   environment,
   errors,
+  i18n,
   pageContext,
   siteVerification,
   spinner,
@@ -17,6 +18,9 @@ import { initParamButtons } from './modules/params.js';
 import { initProperties } from './modules/properties.js';
 import { initReindex } from './modules/re-index.js';
 
+await i18n.initialize();
+i18n.localizeDocument();
+
 /** @type {HTMLDivElement} */
 const appEl = dom.getRequiredElement('#app');
 const initialHTML = appEl.innerHTML;
@@ -27,16 +31,16 @@ async function init() {
     const invocationTab = await targetTab.getInvocationTab();
     const activeUrl = invocationTab?.url;
     if (!activeUrl) {
-      throw new Error('Unable to access active tab URL.');
+      throw new Error(i18n.getMessage('unableToAccessActiveTabUrl'));
     }
     const tabId = invocationTab?.id;
     if (typeof tabId !== 'number') {
-      throw new Error('Missing tab ID.');
+      throw new Error(i18n.getMessage('missingTabId'));
     }
 
     const { protocol, origin } = new URL(activeUrl);
     if (protocol !== 'http:' && protocol !== 'https:') {
-      throw new Error('Active tab must use HTTP or HTTPS.');
+      throw new Error(i18n.getMessage('activeTabHttpRequired'));
     }
     // Can probably be removed without problems
     await targetPermissions.assertTargetTabAccessible(tabId, origin);
@@ -62,7 +66,7 @@ async function init() {
 
     const sitevisionMode = await pageContext.getSitevisionMode(invocationTab);
     if (sitevisionMode === null) {
-      throw new Error('Active tab is not a Sitevision site.');
+      throw new Error(i18n.getMessage('activeTabNotSitevision'));
     }
 
     const editInfo = await editMode.getEditInfo(invocationTab);
@@ -108,7 +112,7 @@ async function init() {
     const msg = errors.messageOf(error);
     /** @type {HTMLDivElement} */
     const errEl = dom.getRequiredElement('#error');
-    errEl.textContent = `Error: ${msg}`;
+    errEl.textContent = i18n.getMessage('errorPrefix', [msg]);
   } finally {
     try {
       await Promise.all([initOpenDocs(), initOpenOptions()]);
@@ -116,7 +120,7 @@ async function init() {
       const msg = errors.messageOf(error);
       /** @type {HTMLDivElement} */
       const errEl = dom.getRequiredElement('#error');
-      errEl.textContent = `Error: ${msg}`;
+      errEl.textContent = i18n.getMessage('errorPrefix', [msg]);
     }
   }
 }

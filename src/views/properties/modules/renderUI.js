@@ -1,6 +1,7 @@
 import {
   dom,
   errors,
+  i18n,
   jsonRenderer,
   options,
   sitevisionRest,
@@ -46,7 +47,7 @@ if (useSyntaxHighlighting) {
     if (target) {
       const nextNode = target.textContent.replace(/"/g, '');
       void navigateToNode(nextNode).catch((error) => {
-        currentPropertiesText = `Error: ${errors.messageOf(error)}`;
+        currentPropertiesText = i18n.getMessage('errorPrefix', [errors.messageOf(error)]);
         preElem.textContent = currentPropertiesText;
       });
     }
@@ -75,13 +76,19 @@ export function renderUI(data, state) {
   document.title = `${state.origin}${restApiPath}/${state.version}/${state.node}/properties`;
 
   if (!data) {
-    currentPropertiesText = 'Error: No data available to render';
+    currentPropertiesText = i18n.getMessage('noDataToRender');
     preElem.textContent = currentPropertiesText;
     return;
   }
 
   if (data.error) {
-    currentPropertiesText = `${data.error}: ${data.message}`;
+    const errorLabel =
+      data.error === 'API Error'
+        ? i18n.getMessage('apiError')
+        : data.error === 'Fetch failed'
+          ? i18n.getMessage('fetchFailed')
+          : data.error;
+    currentPropertiesText = `${errorLabel}: ${data.message}`;
     preElem.textContent = currentPropertiesText;
     return;
   }
@@ -139,8 +146,8 @@ export async function navigateToNode(nextNode, navigationOptions = {}) {
 
   errorElem.textContent = '';
   preElem.style.minHeight = `${preElem.getBoundingClientRect().height}px`;
-  preElem.textContent = 'Loading...';
-  currentPropertiesText = 'Loading...';
+  preElem.textContent = i18n.getMessage('loading');
+  currentPropertiesText = i18n.getMessage('loading');
 
   try {
     await targetPermissions.assertTargetTabAccessible(Number(state.anchorTabId), state.origin);
@@ -170,11 +177,14 @@ export async function navigateToNode(nextNode, navigationOptions = {}) {
     }
 
     const msg = errors.messageOf(error);
-    const targetAccessErrorMessage = targetPermissions.getTargetAccessErrorMessage(msg);
+    const targetAccessErrorMessage = targetPermissions.getTargetAccessErrorMessage(error);
 
     if (targetAccessErrorMessage) {
-      errorElem.textContent = `Warning: ${targetAccessErrorMessage}`;
-      renderUI({ error: 'Target access unavailable', message: targetAccessErrorMessage }, state);
+      errorElem.textContent = i18n.getMessage('warningPrefix', [targetAccessErrorMessage]);
+      renderUI(
+        { error: i18n.getMessage('targetAccessUnavailable'), message: targetAccessErrorMessage },
+        state
+      );
       return true;
     }
 

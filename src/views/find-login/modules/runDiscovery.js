@@ -1,4 +1,4 @@
-import { dom, errors, logger, targetPermissions, targetTab } from '../../../api/index.js';
+import { dom, errors, i18n, logger, targetPermissions, targetTab } from '../../../api/index.js';
 
 const LOGIN_SELECTORS = ['.sv-login-portlet', '.sv-login-form'].join(',');
 
@@ -20,7 +20,7 @@ export function setStatus(state, message, url = '') {
 
   if (badge) {
     badge.className = `badge badge-${state}`;
-    badge.textContent = state.toUpperCase();
+    badge.textContent = i18n.getMessage(`status${state[0].toUpperCase()}${state.slice(1)}`);
   }
 
   if (link) {
@@ -103,13 +103,13 @@ async function probeEndpoint(tabId, targetUrl, origin, logger) {
     });
   } catch (err) {
     const errorMsg = errors.messageOf(err);
-    const targetAccessErrorMessage = targetPermissions.getTargetAccessErrorMessage(errorMsg);
+    const targetAccessErrorMessage = targetPermissions.getTargetAccessErrorMessage(err);
     if (targetAccessErrorMessage) {
       logger.append(`-> ${targetAccessErrorMessage}`);
       return { outcome: 'TARGET_UNAVAILABLE', reason: targetAccessErrorMessage };
     }
 
-    logger.append(`-> Network error (${errorMsg})`);
+    logger.append(i18n.getMessage('networkError', [errorMsg]));
     return { outcome: 'ERROR', reason: errorMsg };
   }
 
@@ -117,18 +117,18 @@ async function probeEndpoint(tabId, targetUrl, origin, logger) {
 
   // 1. Check HTTP 3xx cross-origin redirect
   if (isCrossOrigin(finalUrl.href, origin)) {
-    logger.append(`-> HTTP ${res.status} cross-origin redirect (${finalUrl.host})`);
+    logger.append(i18n.getMessage('httpCrossOriginRedirect', [String(res.status), finalUrl.host]));
     return { outcome: 'CROSS_ORIGIN_REDIRECT' };
   }
 
   if (finalUrl.href !== targetUrl) {
-    logger.append(`-> Internal redirect (${finalUrl.pathname})`);
+    logger.append(i18n.getMessage('internalRedirect', [finalUrl.pathname]));
   }
 
   // 2. Check HTTP Basic Auth (WebDAV / protected endpoints)
   const authHeader = res.headers['www-authenticate'] || '';
   if (res.status === 401 && authHeader.toLowerCase().includes('basic')) {
-    logger.append('-> SEMI-FOUND! Basic Auth detected.');
+    logger.append(i18n.getMessage('basicAuthDetected'));
     return { outcome: 'FOUND', matchUrl: finalUrl.toString(), type: 'WEBDAV' };
   }
 
@@ -137,21 +137,21 @@ async function probeEndpoint(tabId, targetUrl, origin, logger) {
 
     // 3. Check HTML meta-refresh redirect
     if (hasMetaRefresh(html)) {
-      logger.append('-> Meta-refresh redirect detected');
+      logger.append(i18n.getMessage('metaRefreshDetected'));
       return { outcome: 'CROSS_ORIGIN_REDIRECT' };
     }
 
     // 4. Evaluate local login selectors
     if (hasLocalLoginForm(html)) {
-      logger.append('-> FOUND! Local login form detected');
+      logger.append(i18n.getMessage('loginFormDetected'));
       return { outcome: 'FOUND', matchUrl: finalUrl.toString(), type: 'FORM' };
     }
 
-    logger.append(`-> HTTP ${res.status} No login form`);
+    logger.append(i18n.getMessage('httpNoLoginForm', [String(res.status)]));
     return { outcome: 'NOT_FOUND' };
   }
 
-  logger.append(`-> HTTP ${res.status}`);
+  logger.append(i18n.getMessage('httpStatus', [String(res.status)]));
   return { outcome: 'NOT_FOUND' };
 }
 
@@ -171,8 +171,8 @@ export async function runDiscovery(tabId, origin, customPaths = []) {
   const loggerInstance = logger.create(logContainer);
   loggerInstance.clear();
 
-  setStatus('running', 'Probing target site(s)...');
-  loggerInstance.log('info', `Starting discovery on: ${origin}`);
+  setStatus('running', i18n.getMessage('probingTargets'));
+  loggerInstance.log('info', i18n.getMessage('startingDiscovery', [origin]));
 
   const webdavTestPaths = ['/webdav/images/', '/webdav/files/'];
   const queue = [...new Set(['/edit', ...webdavTestPaths, ...customPaths])].filter(Boolean);
@@ -186,7 +186,7 @@ export async function runDiscovery(tabId, origin, customPaths = []) {
     const targetUrl = new URL(path, origin).toString();
     const paddedPath = path.padEnd(maxPathLength, ' ');
 
-    loggerInstance.log('info', `GET ${paddedPath}`);
+    loggerInstance.log('info', i18n.getMessage('getPath', [paddedPath]));
 
     try {
       const result = await probeEndpoint(tabId, targetUrl, origin, loggerInstance);
@@ -195,31 +195,31 @@ export async function runDiscovery(tabId, origin, customPaths = []) {
         if (result.type === 'WEBDAV') {
           // Store WebDAV as a secondary fallback and continue searching for a primary login form
           webdavFallbackUrl = result.matchUrl;
-          loggerInstance.append('Continuing search for login form.');
+          loggerInstance.append(i18n.getMessage('continuingLoginSearch'));
         } else {
           // Primary login form detected — terminate search immediately
-          setStatus('success', 'Login form found at:', result.matchUrl);
+          setStatus('success', i18n.getMessage('loginFormFoundAt'), result.matchUrl);
           return;
         }
       }
 
       if (result.outcome === 'TARGET_UNAVAILABLE' && result.reason) {
-        setStatus('error', 'Target unavailable:', result.reason);
+        setStatus('error', i18n.getMessage('targetUnavailableStatus'), result.reason);
         return;
       }
     } catch (err) {
-      loggerInstance.append(`-> Error: ${errors.messageOf(err)}`);
+      loggerInstance.append(i18n.getMessage('discoveryError', [errors.messageOf(err)]));
     }
   }
 
   // Fallback to WebDAV endpoint if no primary login form was found during queue traversal
   if (webdavFallbackUrl) {
-    setStatus('success', 'Basic Auth found at:', webdavFallbackUrl);
-    loggerInstance.log('info', `Basic Auth found at: ${webdavFallbackUrl}`);
-    loggerInstance.log('warn', 'Discovery finished — only Basic Auth was found.');
+    setStatus('success', i18n.getMessage('basicAuthFoundAt'), webdavFallbackUrl);
+    loggerInstance.log('info', `${i18n.getMessage('basicAuthFoundAt')} ${webdavFallbackUrl}`);
+    loggerInstance.log('warn', i18n.getMessage('basicAuthOnlyFound'));
     return;
   }
 
-  loggerInstance.log('warn', 'Discovery finished — no login found.');
-  setStatus('warn', 'No login found.');
+  loggerInstance.log('warn', i18n.getMessage('noLoginFound'));
+  setStatus('warn', i18n.getMessage('noLoginFound'));
 }

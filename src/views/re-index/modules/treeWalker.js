@@ -1,3 +1,5 @@
+import { i18n } from '../../../api/index.js';
+
 /** @typedef {import('./types.js').DiscoveredNode} DiscoveredNode */
 
 /**
@@ -23,7 +25,7 @@ export async function walkNodeTree({
   onNode,
 }) {
   if (typeof rootNode.id !== 'string') {
-    throw new Error('Root node is missing an ID.');
+    throw new Error(i18n.getMessage('rootIdMissing'));
   }
 
   const visited = new Set([rootNode.id]);

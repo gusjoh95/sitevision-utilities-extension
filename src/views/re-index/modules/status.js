@@ -1,4 +1,4 @@
-import { dom } from '../../../api/index.js';
+import { dom, i18n } from '../../../api/index.js';
 
 /**
  * Updates the status badge and summary text in the reindex view.
@@ -14,6 +14,6 @@ export function setStatus(state, message) {
   if (summaryText) summaryText.textContent = message;
   if (badge) {
     badge.className = `badge badge-${state}`;
-    badge.textContent = state.toUpperCase();
+    badge.textContent = i18n.getMessage(`status${state[0].toUpperCase()}${state.slice(1)}`);
   }
 }

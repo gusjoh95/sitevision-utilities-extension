@@ -1,27 +1,45 @@
 <!doctype html>
-<html lang="en">
+<html lang="sv">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <link rel="stylesheet" href="../../resources/style/base.css" />
     <link id="json-theme" href="../../resources/style/json-themes/default.css" rel="stylesheet" />
     <link rel="stylesheet" href="properties.css" />
-    <title>Properties</title>
+    <title data-i18n="properties"></title>
   </head>
 
   <body>
     <div id="header-wrapper" class="properties-header">
-      <h1>Properties</h1>
+      <h1 data-i18n="properties"></h1>
       <div class="button-collection">
-        <button data-tooltip type="button" aria-label="Previous node" id="back">
+        <button
+          data-tooltip
+          type="button"
+          aria-label="Previous node"
+          data-i18n-aria-label="previousNode"
+          id="back"
+        >
           <span class="icon icon--arrow-left" aria-hidden="true"></span>
         </button>
 
-        <button data-tooltip type="button" aria-label="Next node" id="forward">
+        <button
+          data-tooltip
+          type="button"
+          aria-label="Next node"
+          data-i18n-aria-label="nextNode"
+          id="forward"
+        >
           <span class="icon icon--arrow-right" aria-hidden="true"></span>
         </button>
 
-        <button data-tooltip type="button" id="copy" aria-label="Copy properties to clipboard">
+        <button
+          data-tooltip
+          type="button"
+          id="copy"
+          aria-label="Copy properties to clipboard"
+          data-i18n-aria-label="copyProperties"
+        >
           <span class="icon icon--copy" aria-hidden="true"></span>
         </button>
 
@@ -31,6 +49,7 @@
           id="wrap"
           aria-pressed="false"
           aria-label="Toggle word wrap"
+          data-i18n-aria-label="toggleWordWrap"
         >
           <span class="icon icon--text-wrap" aria-hidden="true"></span>
         </button>
@@ -41,6 +60,7 @@
           id="version-toggle"
           aria-pressed="true"
           aria-label="Online version"
+          data-i18n-aria-label="onlineVersion"
         >
           <span class="icon icon--globe2" aria-hidden="true"></span>
         </button>
@@ -57,6 +77,7 @@
       id="json-id-copy-template"
       class="json-id-copy"
       aria-label="Copy node ID"
+      data-i18n-aria-label="copyNodeId"
     >
       <span class="icon icon--copy" aria-hidden="true"></span>
     </button>

@@ -1,4 +1,4 @@
-import { errors, logger } from '../../../api/index.js';
+import { errors, i18n, logger } from '../../../api/index.js';
 import { BEFORE_UNLOAD_GUARD_MESSAGE } from '../../../background/messages.js';
 import { setStatus } from './status.js';
 import { runReindexQueue, previewReindexQueue, cancelReindex } from './reindexQueue.js';
@@ -23,18 +23,15 @@ async function withBeforeUnloadGuard(tabId, logger, operation) {
     guardId,
   });
   if (!installResult?.installed) {
-    throw new Error('Could not install the navigation guard in the Sitevision tab.');
+    throw new Error(i18n.getMessage('navigationGuardInstallFailed'));
   }
 
-  logger.log(
-    'info',
-    'Navigation guard active: leaving or reloading the Sitevision tab may show a browser confirmation.'
-  );
+  logger.log('info', i18n.getMessage('navigationGuardActive'));
 
   let isViewExiting = false;
   const handleViewExit = () => {
     isViewExiting = true;
-    logger.log('info', 'Re-index view is closing; requesting navigation-guard cleanup.');
+    logger.log('info', i18n.getMessage('reindexViewClosing'));
     void browser.runtime
       .sendMessage({ type: BEFORE_UNLOAD_GUARD_MESSAGE, action: 'remove', tabId, guardId })
       .catch(() => {});
@@ -54,12 +51,15 @@ async function withBeforeUnloadGuard(tabId, logger, operation) {
           guardId,
         });
         if (result?.removed) {
-          logger.log('info', 'Navigation guard removed from the Sitevision tab.');
+          logger.log('info', i18n.getMessage('navigationGuardRemoved'));
         } else {
-          logger.log('warn', 'Navigation guard cleanup could not find the active guard.');
+          logger.log('warn', i18n.getMessage('navigationGuardNotFound'));
         }
       } catch (err) {
-        logger.log('error', `Navigation guard cleanup failed: ${errors.messageOf(err)}`);
+        logger.log(
+          'error',
+          i18n.getMessage('navigationGuardCleanupFailed', [errors.messageOf(err)])
+        );
       }
     }
   }
@@ -90,12 +90,12 @@ async function runLoggedOperation(
   const loggerInstance = logger.create(logContainer);
   loggerInstance.clear();
   setStatus('running', startingMessage);
-  loggerInstance.log('info', `Target origin: ${origin}`);
+  loggerInstance.log('info', i18n.getMessage('targetOrigin', [origin]));
 
   try {
     await operation(loggerInstance);
   } catch (err) {
-    const message = `${errorPrefix}: ${errors.messageOf(err)}`;
+    const message = i18n.getMessage(errorPrefix, [errors.messageOf(err)]);
     loggerInstance.log('error', message);
     setStatus('error', message);
   }
@@ -117,8 +117,8 @@ export async function runReindex(tabId, origin, rootNode, csrfToken, options) {
     tabId,
     origin,
     rootNode,
-    `Starting tree reindex from root: ${rootNode.id}`,
-    'Reindex failed',
+    i18n.getMessage('startingTreeReindex', [rootNode.id]),
+    'reindexFailed',
     (logger) =>
       withBeforeUnloadGuard(tabId, logger, () =>
         runReindexQueue({ tabId, origin, rootNode, csrfToken, logger, ...options })
@@ -141,8 +141,8 @@ export async function previewReindex(tabId, origin, rootNode, options) {
     tabId,
     origin,
     rootNode,
-    `Previewing tree from root: ${rootNode.id}`,
-    'Preview failed',
+    i18n.getMessage('previewingTree', [rootNode.id]),
+    'previewFailed',
     (logger) =>
       withBeforeUnloadGuard(tabId, logger, () =>
         previewReindexQueue({ tabId, origin, rootNode, logger, ...options })

@@ -1,5 +1,8 @@
-import { dom, errors } from '../../api/index.js';
+import { dom, errors, i18n } from '../../api/index.js';
 import { initPropertiesView } from './modules/initPropertiesView.js';
+
+await i18n.initialize();
+i18n.localizeDocument();
 
 export const restApiPath = '/rest-api/1';
 
@@ -12,5 +15,7 @@ async function init() {
 }
 
 init().catch((error) => {
-  dom.getRequiredElement('.json-holder pre').textContent = `Error: ${errors.messageOf(error)}`;
+  dom.getRequiredElement('.json-holder pre').textContent = i18n.getMessage('errorPrefix', [
+    errors.messageOf(error),
+  ]);
 });

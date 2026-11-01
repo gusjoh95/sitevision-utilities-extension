@@ -15,3 +15,4 @@ export * as logger from './modules/logger.js';
 export * as environment from './modules/environment.js';
 export * as spinner from './modules/spinner.js';
 export * as sessionParams from './modules/sessionParams.js';
+export * as i18n from './modules/i18n.js';

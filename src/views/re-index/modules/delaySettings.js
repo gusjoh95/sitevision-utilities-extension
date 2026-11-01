@@ -1,3 +1,5 @@
+import { i18n } from '../../../api/index.js';
+
 /**
  * @typedef {Object} DelaySettingsParams
  * @property {HTMLInputElement} reindexDelayInput
@@ -50,11 +52,10 @@ function setLowDelayDialogText(dialog) {
     throw new Error('Low-delay dialog is missing a required element.');
   }
 
-  title.textContent = 'Low delay warning';
-  message.textContent =
-    'Delays below 100 ms are at your own risk. Low values may trigger rate limits or freeze your session.';
-  okButton.textContent = 'OK';
-  cancelButton.textContent = 'Cancel';
+  title.textContent = i18n.getMessage('lowDelayWarning');
+  message.textContent = i18n.getMessage('lowDelayWarningText');
+  okButton.textContent = i18n.getMessage('ok');
+  cancelButton.textContent = i18n.getMessage('cancel');
 }
 
 /**

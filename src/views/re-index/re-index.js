@@ -1,4 +1,12 @@
-import { dom, errors, pageContext, sitevisionRest, spinner, targetTab } from '../../api/index.js';
+import {
+  dom,
+  errors,
+  i18n,
+  pageContext,
+  sitevisionRest,
+  spinner,
+  targetTab,
+} from '../../api/index.js';
 import { getCurrentState } from './modules/getCurrentState.js'; // Getting params could be done in the API layer instead of the view layer.
 import { runReindex, previewReindex, cancelReindex } from './modules/runReindex.js';
 import { bindDelaySettings } from './modules/delaySettings.js';
@@ -7,6 +15,9 @@ import {
   DEFAULT_REINDEX_DELAY_MS,
   updateCachedPreviewSummary,
 } from './modules/reindexQueue.js';
+
+await i18n.initialize();
+i18n.localizeDocument();
 
 /**
  * Retrieves the CSRF token from PageContext, falling back to edit-mode bootstrap data.
@@ -37,7 +48,7 @@ async function getBootstrapCsrfToken(tabId) {
  *
  * @returns {Promise<void>} Resolves after the view event handlers are registered.
  */
-document.addEventListener('DOMContentLoaded', async () => {
+async function initializeReindexView() {
   const { origin, anchorTabId, rootNodeId } = getCurrentState();
 
   const startBtn = /** @type {HTMLButtonElement} */ (dom.getRequiredElement('#start-reindex-btn'));
@@ -127,27 +138,27 @@ document.addEventListener('DOMContentLoaded', async () => {
     nodeOutput.textContent = rootNode.id;
     csrfToken = await getBootstrapCsrfToken(Number(anchorTabId));
     if (!csrfToken) {
-      throw new Error(
-        `No CSRF token found – ensure that you're logged in. Reindexing will not be possible.`
-      );
+      throw new Error(i18n.getMessage('csrfTokenMissing'));
     }
 
     startBtn.disabled = false;
     previewBtn.disabled = false;
   } catch (err) {
-    errorElement.textContent = `Error: ${errors.messageOf(err)}`;
+    errorElement.textContent = i18n.getMessage('errorPrefix', [errors.messageOf(err)]);
   }
 
   startBtn?.addEventListener('click', () => {
     void (async () => {
       if (!rootNode) {
-        errorElement.textContent = 'Error: Root node properties are unavailable.';
+        errorElement.textContent = i18n.getMessage('missingRootProperties');
         return;
       }
 
       const token = csrfToken;
       if (!token) {
-        errorElement.textContent = `Error: No CSRF token found – ensure that you're logged in.`;
+        errorElement.textContent = i18n.getMessage('errorPrefix', [
+          i18n.getMessage('missingCsrfToken'),
+        ]);
         return;
       }
 
@@ -160,7 +171,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   previewBtn?.addEventListener('click', () => {
     void (async () => {
       if (!rootNode) {
-        errorElement.textContent = 'Error: Root node properties are unavailable.';
+        errorElement.textContent = i18n.getMessage('missingRootProperties');
         return;
       }
 
@@ -174,4 +185,6 @@ document.addEventListener('DOMContentLoaded', async () => {
     cancelReindex();
     cancelBtn.disabled = true;
   });
-});
+}
+
+await initializeReindexView();

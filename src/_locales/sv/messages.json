@@ -1,0 +1,212 @@
+{
+  "extensionName": {
+    "message": "Sitevision Utilities",
+    "description": "Tilläggets namn."
+  },
+  "extensionDescription": {
+    "message": "Inofficiellt Sitevision-tillägg för nodegenskaper, inloggningsupptäckt, sessionsparametrar, rekursiv omindexering med mera.",
+    "description": "Kort beskrivning av tillägget."
+  },
+  "findLoginPage": { "message": "Hitta inloggningssida" },
+  "reindexNodeTree": { "message": "Indexera om nodträd" },
+  "openUserGuide": { "message": "Öppna användarguiden" },
+  "openExtensionOptions": { "message": "Öppna tilläggsalternativ" },
+  "nodeProperties": { "message": "Nodegenskaper" },
+  "version": { "message": "Version" },
+  "online": { "message": "Online" },
+  "offline": { "message": "Offline" },
+  "nodeId": { "message": "Nod-ID" },
+  "getNodeProperties": { "message": "Hämta nodegenskaper" },
+  "currentNode": { "message": "Aktuell nod" },
+  "currentUser": { "message": "Aktuell användare" },
+  "sessionParameters": { "message": "Sessionsparametrar" },
+  "jsdebugTooltip": {
+    "message": "jsdebug-läget uppskattas utifrån tillgångsfiler i DOM:en och kan vara felaktigt."
+  },
+  "consentCookie": { "message": "Samtyckeskaka" },
+  "cookiePermissionPrompt": {
+    "message": "Värdbehörighet krävs för att läsa kakor. Ge behörighet genom att klicka på knappen nedan."
+  },
+  "grantPermissions": { "message": "Ge behörighet" },
+  "acceptedCookies": { "message": "Godkända kakor:" },
+  "deniedCookies": { "message": "Nekade kakor:" },
+  "acceptedCookiesCount": { "message": "Godkända kakor ($1):" },
+  "deniedCookiesCount": { "message": "Nekade kakor ($1):" },
+  "deleteConsentCookie": { "message": "Ta bort samtyckeskaka" },
+  "targetPaths": { "message": "Målsökvägar" },
+  "loginPathsHelp": {
+    "message": "Ange en sökväg per rad eller separera dem med kommatecken (t.ex. /login, /admin/login)."
+  },
+  "richJsonView": { "message": "Utökad JSON-vy" },
+  "richJsonViewHelp": {
+    "message": "Aktiverar syntaxmarkering och klickbar nodnavigering i egenskapsvyn."
+  },
+  "jsonTheme": { "message": "JSON-tema:" },
+  "default": { "message": "Standard" },
+  "themePreview": { "message": "Förhandsvisning av tema" },
+  "notApplicableInEditMode": { "message": "Gäller inte i redigeringsläge" },
+  "reloadOnParameterUpdate": { "message": "Läs in sidan igen när en parameter ändras" },
+  "save": { "message": "Spara" },
+  "optionsTitle": { "message": "Alternativ" },
+  "language": { "message": "Språk:" },
+  "automaticBrowserLanguage": { "message": "Automatiskt (webbläsarens språk)" },
+  "english": { "message": "Engelska" },
+  "swedish": { "message": "Svenska" },
+  "copyNodeId": { "message": "Kopiera nod-ID" },
+  "properties": { "message": "Egenskaper" },
+  "previousNode": { "message": "Föregående nod" },
+  "nextNode": { "message": "Nästa nod" },
+  "copyProperties": { "message": "Kopiera egenskaper till urklipp" },
+  "toggleWordWrap": { "message": "Växla radbrytning" },
+  "onlineVersion": { "message": "Onlineversion" },
+  "reindexViewTitle": { "message": "Indexera om nodträd" },
+  "rootNodeId": { "message": "Rotnodens ID:" },
+  "loading": { "message": "Läser in..." },
+  "startReindex": { "message": "Starta omindexering" },
+  "startReindexTooltip": {
+    "message": "Startar en djupet-först-omindexering av nodträdet. En färdig förhandsvisning används om den finns."
+  },
+  "preview": { "message": "Förhandsvisa" },
+  "previewTooltip": { "message": "Skapar en förhandsvisning av nodträdet som ska indexeras om." },
+  "cancel": { "message": "Avbryt" },
+  "cancelReindexTooltip": {
+    "message": "Avbryter den pågående omindexeringen eller förhandsvisningen."
+  },
+  "includeRobotsIndexFalse": { "message": "Indexera om noder med robotsIndex=false:" },
+  "delayBetweenIndexCalls": { "message": "Fördröjning mellan indexeringsanrop (ms):" },
+  "delayBetweenApiCalls": { "message": "Fördröjning mellan REST API-anrop (ms):" },
+  "statusIdle": { "message": "REDO" },
+  "readyToReindex": { "message": "Redo att indexera om" },
+  "lowDelayWarning": { "message": "Varning för kort fördröjning" },
+  "lowDelayWarningText": {
+    "message": "Fördröjningar under 100 ms används på egen risk. Korta fördröjningar kan utlösa hastighetsbegränsningar eller låsa sessionen."
+  },
+  "ok": { "message": "OK" },
+  "statusRunning": { "message": "PÅGÅR" },
+  "statusSuccess": { "message": "KLAR" },
+  "statusWarn": { "message": "VARNING" },
+  "statusError": { "message": "FEL" },
+  "findLoginTitle": { "message": "Hitta inloggningssida" },
+  "clickToCopyUrl": { "message": "Klicka för att kopiera URL" },
+  "errorPrefix": { "message": "Fel: $1" },
+  "warningPrefix": { "message": "Varning: $1" },
+  "errorOpeningWindow": { "message": "Fel när fönstret öppnades: $1" },
+  "missingCookie": { "message": "Kakan \"$1\" hittades inte" },
+  "cookiePermissionForOrigin": {
+    "message": "Värdbehörighet för $1 krävs för att läsa kakor. Ge behörighet genom att klicka på knappen nedan."
+  },
+  "startingTreeReindex": { "message": "Startar omindexering av nodträdet från roten: $1" },
+  "previewingTree": { "message": "Förhandsvisar nodträdet från roten: $1" },
+  "targetOrigin": { "message": "Måladress: $1" },
+  "reindexFailed": { "message": "Omindexeringen misslyckades: $1" },
+  "previewFailed": { "message": "Förhandsvisningen misslyckades: $1" },
+  "navigationGuardActive": {
+    "message": "Navigeringsskyddet är aktivt: om du lämnar eller läser in Sitevision-fliken igen kan webbläsaren visa en bekräftelse."
+  },
+  "reindexViewClosing": {
+    "message": "Vyn för omindexering stängs; begär rensning av navigeringsskyddet."
+  },
+  "navigationGuardRemoved": {
+    "message": "Navigeringsskyddet har tagits bort från Sitevision-fliken."
+  },
+  "navigationGuardNotFound": {
+    "message": "Kunde inte hitta det aktiva navigeringsskyddet vid rensning."
+  },
+  "navigationGuardCleanupFailed": { "message": "Rensning av navigeringsskyddet misslyckades: $1" },
+  "navigationGuardInstallFailed": {
+    "message": "Kunde inte installera navigeringsskyddet i Sitevision-fliken."
+  },
+  "previewSummary": {
+    "message": "$1 noder hittades; $2 ska indexeras om; $3 hoppades över på grund av robotsIndex=false; $4 kan inte indexeras. $5"
+  },
+  "includingRobotsIndexFalse": { "message": "robotsIndex=false inkluderas." },
+  "respectingRobotsIndex": { "message": "robotsIndex respekteras." },
+  "previewUpdatedFromCache": {
+    "message": "Förhandsvisningen uppdaterades från sparad genomsökning: $1"
+  },
+  "previewSummaryStatus": { "message": "Förhandsvisning: $1" },
+  "notIndexableReason": { "message": "nodtypen kan inte indexeras" },
+  "robotsIndexFalseReason": { "message": "robotsIndex=false" },
+  "traversingChildren": { "message": "genomsöker underordnade noder..." },
+  "notTraversingChildren": { "message": "genomsöker inte underordnade noder." },
+  "notReindexingNode": { "message": "Indexerar inte om $1 ($2, $3): $4; $5" },
+  "reindexingNode": { "message": "Indexerar om $1 ($2, $3)..." },
+  "okArrow": { "message": "-> OK" },
+  "reusingPreview": {
+    "message": "Återanvänder förhandsvisning: indexerar om $1 tidigare hittade noder..."
+  },
+  "fetchingRootChildren": { "message": "Hämtar underordnade noder till roten $1..." },
+  "processedIndexed": { "message": "Bearbetat $1 noder; $2 har indexerats..." },
+  "reindexCancelled": { "message": "Omindexeringen avbröts av användaren." },
+  "cancelledProcessedIndexed": { "message": "Avbruten. Bearbetat $1 noder; $2 har indexerats." },
+  "reindexFinished": { "message": "Klart! Bearbetat $1 noder; $2 har indexerats." },
+  "reindexCompleted": { "message": "Slutfört. Bearbetat $1 noder; $2 har indexerats." },
+  "previewingReindexTree": {
+    "message": "Förhandsvisar omindexering av nodträdet från roten $1..."
+  },
+  "previewCancelled": { "message": "Förhandsvisningen avbröts av användaren." },
+  "previewCancelledCount": { "message": "Förhandsvisningen avbröts. $1 noder hittades." },
+  "discoveryComplete": { "message": "Genomsökningen är klar: $1" },
+  "previewIndexLabel": { "message": "[indexera om]" },
+  "previewRobotsLabel": { "message": "[robotsIndex=false]" },
+  "previewNotIndexableLabel": { "message": "[kan inte indexeras]" },
+  "targetClosed": {
+    "message": "Den ursprungliga webbplatsfliken stängdes. Öppna den här vyn igen från en aktiv sida."
+  },
+  "targetUnavailable": {
+    "message": "Den ursprungliga webbplatsfliken har navigerat till en annan plats eller så har webbläsarbehörigheter återkallats. Öppna den här vyn igen från en aktiv sida."
+  },
+  "inaccessibleTarget": { "message": "Målfliken finns inte längre eller är inte tillgänglig." },
+  "probingTargets": { "message": "Söker igenom målsidor..." },
+  "startingDiscovery": { "message": "Startar sökning på: $1" },
+  "getPath": { "message": "GET $1" },
+  "networkError": { "message": "-> Nätverksfel ($1)" },
+  "httpCrossOriginRedirect": { "message": "-> HTTP $1 omdirigering till annan värd ($2)" },
+  "internalRedirect": { "message": "-> Intern omdirigering ($1)" },
+  "basicAuthDetected": { "message": "-> DELVIS HITTAD! Basic Auth upptäcktes." },
+  "metaRefreshDetected": { "message": "-> Omdirigering via meta refresh upptäcktes" },
+  "loginFormDetected": { "message": "-> HITTAD! Lokalt inloggningsformulär upptäcktes" },
+  "httpNoLoginForm": { "message": "-> HTTP $1 Inget inloggningsformulär" },
+  "httpStatus": { "message": "-> HTTP $1" },
+  "continuingLoginSearch": { "message": "Fortsätter sökningen efter inloggningsformulär." },
+  "loginFormFoundAt": { "message": "Inloggningsformulär hittades på:" },
+  "targetUnavailableStatus": { "message": "Målet är inte tillgängligt:" },
+  "basicAuthFoundAt": { "message": "Basic Auth hittades på:" },
+  "basicAuthOnlyFound": { "message": "Sökningen är klar, endast Basic Auth hittades." },
+  "noLoginFound": { "message": "Inget inloggningsställe hittades." },
+  "discoveryError": { "message": "-> Fel: $1" },
+  "probeError": { "message": "Fel: $1" },
+  "missingPropertiesParameters": {
+    "message": "Fel: Obligatoriska URL-parametrar saknas (origin/node/anchorTabId)."
+  },
+  "noDataToRender": { "message": "Fel: Det finns inga data att visa" },
+  "targetAccessUnavailable": { "message": "Målåtkomst saknas" },
+  "rootIdMissing": { "message": "Rotnoden saknar ett ID." },
+  "missingRootProperties": { "message": "Fel: Rotnodens egenskaper är inte tillgängliga." },
+  "missingCsrfToken": { "message": "Ingen CSRF-token hittades. Kontrollera att du är inloggad." },
+  "csrfTokenMissing": {
+    "message": "Ingen CSRF-token hittades. Kontrollera att du är inloggad. Omindexering är inte möjlig."
+  },
+  "apiError": { "message": "API-fel" },
+  "fetchFailed": { "message": "Hämtningen misslyckades" },
+  "loadThemesFailed": { "message": "Kunde inte läsa in teman: HTTP $1 $2" },
+  "loadThemePreviewFailed": { "message": "Kunde inte läsa in temaförhandsvisningen: HTTP $1 $2" },
+  "noActiveTabUrlFound": { "message": "Ingen URL hittades för den aktiva fliken." },
+  "noActiveTabCookieUrl": {
+    "message": "Ingen URL för aktiv flik är tillgänglig för kontroll av samtyckeskakor."
+  },
+  "noActiveTabSessionParameters": {
+    "message": "Ingen aktiv flik är tillgänglig för kontroll av sessionsparametrar."
+  },
+  "sessionParameterNoResult": { "message": "Kontrollen av sessionsparametrar gav inget resultat." },
+  "noActiveTabPropertiesUrl": {
+    "message": "Ingen URL för aktiv flik är tillgänglig för hämtning av egenskaper."
+  },
+  "unableToAccessActiveTabUrl": {
+    "message": "Det går inte att komma åt URL:en för den aktiva fliken."
+  },
+  "missingTabId": { "message": "Flik-ID saknas." },
+  "activeTabHttpRequired": { "message": "Den aktiva fliken måste använda HTTP eller HTTPS." },
+  "activeTabNotSitevision": { "message": "Den aktiva fliken är inte en Sitevision-webbplats." },
+  "reindexHttpFailure": { "message": "HTTP $1 vid omindexering av nod" }
+}

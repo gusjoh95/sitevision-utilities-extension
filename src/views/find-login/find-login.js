@@ -1,6 +1,9 @@
-import { dom, errors, options, spinner, targetPermissions } from '../../api/index.js';
+import { dom, errors, i18n, options, spinner, targetPermissions } from '../../api/index.js';
 import { getCurrentState } from './modules/getCurrentState.js';
 import { runDiscovery } from './modules/runDiscovery.js';
+
+await i18n.initialize();
+i18n.localizeDocument();
 
 async function initFindLoginView() {
   const { origin, anchorTabId } = getCurrentState();
@@ -13,7 +16,7 @@ async function initFindLoginView() {
     tabId: Number(anchorTabId),
     origin,
     onLost: ({ message }) => {
-      errorElem.textContent = `Warning: ${message}`;
+      errorElem.textContent = i18n.getMessage('warningPrefix', [message]);
     },
   });
 
@@ -26,7 +29,7 @@ async function initFindLoginView() {
 
         await browser.tabs.create({ url });
       } catch (err) {
-        errorElem.textContent = `Error: ${errors.messageOf(err)}`;
+        errorElem.textContent = i18n.getMessage('errorPrefix', [errors.messageOf(err)]);
       }
     });
   }
@@ -42,8 +45,8 @@ async function initFindLoginView() {
     );
   } catch (error) {
     const errorMsg = errors.messageOf(error);
-    errorElem.textContent = `Error: ${errorMsg}`;
+    errorElem.textContent = i18n.getMessage('errorPrefix', [errorMsg]);
   }
 }
 
-document.addEventListener('DOMContentLoaded', initFindLoginView);
+await initFindLoginView();
