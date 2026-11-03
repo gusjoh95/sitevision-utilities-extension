@@ -10,8 +10,11 @@
   --view-width: 320px;
   --view-padding-inline: var(--spacing-lg);
   --border-radius: 8px;
-  --font-family: sans-serif;
-  --mono-font-family: monospace;
+  --font-family: Aptos, 'Segoe UI', 'Segoe UI Variable Text', system-ui, sans-serif;
+  --font-family-heading:
+    system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Noto Sans, Ubuntu, sans-serif;
+  --mono-font-family:
+    ui-monospace, 'Cascadia Code', 'Source Code Pro', Menlo, Consolas, 'DejaVu Sans Mono', monospace;
   --base-font-size: 14px;
   --base-line-height: 1.45;
   --spacing-xs: 4px;
@@ -58,6 +61,13 @@ body {
   -moz-osx-font-smoothing: grayscale;
 }
 
+button,
+input,
+select,
+textarea {
+  font-family: inherit;
+}
+
 body {
   padding: var(--spacing-md) var(--view-padding-inline);
   background-color: var(--bg-color);
@@ -85,13 +95,24 @@ summary {
 
 /* 3. Typography & Text Elements */
 
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  font-family: var(--font-family-heading);
+  text-transform: uppercase;
+}
+
 h1 {
   margin: 0 0 8px;
-  font-size: 1.6rem;
+  font-size: 1.35rem;
 }
 
 h2 {
   margin: 20px 0 8px;
+  font-size: 1.125rem;
 }
 
 a {
@@ -154,7 +175,7 @@ form {
 }
 
 legend {
-  font-size: 0.85rem;
+  font-size: 0.9rem;
   font-weight: 600;
 }
 
