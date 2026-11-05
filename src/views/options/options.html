@@ -2,6 +2,7 @@
 <html>
   <head>
     <title>Options</title>
+    <script src="../../resources/theme-init.js"></script>
     <link rel="stylesheet" href="../../resources/style/base.css" />
     <link rel="stylesheet" type="text/css" href="options.css" />
     <link id="json-theme" href="../../resources/style/json-themes/default.css" rel="stylesheet" />
@@ -10,6 +11,17 @@
   <body>
     <div id="error"></div>
     <form id="options-form">
+      <div id="appearance-wrapper">
+        <h2>Appearance</h2>
+        <div>
+          <label for="color-scheme">Extension color scheme:</label>
+          <select id="color-scheme" name="color-scheme">
+            <option value="auto">Auto</option>
+            <option value="light">Light</option>
+            <option value="dark">Dark</option>
+          </select>
+        </div>
+      </div>
       <div id="login-paths-wrapper">
         <h2>Find login page</h2>
         <div>

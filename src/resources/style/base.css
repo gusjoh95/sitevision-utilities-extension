@@ -22,24 +22,29 @@
   --spacing-md: 8px;
   --spacing-lg: 12px;
   --spacing-xl: 16px;
-}
-
-@media (prefers-color-scheme: light) {
-  :root {
-    --bg-color-dark: var(--color-white-light);
-    --bg-color: var(--color-white);
-    --fg-color: var(--color-black);
-    --fg-color-light: var(--color-black-dark);
-  }
+  color-scheme: light;
+  --bg-color-dark: var(--color-white-light);
+  --bg-color: var(--color-white);
+  --fg-color: var(--color-black);
+  --fg-color-light: var(--color-black-dark);
 }
 
 @media (prefers-color-scheme: dark) {
-  :root {
+  :root:not([data-theme='light']) {
+    color-scheme: dark;
     --bg-color-dark: var(--color-black-dark);
     --bg-color: var(--color-black);
     --fg-color: var(--color-white);
     --fg-color-light: var(--color-white-light);
   }
+}
+
+:root[data-theme='dark'] {
+  color-scheme: dark;
+  --bg-color-dark: var(--color-black-dark);
+  --bg-color: var(--color-black);
+  --fg-color: var(--color-white);
+  --fg-color-light: var(--color-white-light);
 }
 
 /* 2. Reset & Base Styles */

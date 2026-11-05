@@ -34,6 +34,7 @@ The popup shows accepted and denied entries in the active site's `sv-cookie-cons
 
 Open Options from the popup's gear button. Changes apply when you select **Save**:
 
+- **Extension color scheme** follows your system setting with **Auto**, or can be set to **Light** or **Dark**.
 - **Target paths** adds site-relative paths for Find login page to check. Separate paths with newlines or commas; a leading slash is added if missing.
 - **Rich JSON view** enables syntax highlighting and clickable node IDs in Properties. **JSON theme** changes the colors; its preview uses sample data.
 - **Reload on parameter update** controls whether session-parameter changes reload the active page. Pages in edit mode are not reloaded.

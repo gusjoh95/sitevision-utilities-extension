@@ -1,5 +1,47 @@
 import { dom, errors, jsonRenderer, options, theme } from '../../api/index.js';
 
+const COLOR_SCHEME_STORAGE_KEY = 'sitevision-utilities-color-scheme';
+
+/**
+ * @returns {'auto' | 'light' | 'dark'}
+ */
+function getColorScheme() {
+  try {
+    const colorScheme = localStorage.getItem(COLOR_SCHEME_STORAGE_KEY) ?? '';
+    if (colorScheme === 'auto' || colorScheme === 'light' || colorScheme === 'dark') {
+      return colorScheme;
+    }
+    return 'auto';
+  } catch {
+    return 'auto';
+  }
+}
+
+/**
+ * @param {string} colorScheme
+ */
+function applyColorScheme(colorScheme) {
+  if (colorScheme === 'auto') {
+    document.documentElement.removeAttribute('data-theme');
+    return;
+  }
+
+  if (colorScheme === 'light' || colorScheme === 'dark') {
+    document.documentElement.dataset.theme = colorScheme;
+  }
+}
+
+/**
+ * @param {string} colorScheme
+ */
+function saveColorScheme(colorScheme) {
+  if (colorScheme === 'auto') {
+    localStorage.removeItem(COLOR_SCHEME_STORAGE_KEY);
+  } else if (colorScheme === 'light' || colorScheme === 'dark') {
+    localStorage.setItem(COLOR_SCHEME_STORAGE_KEY, colorScheme);
+  }
+}
+
 document.addEventListener('DOMContentLoaded', async () => {
   /** @type {HTMLInputElement} */
   const useSyntaxHighlighting = dom.getRequiredElement('#use-syntax-highlighting');
@@ -11,6 +53,8 @@ document.addEventListener('DOMContentLoaded', async () => {
   const errorElem = dom.getRequiredElement('#error');
   /** @type {HTMLSelectElement} */
   const dropdown = dom.getRequiredElement('#theme-dropdown');
+  /** @type {HTMLSelectElement} */
+  const colorSchemeSelect = dom.getRequiredElement('#color-scheme');
   /** @type {HTMLDetailsElement} */
   const expandable = dom.getRequiredElement('#expandable');
   /** @type {HTMLButtonElement} */
@@ -19,6 +63,10 @@ document.addEventListener('DOMContentLoaded', async () => {
   const copyButtonTemplate = dom.getRequiredElement('#json-id-copy-template');
   /** @type {HTMLPreElement} */
   const preview = dom.getRequiredElement('.json-holder pre');
+  colorSchemeSelect.value = getColorScheme();
+  colorSchemeSelect.addEventListener('change', () => {
+    applyColorScheme(colorSchemeSelect.value);
+  });
 
   preview.addEventListener('click', (event) => {
     if (!(event.target instanceof Element)) {
@@ -99,6 +147,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       };
       saveBtn.setAttribute('disabled', '');
       if (await options.setOptions(toStore)) {
+        saveColorScheme(colorSchemeSelect.value);
         window.close();
       }
 
