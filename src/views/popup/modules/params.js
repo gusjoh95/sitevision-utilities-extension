@@ -33,7 +33,7 @@ export async function initParamButtons(tab, sitevisionMode) {
 
   const activeTabId = tab?.id;
   if (typeof activeTabId !== 'number') {
-    throw new Error(i18n.getMessage('noActiveTabSessionParameters'));
+    throw new Error(i18n.getMessage('popup_noActiveTabSessionParameters'));
   }
 
   /** @type {number} */
@@ -71,7 +71,7 @@ export async function initParamButtons(tab, sitevisionMode) {
     });
 
     if (!result) {
-      throw new Error(i18n.getMessage('sessionParameterNoResult'));
+      throw new Error(i18n.getMessage('popup_sessionParameterNoResult'));
     }
     return result;
   }
@@ -100,7 +100,7 @@ export async function initParamButtons(tab, sitevisionMode) {
         }
       } catch (error) {
         checkbox.checked = !targetState;
-        dom.getRequiredElement('#error').textContent = i18n.getMessage('errorPrefix', [
+        dom.getRequiredElement('#error').textContent = i18n.getMessage('common_errorPrefix', [
           errors.messageOf(error),
         ]);
       } finally {

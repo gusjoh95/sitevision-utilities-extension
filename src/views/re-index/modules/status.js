@@ -14,6 +14,6 @@ export function setStatus(state, message) {
   if (summaryText) summaryText.textContent = message;
   if (badge) {
     badge.className = `badge badge-${state}`;
-    badge.textContent = i18n.getMessage(`status${state[0].toUpperCase()}${state.slice(1)}`);
+    badge.textContent = i18n.getMessage(`common_status${state[0].toUpperCase()}${state.slice(1)}`);
   }
 }

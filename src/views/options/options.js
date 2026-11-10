@@ -58,7 +58,10 @@ async function initializeOptionsView() {
       const response = await fetch(jsonUrl);
       if (!response.ok) {
         throw new Error(
-          i18n.getMessage('loadThemesFailed', [String(response.status), response.statusText])
+          i18n.getMessage('options_loadThemesFailed', [
+            String(response.status),
+            response.statusText,
+          ])
         );
       }
       /** @type {{ file: string, name: string }[]} */
@@ -130,7 +133,7 @@ async function initializeOptionsView() {
           );
           if (!dummyJson.ok) {
             throw new Error(
-              i18n.getMessage('loadThemePreviewFailed', [
+              i18n.getMessage('options_loadThemePreviewFailed', [
                 String(dummyJson.status),
                 dummyJson.statusText,
               ])

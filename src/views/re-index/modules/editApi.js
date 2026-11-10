@@ -18,7 +18,7 @@ export async function reindexSingleNode(tabId, origin, nodeId, csrfToken) {
       headers: { 'x-csrf-token': csrfToken },
     },
   });
-  if (!res.ok) throw new Error(i18n.getMessage('reindexHttpFailure', [String(res.status)]));
+  if (!res.ok) throw new Error(i18n.getMessage('reindex_reindexHttpFailure', [String(res.status)]));
 
   return res;
 }

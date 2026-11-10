@@ -14,7 +14,7 @@ window.addEventListener('popstate', (event) => {
       : urlState.version;
 
   void navigateToNode(node, { version, historyAction: 'none' }).catch((error) => {
-    dom.getRequiredElement('.json-holder pre').textContent = i18n.getMessage('errorPrefix', [
+    dom.getRequiredElement('.json-holder pre').textContent = i18n.getMessage('common_errorPrefix', [
       errors.messageOf(error),
     ]);
   });
@@ -32,7 +32,7 @@ export async function initPropertiesView() {
   const errorElement = dom.getRequiredElement('#error');
 
   if (!state.origin || !state.node || !state.anchorTabId) {
-    preElement.textContent = i18n.getMessage('missingPropertiesParameters');
+    preElement.textContent = i18n.getMessage('properties_missingPropertiesParameters');
     return;
   }
 
@@ -40,7 +40,7 @@ export async function initPropertiesView() {
     tabId: Number(state.anchorTabId),
     origin: state.origin,
     onLost: ({ message }) => {
-      errorElement.textContent = i18n.getMessage('warningPrefix', [message]);
+      errorElement.textContent = i18n.getMessage('common_warningPrefix', [message]);
     },
   });
 

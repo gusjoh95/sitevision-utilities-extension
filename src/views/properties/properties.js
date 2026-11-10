@@ -15,7 +15,7 @@ async function init() {
 }
 
 init().catch((error) => {
-  dom.getRequiredElement('.json-holder pre').textContent = i18n.getMessage('errorPrefix', [
+  dom.getRequiredElement('.json-holder pre').textContent = i18n.getMessage('common_errorPrefix', [
     errors.messageOf(error),
   ]);
 });

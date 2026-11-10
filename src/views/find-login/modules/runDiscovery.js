@@ -20,7 +20,7 @@ export function setStatus(state, message, url = '') {
 
   if (badge) {
     badge.className = `badge badge-${state}`;
-    badge.textContent = i18n.getMessage(`status${state[0].toUpperCase()}${state.slice(1)}`);
+    badge.textContent = i18n.getMessage(`common_status${state[0].toUpperCase()}${state.slice(1)}`);
   }
 
   if (link) {
@@ -109,7 +109,7 @@ async function probeEndpoint(tabId, targetUrl, origin, logger) {
       return { outcome: 'TARGET_UNAVAILABLE', reason: targetAccessErrorMessage };
     }
 
-    logger.append(i18n.getMessage('networkError', [errorMsg]));
+    logger.append(i18n.getMessage('findLogin_networkError', [errorMsg]));
     return { outcome: 'ERROR', reason: errorMsg };
   }
 
@@ -117,18 +117,20 @@ async function probeEndpoint(tabId, targetUrl, origin, logger) {
 
   // 1. Check HTTP 3xx cross-origin redirect
   if (isCrossOrigin(finalUrl.href, origin)) {
-    logger.append(i18n.getMessage('httpCrossOriginRedirect', [String(res.status), finalUrl.host]));
+    logger.append(
+      i18n.getMessage('findLogin_httpCrossOriginRedirect', [String(res.status), finalUrl.host])
+    );
     return { outcome: 'CROSS_ORIGIN_REDIRECT' };
   }
 
   if (finalUrl.href !== targetUrl) {
-    logger.append(i18n.getMessage('internalRedirect', [finalUrl.pathname]));
+    logger.append(i18n.getMessage('findLogin_internalRedirect', [finalUrl.pathname]));
   }
 
   // 2. Check HTTP Basic Auth (WebDAV / protected endpoints)
   const authHeader = res.headers['www-authenticate'] || '';
   if (res.status === 401 && authHeader.toLowerCase().includes('basic')) {
-    logger.append(i18n.getMessage('basicAuthDetected'));
+    logger.append(i18n.getMessage('findLogin_basicAuthDetected'));
     return { outcome: 'FOUND', matchUrl: finalUrl.toString(), type: 'WEBDAV' };
   }
 
@@ -137,21 +139,21 @@ async function probeEndpoint(tabId, targetUrl, origin, logger) {
 
     // 3. Check HTML meta-refresh redirect
     if (hasMetaRefresh(html)) {
-      logger.append(i18n.getMessage('metaRefreshDetected'));
+      logger.append(i18n.getMessage('findLogin_metaRefreshDetected'));
       return { outcome: 'CROSS_ORIGIN_REDIRECT' };
     }
 
     // 4. Evaluate local login selectors
     if (hasLocalLoginForm(html)) {
-      logger.append(i18n.getMessage('loginFormDetected'));
+      logger.append(i18n.getMessage('findLogin_loginFormDetected'));
       return { outcome: 'FOUND', matchUrl: finalUrl.toString(), type: 'FORM' };
     }
 
-    logger.append(i18n.getMessage('httpNoLoginForm', [String(res.status)]));
+    logger.append(i18n.getMessage('findLogin_httpNoLoginForm', [String(res.status)]));
     return { outcome: 'NOT_FOUND' };
   }
 
-  logger.append(i18n.getMessage('httpStatus', [String(res.status)]));
+  logger.append(i18n.getMessage('findLogin_httpStatus', [String(res.status)]));
   return { outcome: 'NOT_FOUND' };
 }
 
@@ -171,8 +173,8 @@ export async function runDiscovery(tabId, origin, customPaths = []) {
   const loggerInstance = logger.create(logContainer);
   loggerInstance.clear();
 
-  setStatus('running', i18n.getMessage('probingTargets'));
-  loggerInstance.log('info', i18n.getMessage('startingDiscovery', [origin]));
+  setStatus('running', i18n.getMessage('findLogin_probingTargets'));
+  loggerInstance.log('info', i18n.getMessage('findLogin_startingDiscovery', [origin]));
 
   const webdavTestPaths = ['/webdav/images/', '/webdav/files/'];
   const queue = [...new Set(['/edit', ...webdavTestPaths, ...customPaths])].filter(Boolean);
@@ -186,7 +188,7 @@ export async function runDiscovery(tabId, origin, customPaths = []) {
     const targetUrl = new URL(path, origin).toString();
     const paddedPath = path.padEnd(maxPathLength, ' ');
 
-    loggerInstance.log('info', i18n.getMessage('getPath', [paddedPath]));
+    loggerInstance.log('info', i18n.getMessage('findLogin_getPath', [paddedPath]));
 
     try {
       const result = await probeEndpoint(tabId, targetUrl, origin, loggerInstance);
@@ -195,31 +197,34 @@ export async function runDiscovery(tabId, origin, customPaths = []) {
         if (result.type === 'WEBDAV') {
           // Store WebDAV as a secondary fallback and continue searching for a primary login form
           webdavFallbackUrl = result.matchUrl;
-          loggerInstance.append(i18n.getMessage('continuingLoginSearch'));
+          loggerInstance.append(i18n.getMessage('findLogin_continuingLoginSearch'));
         } else {
           // Primary login form detected — terminate search immediately
-          setStatus('success', i18n.getMessage('loginFormFoundAt'), result.matchUrl);
+          setStatus('success', i18n.getMessage('findLogin_loginFormFoundAt'), result.matchUrl);
           return;
         }
       }
 
       if (result.outcome === 'TARGET_UNAVAILABLE' && result.reason) {
-        setStatus('error', i18n.getMessage('targetUnavailableStatus'), result.reason);
+        setStatus('error', i18n.getMessage('findLogin_targetUnavailableStatus'), result.reason);
         return;
       }
     } catch (err) {
-      loggerInstance.append(i18n.getMessage('discoveryError', [errors.messageOf(err)]));
+      loggerInstance.append(i18n.getMessage('findLogin_discoveryError', [errors.messageOf(err)]));
     }
   }
 
   // Fallback to WebDAV endpoint if no primary login form was found during queue traversal
   if (webdavFallbackUrl) {
-    setStatus('success', i18n.getMessage('basicAuthFoundAt'), webdavFallbackUrl);
-    loggerInstance.log('info', `${i18n.getMessage('basicAuthFoundAt')} ${webdavFallbackUrl}`);
-    loggerInstance.log('warn', i18n.getMessage('basicAuthOnlyFound'));
+    setStatus('success', i18n.getMessage('findLogin_basicAuthFoundAt'), webdavFallbackUrl);
+    loggerInstance.log(
+      'info',
+      `${i18n.getMessage('findLogin_basicAuthFoundAt')} ${webdavFallbackUrl}`
+    );
+    loggerInstance.log('warn', i18n.getMessage('findLogin_basicAuthOnlyFound'));
     return;
   }
 
-  loggerInstance.log('warn', i18n.getMessage('noLoginFound'));
-  setStatus('warn', i18n.getMessage('noLoginFound'));
+  loggerInstance.log('warn', i18n.getMessage('findLogin_noLoginFound'));
+  setStatus('warn', i18n.getMessage('findLogin_noLoginFound'));
 }

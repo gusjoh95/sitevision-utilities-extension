@@ -31,16 +31,16 @@ async function init() {
     const invocationTab = await targetTab.getInvocationTab();
     const activeUrl = invocationTab?.url;
     if (!activeUrl) {
-      throw new Error(i18n.getMessage('unableToAccessActiveTabUrl'));
+      throw new Error(i18n.getMessage('popup_unableToAccessActiveTabUrl'));
     }
     const tabId = invocationTab?.id;
     if (typeof tabId !== 'number') {
-      throw new Error(i18n.getMessage('missingTabId'));
+      throw new Error(i18n.getMessage('popup_missingTabId'));
     }
 
     const { protocol, origin } = new URL(activeUrl);
     if (protocol !== 'http:' && protocol !== 'https:') {
-      throw new Error(i18n.getMessage('activeTabHttpRequired'));
+      throw new Error(i18n.getMessage('popup_activeTabHttpRequired'));
     }
     // Can probably be removed without problems
     await targetPermissions.assertTargetTabAccessible(tabId, origin);
@@ -66,7 +66,7 @@ async function init() {
 
     const sitevisionMode = await pageContext.getSitevisionMode(invocationTab);
     if (sitevisionMode === null) {
-      throw new Error(i18n.getMessage('activeTabNotSitevision'));
+      throw new Error(i18n.getMessage('popup_activeTabNotSitevision'));
     }
 
     const editInfo = await editMode.getEditInfo(invocationTab);
@@ -112,7 +112,7 @@ async function init() {
     const msg = errors.messageOf(error);
     /** @type {HTMLDivElement} */
     const errEl = dom.getRequiredElement('#error');
-    errEl.textContent = i18n.getMessage('errorPrefix', [msg]);
+    errEl.textContent = i18n.getMessage('common_errorPrefix', [msg]);
   } finally {
     try {
       await Promise.all([initOpenDocs(), initOpenOptions()]);
@@ -120,7 +120,7 @@ async function init() {
       const msg = errors.messageOf(error);
       /** @type {HTMLDivElement} */
       const errEl = dom.getRequiredElement('#error');
-      errEl.textContent = i18n.getMessage('errorPrefix', [msg]);
+      errEl.textContent = i18n.getMessage('common_errorPrefix', [msg]);
     }
   }
 }

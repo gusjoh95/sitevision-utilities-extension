@@ -52,10 +52,10 @@ function setLowDelayDialogText(dialog) {
     throw new Error('Low-delay dialog is missing a required element.');
   }
 
-  title.textContent = i18n.getMessage('lowDelayWarning');
-  message.textContent = i18n.getMessage('lowDelayWarningText');
-  okButton.textContent = i18n.getMessage('ok');
-  cancelButton.textContent = i18n.getMessage('cancel');
+  title.textContent = i18n.getMessage('reindex_lowDelayWarning');
+  message.textContent = i18n.getMessage('reindex_lowDelayWarningText');
+  okButton.textContent = i18n.getMessage('common_ok');
+  cancelButton.textContent = i18n.getMessage('common_cancel');
 }
 
 /**

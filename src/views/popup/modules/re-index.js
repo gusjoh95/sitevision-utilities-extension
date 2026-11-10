@@ -13,7 +13,7 @@ export async function initReindex(tab, rootNodeId) {
 
   try {
     if (!tab?.url) {
-      throw new Error(i18n.getMessage('noActiveTabUrlFound'));
+      throw new Error(i18n.getMessage('popup_noActiveTabUrlFound'));
     }
 
     const origin = new URL(tab.url).origin;
@@ -32,13 +32,13 @@ export async function initReindex(tab, rootNodeId) {
         const msg = errors.messageOf(err);
         /** @type {HTMLDivElement} */
         const errEl = dom.getRequiredElement('#error');
-        errEl.textContent = i18n.getMessage('errorOpeningWindow', [msg]);
+        errEl.textContent = i18n.getMessage('common_errorOpeningWindow', [msg]);
       }
     });
   } catch (err) {
     const msg = errors.messageOf(err);
     /** @type {HTMLDivElement} */
     const errEl = dom.getRequiredElement('#error');
-    errEl.textContent = i18n.getMessage('errorPrefix', [msg]);
+    errEl.textContent = i18n.getMessage('common_errorPrefix', [msg]);
   }
 }

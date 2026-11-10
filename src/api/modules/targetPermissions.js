@@ -14,23 +14,23 @@ const targetLostReasons = {
 const inaccessibleTargetMessage = 'Target tab no longer exists or is inaccessible.';
 
 const targetAccessMessageKeys = {
-  [targetLostReasons.closed]: 'targetClosed',
-  [targetLostReasons.crossOrigin]: 'targetUnavailable',
-  inaccessible: 'inaccessibleTarget',
+  [targetLostReasons.closed]: 'common_targetClosed',
+  [targetLostReasons.crossOrigin]: 'common_targetUnavailable',
+  inaccessible: 'common_inaccessibleTarget',
 };
 
 /** @typedef {keyof typeof targetAccessMessageKeys} TargetAccessReason */
 const targetAccessErrorMessages = [
   {
-    messageKey: 'inaccessibleTarget',
+    messageKey: 'common_inaccessibleTarget',
     fragments: [inaccessibleTargetMessage],
   },
   {
-    messageKey: 'targetClosed',
+    messageKey: 'common_targetClosed',
     fragments: ['No tab with id', 'is not a valid tab ID'],
   },
   {
-    messageKey: 'targetUnavailable',
+    messageKey: 'common_targetUnavailable',
     fragments: [
       'Target tab is inaccessible.',
       'Missing host permission',

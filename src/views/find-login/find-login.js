@@ -16,7 +16,7 @@ async function initFindLoginView() {
     tabId: Number(anchorTabId),
     origin,
     onLost: ({ message }) => {
-      errorElem.textContent = i18n.getMessage('warningPrefix', [message]);
+      errorElem.textContent = i18n.getMessage('common_warningPrefix', [message]);
     },
   });
 
@@ -29,7 +29,7 @@ async function initFindLoginView() {
 
         await browser.tabs.create({ url });
       } catch (err) {
-        errorElem.textContent = i18n.getMessage('errorPrefix', [errors.messageOf(err)]);
+        errorElem.textContent = i18n.getMessage('common_errorPrefix', [errors.messageOf(err)]);
       }
     });
   }
@@ -45,7 +45,7 @@ async function initFindLoginView() {
     );
   } catch (error) {
     const errorMsg = errors.messageOf(error);
-    errorElem.textContent = i18n.getMessage('errorPrefix', [errorMsg]);
+    errorElem.textContent = i18n.getMessage('common_errorPrefix', [errorMsg]);
   }
 }
 

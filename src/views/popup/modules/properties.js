@@ -80,7 +80,7 @@ export async function initProperties(
 
     try {
       if (!tab?.url) {
-        throw new Error(i18n.getMessage('noActiveTabPropertiesUrl'));
+        throw new Error(i18n.getMessage('popup_noActiveTabPropertiesUrl'));
       }
       if (!node) {
         propertiesIdInput.focus();
@@ -106,7 +106,7 @@ export async function initProperties(
       const msg = errors.messageOf(e);
       /** @type {HTMLDivElement} */
       const errEl = dom.getRequiredElement('#error');
-      errEl.textContent = i18n.getMessage('errorPrefix', [msg]);
+      errEl.textContent = i18n.getMessage('common_errorPrefix', [msg]);
     }
   }
 

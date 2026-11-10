@@ -138,10 +138,10 @@ function formatPreviewSummary(nodes, includeRobotsIndexFalse) {
   ).length;
   const willReindexCount = nodes.length - robotsIndexSkippedCount - notIndexableCount;
   const robotsIndexMode = includeRobotsIndexFalse
-    ? i18n.getMessage('includingRobotsIndexFalse')
-    : i18n.getMessage('respectingRobotsIndex');
+    ? i18n.getMessage('reindex_includingRobotsIndexFalse')
+    : i18n.getMessage('reindex_respectingRobotsIndex');
 
-  return i18n.getMessage('previewSummary', [
+  return i18n.getMessage('reindex_previewSummary', [
     String(nodes.length),
     String(willReindexCount),
     String(robotsIndexSkippedCount),
@@ -159,8 +159,8 @@ export function updateCachedPreviewSummary(includeRobotsIndexFalse) {
   if (!cachedPreview) return false;
 
   const summary = formatPreviewSummary(cachedPreview.nodes, includeRobotsIndexFalse);
-  cachedPreview.logger.log('info', i18n.getMessage('previewUpdatedFromCache', [summary]));
-  setStatus('idle', i18n.getMessage('previewSummaryStatus', [summary]));
+  cachedPreview.logger.log('info', i18n.getMessage('reindex_previewUpdatedFromCache', [summary]));
+  setStatus('idle', i18n.getMessage('reindex_previewSummaryStatus', [summary]));
   return true;
 }
 
@@ -189,14 +189,14 @@ async function maybeReindexNode(
   if (decision !== 'index') {
     const reason =
       decision === 'not-indexable'
-        ? i18n.getMessage('notIndexableReason')
-        : i18n.getMessage('robotsIndexFalseReason');
+        ? i18n.getMessage('reindex_notIndexableReason')
+        : i18n.getMessage('reindex_robotsIndexFalseReason');
     const traversal = TRAVERSABLE_NODE_TYPES.includes(node.type)
-      ? i18n.getMessage('traversingChildren')
-      : i18n.getMessage('notTraversingChildren');
+      ? i18n.getMessage('reindex_traversingChildren')
+      : i18n.getMessage('reindex_notTraversingChildren');
     logger.log(
       'info',
-      i18n.getMessage('notReindexingNode', [
+      i18n.getMessage('reindex_notReindexingNode', [
         node.displayName,
         node.id,
         node.type,
@@ -208,9 +208,12 @@ async function maybeReindexNode(
   }
 
   if (!(await waitBeforeReindexCall())) return false;
-  logger.log('info', i18n.getMessage('reindexingNode', [node.displayName, node.id, node.type]));
+  logger.log(
+    'info',
+    i18n.getMessage('reindex_reindexingNode', [node.displayName, node.id, node.type])
+  );
   await reindexSingleNode(tabId, origin, node.id, csrfToken);
-  logger.append(i18n.getMessage('okArrow'));
+  logger.append(i18n.getMessage('reindex_okArrow'));
   return true;
 }
 
@@ -238,7 +241,7 @@ export async function runReindexQueue({
   apiDelayMs = DEFAULT_API_DELAY_MS,
 }) {
   if (typeof rootNode.id !== 'string') {
-    throw new Error(i18n.getMessage('rootIdMissing'));
+    throw new Error(i18n.getMessage('reindex_rootIdMissing'));
   }
 
   const rootNodeId = rootNode.id;
@@ -260,7 +263,7 @@ export async function runReindexQueue({
   let reason;
 
   if (preview) {
-    logger.log('info', i18n.getMessage('reusingPreview', [String(preview.nodes.length)]));
+    logger.log('info', i18n.getMessage('reindex_reusingPreview', [String(preview.nodes.length)]));
     reason = 'completed';
 
     for (const node of preview.nodes) {
@@ -288,11 +291,11 @@ export async function runReindexQueue({
       processedCount++;
       setStatus(
         'running',
-        i18n.getMessage('processedIndexed', [String(processedCount), String(indexedCount)])
+        i18n.getMessage('reindex_processedIndexed', [String(processedCount), String(indexedCount)])
       );
     }
   } else {
-    logger.log('info', i18n.getMessage('fetchingRootChildren', [rootNodeId]));
+    logger.log('info', i18n.getMessage('reindex_fetchingRootChildren', [rootNodeId]));
 
     ({ reason } = await walkNodeTree({
       rootNode,
@@ -316,27 +319,33 @@ export async function runReindexQueue({
         processedCount++;
         setStatus(
           'running',
-          i18n.getMessage('processedIndexed', [String(processedCount), String(indexedCount)])
+          i18n.getMessage('reindex_processedIndexed', [
+            String(processedCount),
+            String(indexedCount),
+          ])
         );
       },
     }));
   }
 
   if (reason === 'cancelled') {
-    logger.log('warn', i18n.getMessage('reindexCancelled'));
+    logger.log('warn', i18n.getMessage('reindex_reindexCancelled'));
     setStatus(
       'warn',
-      i18n.getMessage('cancelledProcessedIndexed', [String(processedCount), String(indexedCount)])
+      i18n.getMessage('reindex_cancelledProcessedIndexed', [
+        String(processedCount),
+        String(indexedCount),
+      ])
     );
     return;
   }
   logger.log(
     'success',
-    i18n.getMessage('reindexFinished', [String(processedCount), String(indexedCount)])
+    i18n.getMessage('reindex_reindexFinished', [String(processedCount), String(indexedCount)])
   );
   setStatus(
     'success',
-    i18n.getMessage('reindexCompleted', [String(processedCount), String(indexedCount)])
+    i18n.getMessage('reindex_reindexCompleted', [String(processedCount), String(indexedCount)])
   );
 }
 
@@ -370,13 +379,13 @@ export async function previewReindexQueue({
   apiDelayMs = DEFAULT_API_DELAY_MS,
 }) {
   if (typeof rootNode.id !== 'string') {
-    throw new Error(i18n.getMessage('rootIdMissing'));
+    throw new Error(i18n.getMessage('reindex_rootIdMissing'));
   }
 
   const rootNodeId = rootNode.id;
   isCancelled = false;
   cachedPreview = null;
-  logger.log('info', i18n.getMessage('previewingReindexTree', [rootNodeId]));
+  logger.log('info', i18n.getMessage('reindex_previewingReindexTree', [rootNodeId]));
 
   /** @type {DiscoveredNode[]} */
   const nodes = [];
@@ -391,23 +400,23 @@ export async function previewReindexQueue({
       const decision = getIndexingDecision(node, includeRobotsIndexFalse);
       const label =
         decision === 'index'
-          ? i18n.getMessage('previewIndexLabel')
+          ? i18n.getMessage('reindex_previewIndexLabel')
           : decision === 'robotsIndex'
-            ? i18n.getMessage('previewRobotsLabel')
-            : i18n.getMessage('previewNotIndexableLabel');
+            ? i18n.getMessage('reindex_previewRobotsLabel')
+            : i18n.getMessage('reindex_previewNotIndexableLabel');
       nodes.push(node);
       logger.log('info', `${label} ${node.displayName} (${node.id}, ${node.type})`);
     },
   });
 
   if (reason === 'cancelled') {
-    logger.log('warn', i18n.getMessage('previewCancelled'));
-    setStatus('warn', i18n.getMessage('previewCancelledCount', [String(nodes.length)]));
+    logger.log('warn', i18n.getMessage('reindex_previewCancelled'));
+    setStatus('warn', i18n.getMessage('reindex_previewCancelledCount', [String(nodes.length)]));
   } else if (reason === 'completed') {
     cachedPreview = { tabId, origin, rootNodeId, nodes, logger };
     const summary = formatPreviewSummary(nodes, includeRobotsIndexFalse);
-    logger.log('success', i18n.getMessage('discoveryComplete', [summary]));
-    setStatus('idle', i18n.getMessage('previewSummaryStatus', [summary]));
+    logger.log('success', i18n.getMessage('reindex_discoveryComplete', [summary]));
+    setStatus('idle', i18n.getMessage('reindex_previewSummaryStatus', [summary]));
   }
 
   return { nodes, reason };

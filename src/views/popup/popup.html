@@ -14,7 +14,7 @@
           type="button"
           data-tooltip
           aria-label="Find login page"
-          data-i18n-aria-label="findLoginPage"
+          data-i18n-aria-label="common_findLoginPage"
           disabled
         >
           <span class="icon icon--crosshair" aria-hidden="true"></span>
@@ -24,7 +24,7 @@
           type="button"
           data-tooltip
           aria-label="Reindex node tree"
-          data-i18n-aria-label="reindexNodeTree"
+          data-i18n-aria-label="popup_reindexNodeTree"
           disabled
         >
           <span class="icon icon--arrow-repeat" aria-hidden="true"></span>
@@ -34,7 +34,7 @@
           type="button"
           data-tooltip
           aria-label="Open user guide"
-          data-i18n-aria-label="openUserGuide"
+          data-i18n-aria-label="popup_openUserGuide"
         >
           <span class="icon icon--book" aria-hidden="true"></span>
         </button>
@@ -43,7 +43,7 @@
           type="button"
           data-tooltip
           aria-label="Open extension options"
-          data-i18n-aria-label="openExtensionOptions"
+          data-i18n-aria-label="popup_openExtensionOptions"
         >
           <span class="icon icon--gear" aria-hidden="true"></span>
         </button>
@@ -51,10 +51,10 @@
       <div id="error"></div>
       <div id="spinner" class="bar hidden"></div>
       <div id="properties-wrapper">
-        <h2 data-i18n="nodeProperties"></h2>
+        <h2 data-i18n="common_nodeProperties"></h2>
         <form id="properties-form">
           <fieldset>
-            <legend data-i18n="version"></legend>
+            <legend data-i18n="common_version"></legend>
             <label>
               <input
                 type="radio"
@@ -64,46 +64,61 @@
                 value="1"
                 checked
               />
-              <span data-i18n="online"></span>
+              <span data-i18n="common_online"></span>
             </label>
             <label>
               <input type="radio" id="properties-offline-mode" disabled name="radio" value="0" />
-              <span data-i18n="offline"></span>
+              <span data-i18n="common_offline"></span>
             </label>
           </fieldset>
           <div class="properties-search">
-            <input type="text" id="properties-id-input" disabled data-i18n-placeholder="nodeId" />
+            <input
+              type="text"
+              id="properties-id-input"
+              disabled
+              data-i18n-placeholder="common_nodeId"
+            />
             <button
               type="submit"
               disabled
               value="getProperties"
               data-tooltip
               aria-label="Get node properties"
-              data-i18n-aria-label="getNodeProperties"
+              data-i18n-aria-label="popup_getNodeProperties"
             >
               <span class="icon icon--search" aria-hidden="true"></span>
             </button>
           </div>
           <div class="flex-row">
             <input type="hidden" id="current-page-id" value="" />
-            <button type="submit" disabled value="getCurrentPage" data-i18n="currentNode"></button>
+            <button
+              type="submit"
+              disabled
+              value="getCurrentPage"
+              data-i18n="popup_currentNode"
+            ></button>
             <input type="hidden" id="current-user-id" value="" />
-            <button type="submit" disabled value="getCurrentUser" data-i18n="currentUser"></button>
+            <button
+              type="submit"
+              disabled
+              value="getCurrentUser"
+              data-i18n="popup_currentUser"
+            ></button>
           </div>
         </form>
       </div>
       <div id="session-params-wrapper">
-        <h2 data-i18n="sessionParameters"></h2>
+        <h2 data-i18n="common_sessionParameters"></h2>
         <form id="session-params-form">
           <label>
             <input type="checkbox" disabled id="toggle-profiling" />
             ?profiling=true
           </label>
-          <label data-i18n-tooltip="jsdebugTooltip">
+          <label data-i18n-tooltip="popup_jsdebugTooltip">
             <input type="checkbox" disabled id="toggle-jsdebug" />
             ?jsdebug=true
             <span class="sr-only">
-              <span data-i18n="jsdebugTooltip"></span>
+              <span data-i18n="popup_jsdebugTooltip"></span>
             </span>
           </label>
           <label>
@@ -113,25 +128,25 @@
         </form>
       </div>
       <div id="cookie-consent-wrapper">
-        <h2 data-i18n="consentCookie"></h2>
+        <h2 data-i18n="popup_consentCookie"></h2>
         <div id="cookie-consent-prompt">
           <p id="cookie-consent-prompt-help">
-            <span data-i18n="cookiePermissionPrompt"></span>
+            <span data-i18n="popup_cookiePermissionPrompt"></span>
           </p>
           <button id="cookie-consent-prompt-button" type="button" disabled>
-            <span data-i18n="grantPermissions"></span>
+            <span data-i18n="popup_grantPermissions"></span>
           </button>
         </div>
         <div id="cookie-consent-info" hidden>
-          <p id="cookie-consent-accepted-label" data-i18n="acceptedCookies"></p>
+          <p id="cookie-consent-accepted-label" data-i18n="popup_acceptedCookies"></p>
           <pre id="cookie-consent-accepted-values"></pre>
 
-          <p id="cookie-consent-denied-label" data-i18n="deniedCookies"></p>
+          <p id="cookie-consent-denied-label" data-i18n="popup_deniedCookies"></p>
           <pre id="cookie-consent-denied-values"></pre>
           <button
             id="cookie-consent-delete-button"
             type="button"
-            data-i18n="deleteConsentCookie"
+            data-i18n="popup_deleteConsentCookie"
           ></button>
 
           <p id="cookie-consent-missing" hidden></p>

@@ -47,7 +47,7 @@ if (useSyntaxHighlighting) {
     if (target) {
       const nextNode = target.textContent.replace(/"/g, '');
       void navigateToNode(nextNode).catch((error) => {
-        currentPropertiesText = i18n.getMessage('errorPrefix', [errors.messageOf(error)]);
+        currentPropertiesText = i18n.getMessage('common_errorPrefix', [errors.messageOf(error)]);
         preElem.textContent = currentPropertiesText;
       });
     }
@@ -76,7 +76,7 @@ export function renderUI(data, state) {
   document.title = `${state.origin}${restApiPath}/${state.version}/${state.node}/properties`;
 
   if (!data) {
-    currentPropertiesText = i18n.getMessage('noDataToRender');
+    currentPropertiesText = i18n.getMessage('properties_noDataToRender');
     preElem.textContent = currentPropertiesText;
     return;
   }
@@ -84,9 +84,9 @@ export function renderUI(data, state) {
   if (data.error) {
     const errorLabel =
       data.error === 'API Error'
-        ? i18n.getMessage('apiError')
+        ? i18n.getMessage('properties_apiError')
         : data.error === 'Fetch failed'
-          ? i18n.getMessage('fetchFailed')
+          ? i18n.getMessage('properties_fetchFailed')
           : data.error;
     currentPropertiesText = `${errorLabel}: ${data.message}`;
     preElem.textContent = currentPropertiesText;
@@ -146,8 +146,8 @@ export async function navigateToNode(nextNode, navigationOptions = {}) {
 
   errorElem.textContent = '';
   preElem.style.minHeight = `${preElem.getBoundingClientRect().height}px`;
-  preElem.textContent = i18n.getMessage('loading');
-  currentPropertiesText = i18n.getMessage('loading');
+  preElem.textContent = i18n.getMessage('common_loading');
+  currentPropertiesText = i18n.getMessage('common_loading');
 
   try {
     await targetPermissions.assertTargetTabAccessible(Number(state.anchorTabId), state.origin);
@@ -180,9 +180,12 @@ export async function navigateToNode(nextNode, navigationOptions = {}) {
     const targetAccessErrorMessage = targetPermissions.getTargetAccessErrorMessage(error);
 
     if (targetAccessErrorMessage) {
-      errorElem.textContent = i18n.getMessage('warningPrefix', [targetAccessErrorMessage]);
+      errorElem.textContent = i18n.getMessage('common_warningPrefix', [targetAccessErrorMessage]);
       renderUI(
-        { error: i18n.getMessage('targetAccessUnavailable'), message: targetAccessErrorMessage },
+        {
+          error: i18n.getMessage('common_targetAccessUnavailable'),
+          message: targetAccessErrorMessage,
+        },
         state
       );
       return true;

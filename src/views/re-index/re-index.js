@@ -138,26 +138,26 @@ async function initializeReindexView() {
     nodeOutput.textContent = rootNode.id;
     csrfToken = await getBootstrapCsrfToken(Number(anchorTabId));
     if (!csrfToken) {
-      throw new Error(i18n.getMessage('csrfTokenMissing'));
+      throw new Error(i18n.getMessage('reindex_csrfTokenMissing'));
     }
 
     startBtn.disabled = false;
     previewBtn.disabled = false;
   } catch (err) {
-    errorElement.textContent = i18n.getMessage('errorPrefix', [errors.messageOf(err)]);
+    errorElement.textContent = i18n.getMessage('common_errorPrefix', [errors.messageOf(err)]);
   }
 
   startBtn?.addEventListener('click', () => {
     void (async () => {
       if (!rootNode) {
-        errorElement.textContent = i18n.getMessage('missingRootProperties');
+        errorElement.textContent = i18n.getMessage('reindex_missingRootProperties');
         return;
       }
 
       const token = csrfToken;
       if (!token) {
-        errorElement.textContent = i18n.getMessage('errorPrefix', [
-          i18n.getMessage('missingCsrfToken'),
+        errorElement.textContent = i18n.getMessage('common_errorPrefix', [
+          i18n.getMessage('reindex_missingCsrfToken'),
         ]);
         return;
       }
@@ -171,7 +171,7 @@ async function initializeReindexView() {
   previewBtn?.addEventListener('click', () => {
     void (async () => {
       if (!rootNode) {
-        errorElement.textContent = i18n.getMessage('missingRootProperties');
+        errorElement.textContent = i18n.getMessage('reindex_missingRootProperties');
         return;
       }
 

@@ -25,7 +25,7 @@ export async function walkNodeTree({
   onNode,
 }) {
   if (typeof rootNode.id !== 'string') {
-    throw new Error(i18n.getMessage('rootIdMissing'));
+    throw new Error(i18n.getMessage('reindex_rootIdMissing'));
   }
 
   const visited = new Set([rootNode.id]);

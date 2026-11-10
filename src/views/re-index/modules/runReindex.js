@@ -23,15 +23,15 @@ async function withBeforeUnloadGuard(tabId, logger, operation) {
     guardId,
   });
   if (!installResult?.installed) {
-    throw new Error(i18n.getMessage('navigationGuardInstallFailed'));
+    throw new Error(i18n.getMessage('reindex_navigationGuardInstallFailed'));
   }
 
-  logger.log('info', i18n.getMessage('navigationGuardActive'));
+  logger.log('info', i18n.getMessage('reindex_navigationGuardActive'));
 
   let isViewExiting = false;
   const handleViewExit = () => {
     isViewExiting = true;
-    logger.log('info', i18n.getMessage('reindexViewClosing'));
+    logger.log('info', i18n.getMessage('reindex_reindexViewClosing'));
     void browser.runtime
       .sendMessage({ type: BEFORE_UNLOAD_GUARD_MESSAGE, action: 'remove', tabId, guardId })
       .catch(() => {});
@@ -51,14 +51,14 @@ async function withBeforeUnloadGuard(tabId, logger, operation) {
           guardId,
         });
         if (result?.removed) {
-          logger.log('info', i18n.getMessage('navigationGuardRemoved'));
+          logger.log('info', i18n.getMessage('reindex_navigationGuardRemoved'));
         } else {
-          logger.log('warn', i18n.getMessage('navigationGuardNotFound'));
+          logger.log('warn', i18n.getMessage('reindex_navigationGuardNotFound'));
         }
       } catch (err) {
         logger.log(
           'error',
-          i18n.getMessage('navigationGuardCleanupFailed', [errors.messageOf(err)])
+          i18n.getMessage('reindex_navigationGuardCleanupFailed', [errors.messageOf(err)])
         );
       }
     }
@@ -90,7 +90,7 @@ async function runLoggedOperation(
   const loggerInstance = logger.create(logContainer);
   loggerInstance.clear();
   setStatus('running', startingMessage);
-  loggerInstance.log('info', i18n.getMessage('targetOrigin', [origin]));
+  loggerInstance.log('info', i18n.getMessage('reindex_targetOrigin', [origin]));
 
   try {
     await operation(loggerInstance);
@@ -117,8 +117,8 @@ export async function runReindex(tabId, origin, rootNode, csrfToken, options) {
     tabId,
     origin,
     rootNode,
-    i18n.getMessage('startingTreeReindex', [rootNode.id]),
-    'reindexFailed',
+    i18n.getMessage('reindex_startingTreeReindex', [rootNode.id]),
+    'reindex_reindexFailed',
     (logger) =>
       withBeforeUnloadGuard(tabId, logger, () =>
         runReindexQueue({ tabId, origin, rootNode, csrfToken, logger, ...options })
@@ -141,8 +141,8 @@ export async function previewReindex(tabId, origin, rootNode, options) {
     tabId,
     origin,
     rootNode,
-    i18n.getMessage('previewingTree', [rootNode.id]),
-    'previewFailed',
+    i18n.getMessage('reindex_previewingTree', [rootNode.id]),
+    'reindex_previewFailed',
     (logger) =>
       withBeforeUnloadGuard(tabId, logger, () =>
         previewReindexQueue({ tabId, origin, rootNode, logger, ...options })
