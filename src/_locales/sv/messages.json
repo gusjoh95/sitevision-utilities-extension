@@ -121,6 +121,9 @@
   "options_language": {
     "message": "Språk:"
   },
+  "options_languageSection": {
+    "message": "Språk"
+  },
   "options_auto": {
     "message": "Auto"
   },

@@ -11,15 +11,28 @@
   <body>
     <div id="error"></div>
     <form id="options-form">
+      <div id="language-wrapper">
+        <h2 data-i18n="options_languageSection"></h2>
+        <label for="locale-select">
+          <span data-i18n="options_language"></span>
+          <select id="locale-select" name="locale">
+            <option value="auto" data-i18n="options_auto"></option>
+            <option value="en" data-i18n="options_english"></option>
+            <option value="sv" data-i18n="options_swedish"></option>
+          </select>
+        </label>
+      </div>
       <div id="appearance-wrapper">
         <h2 data-i18n="options_appearance"></h2>
         <div>
-          <label for="color-scheme" data-i18n="options_colorScheme"></label>
-          <select id="color-scheme" name="color-scheme">
-            <option value="auto" data-i18n="options_auto"></option>
-            <option value="light" data-i18n="options_light"></option>
-            <option value="dark" data-i18n="options_dark"></option>
-          </select>
+          <label for="color-scheme">
+            <span data-i18n="options_colorScheme"></span>
+            <select id="color-scheme" name="color-scheme">
+              <option value="auto" data-i18n="options_auto"></option>
+              <option value="light" data-i18n="options_light"></option>
+              <option value="dark" data-i18n="options_dark"></option>
+            </select>
+          </label>
         </div>
       </div>
       <div id="login-paths-wrapper">
@@ -55,10 +68,12 @@
           </span>
         </label>
         <div>
-          <label for="theme-dropdown" data-i18n="options_jsonTheme"></label>
-          <select name="Theme" id="theme-dropdown">
-            <option value="" data-i18n="common_default"></option>
-          </select>
+          <label for="theme-dropdown">
+            <span data-i18n="options_jsonTheme"></span>
+            <select name="Theme" id="theme-dropdown">
+              <option value="" data-i18n="common_default"></option>
+            </select>
+          </label>
         </div>
         <div>
           <details id="expandable">
@@ -81,14 +96,6 @@
             Not applicable in edit mode
           </span>
         </label>
-      </div>
-      <div id="language-wrapper">
-        <label for="locale-select" data-i18n="options_language"></label>
-        <select id="locale-select" name="locale">
-          <option value="auto" data-i18n="options_auto"></option>
-          <option value="en" data-i18n="options_english"></option>
-          <option value="sv" data-i18n="options_swedish"></option>
-        </select>
       </div>
       <div id="save-wrapper">
         <button id="save" type="button" disabled data-i18n="common_save"></button>

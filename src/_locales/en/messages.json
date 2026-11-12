@@ -121,6 +121,9 @@
   "options_language": {
     "message": "Language:"
   },
+  "options_languageSection": {
+    "message": "Language"
+  },
   "options_auto": {
     "message": "Auto"
   },

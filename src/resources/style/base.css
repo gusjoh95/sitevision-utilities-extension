@@ -187,21 +187,27 @@ label {
   font-size: 1rem;
   display: flex;
   flex-direction: row;
-  gap: var(--spacing-xs);
+  gap: var(--spacing-md) var(--spacing-xs);
   align-items: center;
   cursor: pointer;
   max-width: fit-content;
 
-  &:has(textarea) {
+  &:has(textarea),
+  &:has(select) {
     flex-direction: column;
     align-items: flex-start;
-    gap: 8px;
+  }
+
+  &:has(textarea) {
     max-width: unset;
     pointer-events: none; /* Disable clicks on empty layout space */
     & > span,
     & > textarea {
       pointer-events: auto; /* Re-enable clicks strictly on text and textarea */
     }
+  }
+  &:has(select) {
+    cursor: default;
   }
 }
 
