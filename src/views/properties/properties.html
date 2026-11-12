@@ -13,6 +13,9 @@
   <body>
     <div id="header-wrapper" class="properties-header">
       <h1>Properties</h1>
+      <fieldset id="endpoint-selector" aria-label="REST endpoint">
+        <legend>Endpoint</legend>
+      </fieldset>
       <div class="button-collection">
         <button data-tooltip type="button" aria-label="Previous node" id="back">
           <span class="icon icon--arrow-left" aria-hidden="true"></span>
@@ -45,6 +48,9 @@
         >
           <span class="icon icon--globe2" aria-hidden="true"></span>
         </button>
+      </div>
+      <div class="request-address">
+        <a id="request-url" target="_blank" rel="noopener noreferrer"></a>
       </div>
     </div>
     <div id="error"></div>

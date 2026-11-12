@@ -1,4 +1,5 @@
 import { dom, errors, targetPermissions, theme } from '../../../api/index.js';
+import { isApiEndpoint } from './endpointOptions.js';
 import { initButtons } from './initButtons.js';
 import { getCurrentState } from './getCurrentState.js';
 import { getCurrentPropertiesText, navigateToNode } from './renderUI.js';
@@ -12,8 +13,11 @@ window.addEventListener('popstate', (event) => {
     historyState?.version === '0' || historyState?.version === '1'
       ? historyState.version
       : urlState.version;
+  const endpoint = isApiEndpoint(historyState?.endpoint)
+    ? historyState.endpoint
+    : urlState.endpoint;
 
-  void navigateToNode(node, { version, historyAction: 'none' }).catch((error) => {
+  void navigateToNode(node, { version, endpoint, historyAction: 'none' }).catch((error) => {
     dom.getRequiredElement('.json-holder pre').textContent = `Error: ${errors.messageOf(error)}`;
   });
 });
@@ -47,7 +51,7 @@ export async function initPropertiesView() {
   const historyIndex =
     typeof currentHistoryState?.index === 'number' ? currentHistoryState.index : 0;
   window.history.replaceState(
-    { index: historyIndex, node: state.node, version: state.version },
+    { index: historyIndex, node: state.node, version: state.version, endpoint: state.endpoint },
     ''
   );
 

@@ -10,6 +10,9 @@ import {
 import { restApiPath } from '../properties.js';
 import { getCurrentState } from './getCurrentState.js';
 
+/** @typedef {import('./endpointOptions.js').ApiEndpoint} ApiEndpoint */
+/** @typedef {import('../../../api/types.js').ModelVersion} ModelVersion */
+
 const useSyntaxHighlighting = await options.getOption('useSyntaxHighlighting');
 
 /** @type {HTMLPreElement} */
@@ -69,10 +72,10 @@ if (useSyntaxHighlighting) {
 
 /**
  * @param {any} data
- * @param {{ origin: string, version: string, node: string, anchorTabId: string }} state
+ * @param {{ origin: string, version: ModelVersion, node: string, anchorTabId: string, endpoint: ApiEndpoint }} state
  */
 export function renderUI(data, state) {
-  document.title = `${state.origin}${restApiPath}/${state.version}/${state.node}/properties`;
+  document.title = `${state.origin}${restApiPath}/${state.version}/${state.node}/${state.endpoint}`;
 
   if (!data) {
     currentPropertiesText = 'Error: No data available to render';
@@ -105,18 +108,26 @@ export function renderUI(data, state) {
 
 /**
  * @param {string} nextNode
- * @param {{ version?: string, historyAction?: "push" | "replace" | "none" }} [navigationOptions={}]
+ * @param {{ version?: ModelVersion, endpoint?: ApiEndpoint, historyAction?: "push" | "replace" | "none" }} [navigationOptions={}]
  * @returns {Promise<boolean>} Whether this navigation remained current and completed.
  */
 export async function navigateToNode(nextNode, navigationOptions = {}) {
   const navigationId = ++activeNavigationId;
-  const { version, historyAction = 'push' } = navigationOptions;
+  const { version, endpoint, historyAction = 'push' } = navigationOptions;
   const state = getCurrentState();
   state.node = nextNode;
   state.version = version ?? state.version;
+  state.endpoint = endpoint ?? state.endpoint;
 
   const params = new URLSearchParams(state);
   const newUrlString = `${window.location.pathname}?${params.toString()}`;
+  const requestUrl = sitevisionRest.getNodeEndpointUrl(state.origin, state.node, {
+    modelVersion: state.version,
+    endpoint: state.endpoint,
+  }).href;
+  const requestUrlLink = /** @type {HTMLAnchorElement} */ (dom.getRequiredElement('#request-url'));
+  requestUrlLink.href = requestUrl;
+  requestUrlLink.textContent = requestUrl;
 
   const currentIndex = window.history.state?.index ?? 0;
   let historyIndex = currentIndex;
@@ -124,13 +135,13 @@ export async function navigateToNode(nextNode, navigationOptions = {}) {
     historyIndex += 1;
     sessionStorage.setItem('maxHistoryIndex', String(historyIndex));
     window.history.pushState(
-      { index: historyIndex, node: state.node, version: state.version },
+      { index: historyIndex, node: state.node, version: state.version, endpoint: state.endpoint },
       '',
       newUrlString
     );
   } else {
     window.history.replaceState(
-      { index: historyIndex, node: state.node, version: state.version },
+      { index: historyIndex, node: state.node, version: state.version, endpoint: state.endpoint },
       '',
       newUrlString
     );
@@ -150,8 +161,9 @@ export async function navigateToNode(nextNode, navigationOptions = {}) {
 
     const res = await spinner.withDeferredSpinner(
       () =>
-        sitevisionRest.fetchNodeProperties(Number(state.anchorTabId), state.origin, state.node, {
+        sitevisionRest.fetchNodeResource(Number(state.anchorTabId), state.origin, state.node, {
           modelVersion: state.version,
+          endpoint: state.endpoint,
         }),
       {
         spinnerEl: dom.getRequiredElement('#spinner'),

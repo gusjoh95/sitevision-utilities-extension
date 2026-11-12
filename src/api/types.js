@@ -6,6 +6,10 @@
  * @typedef {import('./modules/editMode.js').EditInfo} EditInfo
  * @typedef {import('./modules/logger.js').Logger} Logger
  * @typedef {import('./modules/targetTab.js').FetchResult} FetchResult
+ * @typedef {import('./modules/sitevisionRest.js').ModelVersion} ModelVersion
+ * @typedef {import('./modules/sitevisionRest.js').NodeEndpoint} NodeEndpoint
+ * @typedef {import('./modules/sitevisionRest.js').NodeProperties} NodeProperties
+ * @typedef {import('./modules/sitevisionRest.js').NodeNode} NodeNode
  */
 
 export {};

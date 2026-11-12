@@ -112,7 +112,8 @@ document.addEventListener('DOMContentLoaded', async () => {
     const rootProperties = await sitevisionRest.fetchNodeProperties(
       Number(anchorTabId),
       origin,
-      rootNodeId
+      rootNodeId,
+      { modelVersion: '1' }
     );
     // Strip "_sitePage" suffix from the UUID if present.
     rootNode = {

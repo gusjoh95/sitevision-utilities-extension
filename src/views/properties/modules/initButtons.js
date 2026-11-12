@@ -1,10 +1,14 @@
 import { dom, errors, options } from '../../../api/index.js';
+import { API_ENDPOINTS, isApiEndpoint } from './endpointOptions.js';
 import { getCurrentState } from './getCurrentState.js';
+
+/** @typedef {import('./endpointOptions.js').ApiEndpoint} ApiEndpoint */
+/** @typedef {import('../../../api/types.js').ModelVersion} ModelVersion */
 
 /**
  * Initializes the properties-page control buttons.
  * @param {() => string} getPropertiesText
- * @param {(node: string, navigationOptions?: { version?: string, historyAction?: 'push' | 'replace' | 'none' }) => Promise<boolean>} navigateToNode
+ * @param {(node: string, navigationOptions?: { version?: ModelVersion, endpoint?: ApiEndpoint, historyAction?: 'push' | 'replace' | 'none' }) => Promise<boolean>} navigateToNode
  */
 export async function initButtons(getPropertiesText, navigateToNode) {
   /** @type {HTMLPreElement} */
@@ -19,6 +23,18 @@ export async function initButtons(getPropertiesText, navigateToNode) {
   const wrapBtn = dom.getRequiredElement('#wrap');
   /** @type {HTMLButtonElement} */
   const versionToggleBtn = dom.getRequiredElement('#version-toggle');
+  const endpointSelector = dom.getRequiredElement('#endpoint-selector');
+  for (const [value, text] of Object.entries(API_ENDPOINTS)) {
+    const label = document.createElement('label');
+    const radio = document.createElement('input');
+    radio.type = 'radio';
+    radio.name = 'endpoint';
+    radio.value = value;
+    label.append(radio, document.createTextNode(text));
+    endpointSelector.append(label);
+  }
+  /** @type {NodeListOf<HTMLInputElement>} */
+  const endpointRadios = endpointSelector.querySelectorAll('input[name="endpoint"]');
 
   const propertiesWordWrapPromise = options.getOption('propertiesWordWrap');
 
@@ -34,7 +50,7 @@ export async function initButtons(getPropertiesText, navigateToNode) {
 
   /**
    * Applies the selected REST API version to the mode toggle.
-   * @param {string} version
+   * @param {ModelVersion} version
    */
   function applyVersionState(version) {
     const isOnline = version === '1';
@@ -42,7 +58,15 @@ export async function initButtons(getPropertiesText, navigateToNode) {
     versionToggleBtn.classList.toggle('active', isOnline);
   }
 
-  applyVersionState(getCurrentState().version);
+  /**
+   * Applies the selected REST endpoint to the radio group.
+   * @param {ApiEndpoint} endpoint
+   */
+  function applyEndpointState(endpoint) {
+    for (const radio of endpointRadios) {
+      radio.checked = radio.value === endpoint;
+    }
+  }
 
   /**
    * Updates disabled status for back and forward buttons based on history index.
@@ -55,6 +79,13 @@ export async function initButtons(getPropertiesText, navigateToNode) {
     forwardBtn.disabled = currentIndex >= maxIndex;
   }
 
+  function syncNavigationControls() {
+    const state = getCurrentState();
+    applyVersionState(state.version);
+    applyEndpointState(state.endpoint);
+    updateHistoryButtons();
+  }
+
   backBtn.addEventListener('click', () => {
     window.history.back();
   });
@@ -63,17 +94,9 @@ export async function initButtons(getPropertiesText, navigateToNode) {
     window.history.forward();
   });
 
-  window.addEventListener('popstate', (event) => {
-    const version = event.state?.version ?? getCurrentState().version;
-    applyVersionState(version);
-    updateHistoryButtons();
-  });
-  window.addEventListener('nodeChanged', () => {
-    applyVersionState(getCurrentState().version);
-    updateHistoryButtons();
-  });
-
-  updateHistoryButtons();
+  window.addEventListener('popstate', syncNavigationControls);
+  window.addEventListener('nodeChanged', syncNavigationControls);
+  syncNavigationControls();
 
   copyBtn.addEventListener('click', async () => {
     try {
@@ -113,6 +136,25 @@ export async function initButtons(getPropertiesText, navigateToNode) {
       applyVersionState(getCurrentState().version);
     }
   });
+
+  for (const radio of endpointRadios) {
+    radio.addEventListener('change', async () => {
+      if (!radio.checked || !isApiEndpoint(radio.value)) {
+        return;
+      }
+
+      const currentState = getCurrentState();
+      try {
+        const navigated = await navigateToNode(currentState.node, { endpoint: radio.value });
+        if (!navigated) {
+          applyEndpointState(getCurrentState().endpoint);
+        }
+      } catch (error) {
+        console.error('Failed to switch properties endpoint:', errors.messageOf(error));
+        applyEndpointState(getCurrentState().endpoint);
+      }
+    });
+  }
 
   const propertiesWordWrap = await propertiesWordWrapPromise;
   applyWrapState(Boolean(propertiesWordWrap));

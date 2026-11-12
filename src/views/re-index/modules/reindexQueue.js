@@ -89,7 +89,8 @@ export function cancelReindex() {
  */
 async function getChildNodes(tabId, origin, nodeId, waitBeforeApiCall) {
   if (!(await waitBeforeApiCall())) return null;
-  const subNodes = await sitevisionRest.fetchNodeChildren(tabId, origin, nodeId, {
+  const subNodes = await sitevisionRest.fetchNodeNodes(tabId, origin, nodeId, {
+    modelVersion: '1',
     includes: DISCOVERABLE_NODE_TYPES,
     properties: NODE_PROPERTIES,
   });
@@ -99,7 +100,7 @@ async function getChildNodes(tabId, origin, nodeId, waitBeforeApiCall) {
 /**
  * Converts REST node data into the metadata used by the re-index queue.
  *
- * @param {import('../../../api/modules/sitevisionRest.js').RestNode} node - Raw child node data from the REST API.
+ * @param {import('../../../api/types.js').NodeNode} node - Raw child node data from the REST API.
  * @returns {DiscoveredNode} Normalized queue node.
  */
 function normalizeNode(node) {

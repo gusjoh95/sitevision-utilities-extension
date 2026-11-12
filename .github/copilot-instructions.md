@@ -6,6 +6,7 @@
 - Keep changes focused, follow the existing structure and style, and avoid unnecessary dependencies or unrelated refactors.
 - Use the standard `browser.*` namespace at runtime. Chromium support relies on the minimum version declared in the manifest templates.
 - Import shared API implementations through `src/api/index.js`, not directly from individual implementation modules.
+- `src/api/types.js` is the intentional shared type surface for API-defined JSDoc types. Keep each canonical type definition in its owning API module, surface it through `types.js`, and import it from `types.js` rather than directly from `src/api/modules/`.
 - Use `dom.getRequiredElement(selector)` from `src/api/index.js` for required DOM elements. For optional elements, use a nullable lookup and handle the missing case explicitly. The helper checks presence, not the element's subtype, so keep the appropriate JSDoc type or runtime `instanceof` check when needed.
 - Include the `.js` extension in relative JavaScript imports.
 - Treat `src/manifest.chrome.json` and `src/manifest.firefox.json` as the source manifests. `src/manifest.json` is generated locally; select the target with `npm run dev:ch` or `npm run dev:ff` instead of editing the generated file.
