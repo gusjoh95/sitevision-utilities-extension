@@ -1,4 +1,4 @@
-import { dom, errors, targetPermissions, theme } from '../../../api/index.js';
+import { dom, errors, i18n, targetPermissions, theme } from '../../../api/index.js';
 import { isApiEndpoint } from './endpointOptions.js';
 import { initButtons } from './initButtons.js';
 import { getCurrentState } from './getCurrentState.js';
@@ -18,7 +18,9 @@ window.addEventListener('popstate', (event) => {
     : urlState.endpoint;
 
   void navigateToNode(node, { version, endpoint, historyAction: 'none' }).catch((error) => {
-    dom.getRequiredElement('.json-holder pre').textContent = `Error: ${errors.messageOf(error)}`;
+    dom.getRequiredElement('.json-holder pre').textContent = i18n.getMessage('common_errorPrefix', [
+      errors.messageOf(error),
+    ]);
   });
 });
 
@@ -34,7 +36,7 @@ export async function initPropertiesView() {
   const errorElement = dom.getRequiredElement('#error');
 
   if (!state.origin || !state.node || !state.anchorTabId) {
-    preElement.textContent = 'Error: Missing required URL parameters (origin/node/anchorTabId).';
+    preElement.textContent = i18n.getMessage('properties_missingPropertiesParameters');
     return;
   }
 
@@ -42,7 +44,7 @@ export async function initPropertiesView() {
     tabId: Number(state.anchorTabId),
     origin: state.origin,
     onLost: ({ message }) => {
-      errorElement.textContent = `Warning: ${message}`;
+      errorElement.textContent = i18n.getMessage('common_warningPrefix', [message]);
     },
   });
 

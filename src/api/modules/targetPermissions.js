@@ -1,4 +1,5 @@
 import { SET_ACTIVE_TARGET_MESSAGE, TARGET_LOST_MESSAGE } from '../../background/messages.js';
+import { getMessage } from './i18n.js';
 
 /**
  * @typedef {'closed' | 'cross-origin'} TargetLostReason
@@ -12,32 +13,25 @@ const targetLostReasons = {
 
 const inaccessibleTargetMessage = 'Target tab no longer exists or is inaccessible.';
 
-const targetLostMessages = {
-  [targetLostReasons.closed]:
-    'The original website tab was closed. Please open this view again from an active page.',
-  [targetLostReasons.crossOrigin]:
-    'The original website tab navigated away or browser permissions were revoked. Please open this view again from an active page.',
+const targetAccessMessageKeys = {
+  [targetLostReasons.closed]: 'common_targetClosed',
+  [targetLostReasons.crossOrigin]: 'common_targetUnavailable',
+  inaccessible: 'common_inaccessibleTarget',
 };
 
-const targetLostReasonValues = Object.keys(targetLostMessages);
-
+/** @typedef {keyof typeof targetAccessMessageKeys} TargetAccessReason */
 const targetAccessErrorMessages = [
   {
-    message: inaccessibleTargetMessage,
+    messageKey: 'common_inaccessibleTarget',
     fragments: [inaccessibleTargetMessage],
   },
   {
-    message: targetLostMessages[targetLostReasons.closed],
-    fragments: [
-      targetLostMessages[targetLostReasons.closed],
-      'No tab with id',
-      'is not a valid tab ID',
-    ],
+    messageKey: 'common_targetClosed',
+    fragments: ['No tab with id', 'is not a valid tab ID'],
   },
   {
-    message: targetLostMessages[targetLostReasons.crossOrigin],
+    messageKey: 'common_targetUnavailable',
     fragments: [
-      targetLostMessages[targetLostReasons.crossOrigin],
       'Target tab is inaccessible.',
       'Missing host permission',
       'Cannot access contents of url',
@@ -45,6 +39,18 @@ const targetAccessErrorMessages = [
     ],
   },
 ];
+
+export class TargetAccessError extends Error {
+  /**
+   * @param {TargetAccessReason} reason
+   * @param {ErrorOptions} [options]
+   */
+  constructor(reason, options) {
+    super(getMessage(targetAccessMessageKeys[reason]), options);
+    this.name = 'TargetAccessError';
+    this.reason = reason;
+  }
+}
 
 /**
  * @typedef {Object} TargetLostEvent
@@ -60,9 +66,8 @@ const targetAccessErrorMessages = [
  * @returns {string}
  */
 export function getTargetLostMessage(reason) {
-  return isTargetLostReason(reason)
-    ? targetLostMessages[reason]
-    : targetLostMessages[targetLostReasons.crossOrigin];
+  const resolvedReason = isTargetLostReason(reason) ? reason : targetLostReasons.crossOrigin;
+  return getMessage(targetAccessMessageKeys[resolvedReason]);
 }
 
 /**
@@ -70,19 +75,26 @@ export function getTargetLostMessage(reason) {
  * @returns {reason is TargetLostReason}
  */
 function isTargetLostReason(reason) {
-  return targetLostReasonValues.includes(reason);
+  return reason === targetLostReasons.closed || reason === targetLostReasons.crossOrigin;
 }
 
 /**
  * Returns the standard target-loss message for browser tab access failures.
  *
- * @param {string} errorMessage
+ * @param {unknown} error
  * @returns {string | null}
  */
-export function getTargetAccessErrorMessage(errorMessage) {
-  for (const { message, fragments } of targetAccessErrorMessages) {
+export function getTargetAccessErrorMessage(error) {
+  if (error instanceof TargetAccessError) {
+    return getMessage(targetAccessMessageKeys[error.reason]);
+  }
+
+  const errorMessage =
+    error instanceof Error ? error.message : typeof error === 'string' ? error : '';
+
+  for (const { messageKey, fragments } of targetAccessErrorMessages) {
     if (fragments.some((fragment) => errorMessage.includes(fragment))) {
-      return message;
+      return getMessage(messageKey);
     }
   }
 
@@ -106,12 +118,12 @@ export async function assertTargetTabAccessible(tabId, origin) {
   try {
     invocationTab = await browser.tabs.get(tabId);
   } catch (error) {
-    throw new Error(getTargetLostMessage(targetLostReasons.closed), { cause: error });
+    throw new TargetAccessError(targetLostReasons.closed, { cause: error });
   }
 
   const currentUrl = invocationTab.pendingUrl || invocationTab.url;
   if (!currentUrl?.length) {
-    throw new Error(getTargetLostMessage(targetLostReasons.crossOrigin));
+    throw new TargetAccessError(targetLostReasons.crossOrigin);
   }
 
   if (!origin) {
@@ -122,11 +134,11 @@ export async function assertTargetTabAccessible(tabId, origin) {
   try {
     currentOrigin = new URL(currentUrl).origin;
   } catch (error) {
-    throw new Error(inaccessibleTargetMessage, { cause: error });
+    throw new TargetAccessError('inaccessible', { cause: error });
   }
 
   if (currentOrigin !== origin) {
-    throw new Error(getTargetLostMessage(targetLostReasons.crossOrigin));
+    throw new TargetAccessError(targetLostReasons.crossOrigin);
   }
 }
 

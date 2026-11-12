@@ -1,9 +1,9 @@
 export const DEFAULT_API_ENDPOINT = 'properties';
 
 export const API_ENDPOINTS = {
-  [DEFAULT_API_ENDPOINT]: 'Properties',
-  nodes: 'Nodes',
-  contentnodes: 'Content nodes',
+  [DEFAULT_API_ENDPOINT]: 'properties_properties',
+  nodes: 'properties_endpointNodes',
+  contentnodes: 'properties_endpointContentNodes',
 };
 
 /** @typedef {keyof typeof API_ENDPOINTS} ApiEndpoint */

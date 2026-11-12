@@ -1,4 +1,4 @@
-import { targetTab } from '../../../api/index.js';
+import { i18n, targetTab } from '../../../api/index.js';
 
 /**
  * Triggers reindex on a single node via the Sitevision Edit API.
@@ -18,7 +18,7 @@ export async function reindexSingleNode(tabId, origin, nodeId, csrfToken) {
       headers: { 'x-csrf-token': csrfToken },
     },
   });
-  if (!res.ok) throw new Error(`HTTP ${res.status} when reindexing node`);
+  if (!res.ok) throw new Error(i18n.getMessage('reindex_reindexHttpFailure', [String(res.status)]));
 
   return res;
 }

@@ -1,4 +1,4 @@
-import { dom, errors, jsonRenderer, options, theme } from '../../api/index.js';
+import { dom, errors, i18n, jsonRenderer, options, theme } from '../../api/index.js';
 
 const COLOR_SCHEME_STORAGE_KEY = 'sitevision-utilities-color-scheme';
 
@@ -42,7 +42,10 @@ function saveColorScheme(colorScheme) {
   }
 }
 
-document.addEventListener('DOMContentLoaded', async () => {
+await i18n.initialize();
+i18n.localizeDocument();
+
+async function initializeOptionsView() {
   /** @type {HTMLInputElement} */
   const useSyntaxHighlighting = dom.getRequiredElement('#use-syntax-highlighting');
   /** @type {HTMLInputElement} */
@@ -55,6 +58,8 @@ document.addEventListener('DOMContentLoaded', async () => {
   const dropdown = dom.getRequiredElement('#theme-dropdown');
   /** @type {HTMLSelectElement} */
   const colorSchemeSelect = dom.getRequiredElement('#color-scheme');
+  /** @type {HTMLSelectElement} */
+  const localeDropdown = dom.getRequiredElement('#locale-select');
   /** @type {HTMLDetailsElement} */
   const expandable = dom.getRequiredElement('#expandable');
   /** @type {HTMLButtonElement} */
@@ -93,13 +98,19 @@ document.addEventListener('DOMContentLoaded', async () => {
     useSyntaxHighlighting.checked = Boolean(opts.useSyntaxHighlighting);
     reloadOnChange.checked = Boolean(opts.reloadOnChange);
     customLoginPaths.value = opts.customLoginPaths.join('\n');
+    localeDropdown.value = opts.locale;
 
     const jsonTheme = opts?.jsonTheme || '';
     try {
       const jsonUrl = browser.runtime.getURL('resources/style/json-themes/themes.json');
       const response = await fetch(jsonUrl);
       if (!response.ok) {
-        throw new Error(`Failed to load themes: HTTP ${response.status} ${response.statusText}`);
+        throw new Error(
+          i18n.getMessage('options_loadThemesFailed', [
+            String(response.status),
+            response.statusText,
+          ])
+        );
       }
       /** @type {{ file: string, name: string }[]} */
       const themes = await response.json();
@@ -144,6 +155,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         useSyntaxHighlighting: Boolean(useSyntaxHighlighting?.checked),
         reloadOnChange: Boolean(reloadOnChange?.checked),
         jsonTheme: String(dropdown.value),
+        locale: localeDropdown.value,
       };
       saveBtn.setAttribute('disabled', '');
       if (await options.setOptions(toStore)) {
@@ -170,7 +182,10 @@ document.addEventListener('DOMContentLoaded', async () => {
           );
           if (!dummyJson.ok) {
             throw new Error(
-              `Failed to load preview: HTTP ${dummyJson.status} ${dummyJson.statusText}`
+              i18n.getMessage('options_loadThemePreviewFailed', [
+                String(dummyJson.status),
+                dummyJson.statusText,
+              ])
             );
           }
           preview.replaceChildren(jsonRenderer.highlight(await dummyJson.json()));
@@ -204,4 +219,6 @@ document.addEventListener('DOMContentLoaded', async () => {
   } catch (error) {
     console.warn('Failed to initialize release notes link:', error);
   }
-});
+}
+
+await initializeOptionsView();

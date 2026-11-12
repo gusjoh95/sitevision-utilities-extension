@@ -1,4 +1,4 @@
-import { dom, errors, targetTab } from '../../../api/index.js';
+import { dom, errors, i18n, targetTab } from '../../../api/index.js';
 
 /**
  * @param {chrome.tabs.Tab} tab - The active tab.
@@ -6,7 +6,7 @@ import { dom, errors, targetTab } from '../../../api/index.js';
 export async function initCookieConsent(tab) {
   const activeTabUrl = tab?.url;
   if (!activeTabUrl) {
-    throw new Error('No active tab URL available for cookie consent checks.');
+    throw new Error(i18n.getMessage('popup_noActiveTabCookieUrl'));
   }
   /** @type {string} */
   const safeTabUrl = activeTabUrl;
@@ -65,9 +65,13 @@ export async function initCookieConsent(tab) {
             const acceptedCookieArr = accepted.split(',').filter(Boolean);
             const deniedCookieArr = denied.split(',').filter(Boolean);
 
-            acceptedLabel.textContent = `Accepted cookies (${acceptedCookieArr.length}):`;
+            acceptedLabel.textContent = i18n.getMessage('popup_acceptedCookiesCount', [
+              String(acceptedCookieArr.length),
+            ]);
             acceptedValues.textContent = acceptedCookieArr.join('\n');
-            deniedLabel.textContent = `Denied cookies (${deniedCookieArr.length}):`;
+            deniedLabel.textContent = i18n.getMessage('popup_deniedCookiesCount', [
+              String(deniedCookieArr.length),
+            ]);
             deniedValues.textContent = deniedCookieArr.join('\n');
 
             deleteConsentCookieBtn.onclick = async () => {
@@ -85,7 +89,10 @@ export async function initCookieConsent(tab) {
                 });
                 await targetTab.reloadInvocationTab(tab, false);
               } catch (error) {
-                dom.getRequiredElement('#error').textContent = `Error: ${errors.messageOf(error)}`;
+                dom.getRequiredElement('#error').textContent = i18n.getMessage(
+                  'common_errorPrefix',
+                  [errors.messageOf(error)]
+                );
               }
             };
           } else {
@@ -93,7 +100,7 @@ export async function initCookieConsent(tab) {
             deniedLabel.textContent = '';
             acceptedValues.textContent = '';
             deniedValues.textContent = '';
-            missingCookieMessage.textContent = `Cookie "${cookieName}" not found`;
+            missingCookieMessage.textContent = i18n.getMessage('popup_missingCookie', [cookieName]);
             missingCookieMessage.hidden = false;
             deleteConsentCookieBtn.hidden = true;
           }
@@ -141,7 +148,7 @@ export async function initCookieConsent(tab) {
           const promptBtn = dom.getRequiredElement('#cookie-consent-prompt-button');
           const promptHelp = dom.getRequiredElement('#cookie-consent-prompt-help');
 
-          promptHelp.textContent = `Host permissions for ${origin}, is required to read cookies. Please grant permissions by clicking the button below.`;
+          promptHelp.textContent = i18n.getMessage('popup_cookiePermissionForOrigin', [origin]);
           promptBtn.disabled = false;
           promptBtn.addEventListener('click', async () => {
             try {
@@ -149,7 +156,9 @@ export async function initCookieConsent(tab) {
                 promptWrapper.hidden = true;
               }
             } catch (error) {
-              dom.getRequiredElement('#error').textContent = `Error: ${errors.messageOf(error)}`;
+              dom.getRequiredElement('#error').textContent = i18n.getMessage('common_errorPrefix', [
+                errors.messageOf(error),
+              ]);
             }
           });
           resolve(undefined);

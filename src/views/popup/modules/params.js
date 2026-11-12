@@ -1,4 +1,4 @@
-import { dom, errors, sessionParams, targetTab } from '../../../api/index.js';
+import { dom, errors, i18n, sessionParams, targetTab } from '../../../api/index.js';
 
 /**
  * @param {chrome.tabs.Tab} tab - The active tab.
@@ -33,7 +33,7 @@ export async function initParamButtons(tab, sitevisionMode) {
 
   const activeTabId = tab?.id;
   if (typeof activeTabId !== 'number') {
-    throw new Error('No active tab available for session parameter checks.');
+    throw new Error(i18n.getMessage('popup_noActiveTabSessionParameters'));
   }
 
   /** @type {number} */
@@ -71,7 +71,7 @@ export async function initParamButtons(tab, sitevisionMode) {
     });
 
     if (!result) {
-      throw new Error('Session parameter check returned no result.');
+      throw new Error(i18n.getMessage('popup_sessionParameterNoResult'));
     }
     return result;
   }
@@ -100,7 +100,9 @@ export async function initParamButtons(tab, sitevisionMode) {
         }
       } catch (error) {
         checkbox.checked = !targetState;
-        dom.getRequiredElement('#error').textContent = `Error: ${errors.messageOf(error)}`;
+        dom.getRequiredElement('#error').textContent = i18n.getMessage('common_errorPrefix', [
+          errors.messageOf(error),
+        ]);
       } finally {
         checkbox.indeterminate = false; // Note: This is purely a visual change.
         checkbox.disabled = false;

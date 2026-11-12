@@ -1,17 +1,17 @@
 <!doctype html>
-<html lang="en">
+<html lang="sv">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <script src="../../resources/theme-init.js"></script>
     <link rel="stylesheet" href="../../resources/style/base.css" />
     <link rel="stylesheet" href="find-login.css" />
-    <title>Find login page</title>
+    <title data-i18n="findLogin_findLoginTitle"></title>
   </head>
 
   <body>
     <div class="find-login-header">
-      <h1>Find login page</h1>
+      <h1 data-i18n="findLogin_findLoginTitle"></h1>
     </div>
     <div id="error"></div>
 
@@ -22,8 +22,9 @@
         id="summary-link"
         href="#"
         class="hidden"
-        data-tooltip="Open URL in new tab"
+        data-tooltip
         aria-label="Open URL in new tab"
+        data-i18n-aria-label="findLogin_openUrlInNewTab"
       ></a>
     </div>
     <div id="spinner" class="bar hidden"></div>

@@ -1,23 +1,27 @@
 <!doctype html>
-<html lang="en">
+<html lang="sv">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <script src="../../resources/theme-init.js"></script>
     <link rel="stylesheet" href="../../resources/style/base.css" />
     <link rel="stylesheet" href="re-index.css" />
-    <title>Reindex Node Tree</title>
+    <title data-i18n="reindex_reindexViewTitle"></title>
   </head>
 
   <body>
     <div class="reindex-header">
-      <h1>Reindex Node Tree</h1>
+      <h1 data-i18n="reindex_reindexViewTitle"></h1>
     </div>
     <div id="error"></div>
 
     <div class="controls-panel">
-      <span id="current-node-label">Root node ID:</span>
-      <output id="current-node-id" aria-labelledby="current-node-label">Loading...</output>
+      <span id="current-node-label" data-i18n="reindex_rootNodeId"></span>
+      <output
+        id="current-node-id"
+        aria-labelledby="current-node-label"
+        data-i18n="common_loading"
+      ></output>
       <div class="input-groups">
         <div class="button-collection">
           <!-- TODO, revise tooltips/labels -->
@@ -26,40 +30,43 @@
             type="button"
             data-tooltip
             aria-label="Starts a depth-first reindex of the node tree. Will use a finished preview if available."
+            data-i18n-aria-label="reindex_startReindexTooltip"
             disabled
           >
-            Start Reindex
+            <span data-i18n="reindex_startReindex"></span>
           </button>
           <button
             id="preview-reindex-btn"
             type="button"
             data-tooltip
             aria-label="Generates a preview of the node tree to be reindexed."
+            data-i18n-aria-label="reindex_previewTooltip"
             disabled
           >
-            Preview
+            <span data-i18n="reindex_preview"></span>
           </button>
           <button
             id="cancel-reindex-btn"
             type="button"
             data-tooltip
             aria-label="Cancels the ongoing reindex or preview operation."
+            data-i18n-aria-label="reindex_cancelReindexTooltip"
             disabled
           >
-            Cancel
+            <span data-i18n="common_cancel"></span>
           </button>
         </div>
         <div class="input-group-inputs">
           <label class="checkbox-setting" for="include-robots-index-false">
-            <span>Reindex nodes with robotsIndex=false:</span>
+            <span data-i18n="reindex_includeRobotsIndexFalse"></span>
             <input type="checkbox" id="include-robots-index-false" />
           </label>
           <label for="reindex-delay-ms">
-            <span>Delay between index calls (ms):</span>
+            <span data-i18n="reindex_delayBetweenIndexCalls"></span>
             <input id="reindex-delay-ms" type="number" min="0" max="60000" step="25" />
           </label>
           <label for="api-delay-ms">
-            <span>Delay between REST-API calls (ms):</span>
+            <span data-i18n="reindex_delayBetweenApiCalls"></span>
             <input id="api-delay-ms" type="number" min="0" max="60000" step="25" />
           </label>
         </div>
@@ -80,8 +87,8 @@
     </dialog>
 
     <div id="status-wrapper">
-      <span class="badge badge-idle">IDLE</span>
-      <span id="summary-text">Ready to reindex</span>
+      <span class="badge badge-idle" data-i18n="common_statusIdle"></span>
+      <span id="summary-text" data-i18n="reindex_readyToReindex"></span>
     </div>
     <div id="spinner" class="bar hidden"></div>
 

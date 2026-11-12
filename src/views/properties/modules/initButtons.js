@@ -1,4 +1,4 @@
-import { dom, errors, options } from '../../../api/index.js';
+import { dom, errors, i18n, options } from '../../../api/index.js';
 import { API_ENDPOINTS, isApiEndpoint } from './endpointOptions.js';
 import { getCurrentState } from './getCurrentState.js';
 
@@ -30,7 +30,7 @@ export async function initButtons(getPropertiesText, navigateToNode) {
     radio.type = 'radio';
     radio.name = 'endpoint';
     radio.value = value;
-    label.append(radio, document.createTextNode(text));
+    label.append(radio, document.createTextNode(i18n.getMessage(text)));
     endpointSelector.append(label);
   }
   /** @type {NodeListOf<HTMLInputElement>} */

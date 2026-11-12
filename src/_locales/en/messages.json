@@ -1,0 +1,487 @@
+{
+  "manifest_extensionName": {
+    "message": "Sitevision Utilities",
+    "description": "The extension name."
+  },
+  "manifest_extensionDescription": {
+    "message": "Unofficial Sitevision extension: node properties, login discovery, session parameters, recursive reindexing, and more.",
+    "description": "A short description of the extension."
+  },
+  "common_findLoginPage": {
+    "message": "Find login page"
+  },
+  "popup_reindexNodeTree": {
+    "message": "Reindex node tree"
+  },
+  "popup_openUserGuide": {
+    "message": "Open user guide"
+  },
+  "popup_openExtensionOptions": {
+    "message": "Open extension options"
+  },
+  "common_nodeProperties": {
+    "message": "Node properties"
+  },
+  "common_version": {
+    "message": "Version"
+  },
+  "common_online": {
+    "message": "Online"
+  },
+  "common_offline": {
+    "message": "Offline"
+  },
+  "common_nodeId": {
+    "message": "Node-id"
+  },
+  "popup_getNodeProperties": {
+    "message": "Get node properties"
+  },
+  "popup_currentNode": {
+    "message": "Current node"
+  },
+  "popup_currentUser": {
+    "message": "Current user"
+  },
+  "common_sessionParameters": {
+    "message": "Session parameters"
+  },
+  "popup_jsdebugTooltip": {
+    "message": "jsdebug state is inferred from asset files in the DOM and may be inaccurate."
+  },
+  "popup_consentCookie": {
+    "message": "Consent cookie"
+  },
+  "popup_cookiePermissionPrompt": {
+    "message": "Host permissions is required to read cookies. Please grant permissions by clicking the button below."
+  },
+  "popup_grantPermissions": {
+    "message": "Grant permissions"
+  },
+  "popup_acceptedCookies": {
+    "message": "Accepted cookies (0):"
+  },
+  "popup_deniedCookies": {
+    "message": "Denied cookies (0):"
+  },
+  "popup_acceptedCookiesCount": {
+    "message": "Accepted cookies ($1):"
+  },
+  "popup_deniedCookiesCount": {
+    "message": "Denied cookies ($1):"
+  },
+  "popup_deleteConsentCookie": {
+    "message": "Delete consent cookie"
+  },
+  "options_targetPaths": {
+    "message": "Target paths"
+  },
+  "options_loginPathsHelp": {
+    "message": "Enter one path per line or separate them with commas (e.g., /login, /admin/login)."
+  },
+  "options_richJsonView": {
+    "message": "Rich JSON view"
+  },
+  "options_richJsonViewHelp": {
+    "message": "Enables syntax highlighting and clickable node traversal in the properties view."
+  },
+  "options_jsonTheme": {
+    "message": "JSON theme:"
+  },
+  "common_default": {
+    "message": "Default"
+  },
+  "options_themePreview": {
+    "message": "Theme preview"
+  },
+  "options_appearance": {
+    "message": "Appearance"
+  },
+  "options_colorScheme": {
+    "message": "Extension color scheme:"
+  },
+  "options_light": {
+    "message": "Light"
+  },
+  "options_dark": {
+    "message": "Dark"
+  },
+  "options_notApplicableInEditMode": {
+    "message": "Not applicable in edit mode"
+  },
+  "options_reloadOnParameterUpdate": {
+    "message": "Reload on parameter update"
+  },
+  "common_save": {
+    "message": "Save"
+  },
+  "options_optionsTitle": {
+    "message": "Options"
+  },
+  "options_language": {
+    "message": "Language:"
+  },
+  "options_auto": {
+    "message": "Auto"
+  },
+  "options_english": {
+    "message": "English"
+  },
+  "options_swedish": {
+    "message": "Swedish"
+  },
+  "common_copyNodeId": {
+    "message": "Copy node ID"
+  },
+  "properties_properties": {
+    "message": "Properties"
+  },
+  "properties_previousNode": {
+    "message": "Previous node"
+  },
+  "properties_nextNode": {
+    "message": "Next node"
+  },
+  "properties_copyProperties": {
+    "message": "Copy properties to clipboard"
+  },
+  "properties_toggleWordWrap": {
+    "message": "Toggle word wrap"
+  },
+  "properties_onlineVersion": {
+    "message": "Online version"
+  },
+  "properties_restEndpoint": {
+    "message": "REST endpoint"
+  },
+  "properties_endpointNodes": {
+    "message": "Nodes"
+  },
+  "properties_endpointContentNodes": {
+    "message": "Content nodes"
+  },
+  "reindex_reindexViewTitle": {
+    "message": "Reindex Node Tree"
+  },
+  "reindex_rootNodeId": {
+    "message": "Root node ID:"
+  },
+  "common_loading": {
+    "message": "Loading..."
+  },
+  "reindex_startReindex": {
+    "message": "Start Reindex"
+  },
+  "reindex_startReindexTooltip": {
+    "message": "Starts a depth-first reindex of the node tree. Will use a finished preview if available."
+  },
+  "reindex_preview": {
+    "message": "Preview"
+  },
+  "reindex_previewTooltip": {
+    "message": "Generates a preview of the node tree to be reindexed."
+  },
+  "common_cancel": {
+    "message": "Cancel"
+  },
+  "reindex_cancelReindexTooltip": {
+    "message": "Cancels the ongoing reindex or preview operation."
+  },
+  "reindex_includeRobotsIndexFalse": {
+    "message": "Reindex nodes with robotsIndex=false:"
+  },
+  "reindex_delayBetweenIndexCalls": {
+    "message": "Delay between index calls (ms):"
+  },
+  "reindex_delayBetweenApiCalls": {
+    "message": "Delay between REST-API calls (ms):"
+  },
+  "common_statusIdle": {
+    "message": "IDLE"
+  },
+  "reindex_readyToReindex": {
+    "message": "Ready to reindex"
+  },
+  "reindex_lowDelayWarning": {
+    "message": "Low delay warning"
+  },
+  "reindex_lowDelayWarningText": {
+    "message": "Delays below 100 ms are at your own risk. Low values may trigger rate limits or freeze your session."
+  },
+  "common_ok": {
+    "message": "OK"
+  },
+  "common_statusRunning": {
+    "message": "RUNNING"
+  },
+  "common_statusSuccess": {
+    "message": "SUCCESS"
+  },
+  "common_statusWarn": {
+    "message": "WARN"
+  },
+  "common_statusError": {
+    "message": "ERROR"
+  },
+  "findLogin_findLoginTitle": {
+    "message": "Find login page"
+  },
+  "findLogin_openUrlInNewTab": {
+    "message": "Open URL in new tab"
+  },
+  "common_errorPrefix": {
+    "message": "Error: $1"
+  },
+  "common_warningPrefix": {
+    "message": "Warning: $1"
+  },
+  "common_errorOpeningWindow": {
+    "message": "Error opening window: $1"
+  },
+  "popup_missingCookie": {
+    "message": "Cookie \"$1\" not found"
+  },
+  "popup_cookiePermissionForOrigin": {
+    "message": "Host permissions for $1, is required to read cookies. Please grant permissions by clicking the button below."
+  },
+  "reindex_startingTreeReindex": {
+    "message": "Starting tree reindex from root: $1"
+  },
+  "reindex_previewingTree": {
+    "message": "Previewing tree from root: $1"
+  },
+  "reindex_targetOrigin": {
+    "message": "Target origin: $1"
+  },
+  "reindex_reindexFailed": {
+    "message": "Reindex failed: $1"
+  },
+  "reindex_previewFailed": {
+    "message": "Preview failed: $1"
+  },
+  "reindex_navigationGuardActive": {
+    "message": "Navigation guard active: leaving or reloading the Sitevision tab may show a browser confirmation."
+  },
+  "reindex_reindexViewClosing": {
+    "message": "Re-index view is closing; requesting navigation-guard cleanup."
+  },
+  "reindex_navigationGuardRemoved": {
+    "message": "Navigation guard removed from the Sitevision tab."
+  },
+  "reindex_navigationGuardNotFound": {
+    "message": "Navigation guard cleanup could not find the active guard."
+  },
+  "reindex_navigationGuardCleanupFailed": {
+    "message": "Navigation guard cleanup failed: $1"
+  },
+  "reindex_navigationGuardInstallFailed": {
+    "message": "Could not install the navigation guard in the Sitevision tab."
+  },
+  "reindex_previewSummary": {
+    "message": "$1 discovered; $2 to reindex; $3 skipped by robotsIndex=false; $4 not indexable. $5"
+  },
+  "reindex_includingRobotsIndexFalse": {
+    "message": "Including robotsIndex=false."
+  },
+  "reindex_respectingRobotsIndex": {
+    "message": "Respecting robotsIndex."
+  },
+  "reindex_previewUpdatedFromCache": {
+    "message": "Preview updated from cached discovery: $1"
+  },
+  "reindex_previewSummaryStatus": {
+    "message": "Preview: $1"
+  },
+  "reindex_notIndexableReason": {
+    "message": "node type is not indexable"
+  },
+  "reindex_robotsIndexFalseReason": {
+    "message": "robotsIndex=false"
+  },
+  "reindex_traversingChildren": {
+    "message": "traversing children..."
+  },
+  "reindex_notTraversingChildren": {
+    "message": "not traversing children."
+  },
+  "reindex_notReindexingNode": {
+    "message": "Not reindexing $1 ($2, $3): $4; $5"
+  },
+  "reindex_reindexingNode": {
+    "message": "Reindexing $1 ($2, $3)..."
+  },
+  "reindex_okArrow": {
+    "message": "-> OK"
+  },
+  "reindex_reusingPreview": {
+    "message": "Reusing preview: reindexing $1 previously discovered nodes..."
+  },
+  "reindex_fetchingRootChildren": {
+    "message": "Fetching subnodes of root $1..."
+  },
+  "reindex_processedIndexed": {
+    "message": "Processed $1 nodes; indexed $2..."
+  },
+  "reindex_reindexCancelled": {
+    "message": "Reindex operation cancelled by user."
+  },
+  "reindex_cancelledProcessedIndexed": {
+    "message": "Cancelled. Processed $1 nodes; indexed $2."
+  },
+  "reindex_reindexFinished": {
+    "message": "Finished! Processed $1 nodes; indexed $2."
+  },
+  "reindex_reindexCompleted": {
+    "message": "Completed. Processed $1 nodes; indexed $2."
+  },
+  "reindex_previewingReindexTree": {
+    "message": "Previewing reindex tree from root $1..."
+  },
+  "reindex_previewCancelled": {
+    "message": "Preview cancelled by user."
+  },
+  "reindex_previewCancelledCount": {
+    "message": "Preview cancelled. Discovered $1 nodes."
+  },
+  "reindex_discoveryComplete": {
+    "message": "Discovery complete: $1"
+  },
+  "reindex_previewIndexLabel": {
+    "message": "[index]"
+  },
+  "reindex_previewRobotsLabel": {
+    "message": "[robotsIndex=false]"
+  },
+  "reindex_previewNotIndexableLabel": {
+    "message": "[not-indexable]"
+  },
+  "common_targetClosed": {
+    "message": "The original website tab was closed. Please open this view again from an active page."
+  },
+  "common_targetUnavailable": {
+    "message": "The original website tab navigated away or browser permissions were revoked. Please open this view again from an active page."
+  },
+  "common_inaccessibleTarget": {
+    "message": "Target tab no longer exists or is inaccessible."
+  },
+  "findLogin_probingTargets": {
+    "message": "Probing target site(s)..."
+  },
+  "findLogin_startingDiscovery": {
+    "message": "Starting discovery on: $1"
+  },
+  "findLogin_getPath": {
+    "message": "GET $1"
+  },
+  "findLogin_networkError": {
+    "message": "-> Network error ($1)"
+  },
+  "findLogin_httpCrossOriginRedirect": {
+    "message": "-> HTTP $1 cross-origin redirect ($2)"
+  },
+  "findLogin_internalRedirect": {
+    "message": "-> Internal redirect ($1)"
+  },
+  "findLogin_basicAuthDetected": {
+    "message": "-> SEMI-FOUND! Basic Auth detected."
+  },
+  "findLogin_metaRefreshDetected": {
+    "message": "-> Meta-refresh redirect detected"
+  },
+  "findLogin_loginFormDetected": {
+    "message": "-> FOUND! Local login form detected"
+  },
+  "findLogin_httpNoLoginForm": {
+    "message": "-> HTTP $1 No login form"
+  },
+  "findLogin_httpStatus": {
+    "message": "-> HTTP $1"
+  },
+  "findLogin_continuingLoginSearch": {
+    "message": "Continuing search for login form."
+  },
+  "findLogin_loginFormFoundAt": {
+    "message": "Login form found at:"
+  },
+  "findLogin_targetUnavailableStatus": {
+    "message": "Target unavailable:"
+  },
+  "findLogin_basicAuthFoundAt": {
+    "message": "Basic Auth found at:"
+  },
+  "findLogin_basicAuthOnlyFound": {
+    "message": "Discovery finished — only Basic Auth was found."
+  },
+  "findLogin_noLoginFound": {
+    "message": "No login found."
+  },
+  "findLogin_discoveryError": {
+    "message": "-> Error: $1"
+  },
+  "findLogin_probeError": {
+    "message": "Error: $1"
+  },
+  "properties_missingPropertiesParameters": {
+    "message": "Error: Missing required URL parameters (origin/node/anchorTabId)."
+  },
+  "properties_noDataToRender": {
+    "message": "Error: No data available to render"
+  },
+  "common_targetAccessUnavailable": {
+    "message": "Target access unavailable"
+  },
+  "reindex_rootIdMissing": {
+    "message": "Root node is missing an ID."
+  },
+  "reindex_missingRootProperties": {
+    "message": "Error: Root node properties are unavailable."
+  },
+  "reindex_missingCsrfToken": {
+    "message": "No CSRF token found – ensure that you're logged in."
+  },
+  "reindex_csrfTokenMissing": {
+    "message": "No CSRF token found – ensure that you're logged in. Reindexing will not be possible."
+  },
+  "properties_apiError": {
+    "message": "API Error"
+  },
+  "properties_fetchFailed": {
+    "message": "Fetch failed"
+  },
+  "options_loadThemesFailed": {
+    "message": "Failed to load themes: HTTP $1 $2"
+  },
+  "options_loadThemePreviewFailed": {
+    "message": "Failed to load preview: HTTP $1 $2"
+  },
+  "popup_noActiveTabUrlFound": {
+    "message": "No active tab URL found."
+  },
+  "popup_noActiveTabCookieUrl": {
+    "message": "No active tab URL available for cookie consent checks."
+  },
+  "popup_noActiveTabSessionParameters": {
+    "message": "No active tab available for session parameter checks."
+  },
+  "popup_sessionParameterNoResult": {
+    "message": "Session parameter check returned no result."
+  },
+  "popup_noActiveTabPropertiesUrl": {
+    "message": "No active tab URL available for properties lookup."
+  },
+  "popup_unableToAccessActiveTabUrl": {
+    "message": "Unable to access active tab URL."
+  },
+  "popup_missingTabId": {
+    "message": "Missing tab ID."
+  },
+  "popup_activeTabHttpRequired": {
+    "message": "Active tab must use HTTP or HTTPS."
+  },
+  "popup_activeTabNotSitevision": {
+    "message": "Active tab is not a Sitevision site."
+  },
+  "reindex_reindexHttpFailure": {
+    "message": "HTTP $1 when reindexing node"
+  }
+}
