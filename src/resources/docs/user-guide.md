@@ -6,6 +6,14 @@ Use **Find login page** to look for login endpoints on the active site's origin.
 
 The search prefers a Sitevision login form. If none is found, a WebDAV endpoint protected by HTTP Basic Auth can be reported as a fallback. Select the result link to open its URL in a new tab. A path that redirects to another origin is not treated as a login result.
 
+## REST Search Console
+
+Open **REST Search Console** from a Sitevision page that exposes a site ID. The popup button is only enabled when the page context contains a valid site ID. The console loads available searchable indexes from that site's index repository; select an index and enter a Solr query. Use **Search** or Ctrl/Command+Enter to run it and view the raw JSON response. The model version defaults to Offline in edit mode and Online otherwise; changing it reloads the index list.
+
+Use **Filter Query** for an optional separate Solr filter. **Fields** accepts comma-separated index field names, initially `id, name, title, URI, svtype, lastModified`; leave it empty to use the API defaults. **Limit** defaults to 25 and offers 10, 25, 50 or 100 hits. The response summary shows the number of returned hits and the elapsed request time, including transport and JSON parsing. If the limit is reached, more hits may exist; this is not a total hit count.
+
+Requests use the active Sitevision tab's session and permissions. External REST API access must be enabled for the site, and some indexes require additional permissions or licenses. Search results only include nodes the current user can read.
+
 ## Reindex node tree
 
 Use **Reindex node tree** to discover and reindex the tree starting at the current node. You must be logged in through the active Sitevision tab; without a valid session token, **Preview** and **Start Reindex** are unavailable.

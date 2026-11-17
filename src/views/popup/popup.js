@@ -17,6 +17,7 @@ import { initOpenOptions } from './modules/open-options.js';
 import { initParamButtons } from './modules/params.js';
 import { initProperties } from './modules/properties.js';
 import { initReindex } from './modules/re-index.js';
+import { initSearch } from './modules/search.js';
 
 await i18n.initialize();
 i18n.localizeDocument();
@@ -80,6 +81,7 @@ async function init() {
       initProperties(invocationTab, context, currentPageNodeId, editInfo.isEditMode),
       initParamButtons(invocationTab, sitevisionMode),
       initCookieConsent(invocationTab),
+      initSearch(invocationTab, context?.siteId ?? '', editInfo.isEditMode),
     ];
 
     if (sitevisionMode === 'online' || sitevisionMode === 'offline') {

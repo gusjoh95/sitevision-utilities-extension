@@ -10,6 +10,7 @@
  * @typedef {import('./modules/sitevisionRest.js').NodeEndpoint} NodeEndpoint
  * @typedef {import('./modules/sitevisionRest.js').NodeProperties} NodeProperties
  * @typedef {import('./modules/sitevisionRest.js').NodeNode} NodeNode
+ * @typedef {import('./modules/sitevisionRest.js').SearchOptions} SearchOptions
  */
 
 export {};

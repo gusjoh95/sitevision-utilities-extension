@@ -1,0 +1,73 @@
+<!doctype html>
+<html lang="sv">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <script src="../../resources/theme-init.js"></script>
+    <link rel="stylesheet" href="../../resources/style/base.css" />
+    <link rel="stylesheet" href="search.css" />
+    <title data-i18n="search_title"></title>
+  </head>
+
+  <body>
+    <h1 data-i18n="search_title"></h1>
+    <div id="error" role="alert"></div>
+    <form id="search-form">
+      <fieldset>
+        <legend data-i18n="common_version"></legend>
+        <label>
+          <input type="radio" name="version" value="1" checked disabled />
+          <span data-i18n="common_online"></span>
+        </label>
+        <label>
+          <input type="radio" name="version" value="0" disabled />
+          <span data-i18n="common_offline"></span>
+        </label>
+      </fieldset>
+      <label for="search-index">
+        <span data-i18n="search_index"></span>
+        <select id="search-index" disabled></select>
+      </label>
+      <label for="search-query">
+        <span data-i18n="search_query"></span>
+        <textarea
+          id="search-query"
+          rows="4"
+          placeholder="*:*"
+          spellcheck="false"
+          required
+        ></textarea>
+      </label>
+      <label class="search-text-field" for="search-filter">
+        <span data-i18n="search_filterQuery"></span>
+        <input id="search-filter" type="text" placeholder="+svtype:page" spellcheck="false" />
+      </label>
+      <label class="search-text-field" for="search-fields">
+        <span data-i18n="search_fields"></span>
+        <input
+          id="search-fields"
+          type="text"
+          value="id, name, title, URI, svtype, lastModified"
+          spellcheck="false"
+          aria-describedby="search-fields-help"
+        />
+      </label>
+      <p id="search-fields-help" data-i18n="search_fieldsHelp"></p>
+      <label for="search-limit">
+        <span data-i18n="search_limit"></span>
+        <select id="search-limit">
+          <option value="10">10</option>
+          <option value="25" selected>25</option>
+          <option value="50">50</option>
+          <option value="100">100</option>
+        </select>
+      </label>
+      <button id="search-submit" type="submit" data-i18n="search_submit" disabled></button>
+    </form>
+    <div id="spinner" class="bar hidden"></div>
+    <div id="search-status" role="status"></div>
+    <pre id="search-results"></pre>
+
+    <script type="module" src="search.js"></script>
+  </body>
+</html>

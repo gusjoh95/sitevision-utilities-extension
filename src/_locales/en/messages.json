@@ -13,6 +13,75 @@
   "popup_reindexNodeTree": {
     "message": "Reindex node tree"
   },
+  "search_open": {
+    "message": "Open REST Search Console"
+  },
+  "search_title": {
+    "message": "REST Search Console"
+  },
+  "search_query": {
+    "message": "Query"
+  },
+  "search_index": {
+    "message": "Index"
+  },
+  "search_selectIndex": {
+    "message": "Select an index"
+  },
+  "search_submit": {
+    "message": "Search"
+  },
+  "search_loadingIndexes": {
+    "message": "Loading indexes..."
+  },
+  "search_searching": {
+    "message": "Searching..."
+  },
+  "search_filterQuery": {
+    "message": "Filter Query (optional)"
+  },
+  "search_fields": {
+    "message": "Fields"
+  },
+  "search_fieldsHelp": {
+    "message": "Comma-separated index fields. Leave empty to use the API defaults."
+  },
+  "search_limit": {
+    "message": "Limit"
+  },
+  "search_invalidLimit": {
+    "message": "Select a limit of 10, 25, 50 or 100."
+  },
+  "search_invalidResults": {
+    "message": "The search endpoint returned an unexpected response; expected an array of hits."
+  },
+  "search_results": {
+    "message": "Showing $1 hits - $2 ms."
+  },
+  "search_resultsAtLimit": {
+    "message": "Showing $1 hits - $2 ms. Limit reached; more hits may exist."
+  },
+  "search_queryRequired": {
+    "message": "Enter a search query."
+  },
+  "search_missingContext": {
+    "message": "Site context or target tab is missing. Open the console from a Sitevision page with a site ID."
+  },
+  "search_invalidIndexes": {
+    "message": "The index repository returned an unexpected response."
+  },
+  "search_noIndexes": {
+    "message": "No searchable indexes were found."
+  },
+  "search_badRequest": {
+    "message": "Invalid request. Check the search query and index."
+  },
+  "search_accessDenied": {
+    "message": "Access denied. Check your session, permissions and REST API settings."
+  },
+  "search_notFound": {
+    "message": "Index or REST API endpoint not found. Check the REST API settings."
+  },
   "popup_openUserGuide": {
     "message": "Open user guide"
   },

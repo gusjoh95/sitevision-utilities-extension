@@ -1,0 +1,22 @@
+html,
+body {
+  width: unset;
+}
+
+#search-query,
+#search-filter,
+#search-fields {
+  font-family: var(--mono-font-family);
+}
+
+#search-form,
+#search-form label:has(textarea) {
+  width: 100%;
+}
+
+#search-form .search-text-field {
+  flex-direction: column;
+  align-items: flex-start;
+  max-width: unset;
+  width: 100%;
+}

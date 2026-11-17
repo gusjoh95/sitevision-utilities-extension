@@ -80,7 +80,7 @@ body {
 }
 
 *:disabled,
-label:has([disabled]) {
+label:has(> input:disabled, > select:disabled, > textarea:disabled) {
   opacity: 0.5 !important;
   cursor: not-allowed !important;
 }

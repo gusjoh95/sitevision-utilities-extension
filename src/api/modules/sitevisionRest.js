@@ -10,6 +10,13 @@ import * as targetTab from './targetTab.js';
  */
 /** @typedef {{ 'jcr:uuid': string, 'jcr:primaryType': string, displayName?: string, robotsIndex?: boolean }} NodeProperties */
 /** @typedef {'0' | '1'} ModelVersion */
+/**
+ * @typedef {Object} SearchOptions
+ * @property {string} query
+ * @property {string} [filterQuery]
+ * @property {number} limit
+ * @property {string[]} [fields]
+ */
 
 /** @type {readonly ['properties', 'nodes', 'contentnodes']} */
 export const NODE_ENDPOINTS = Object.freeze(['properties', 'nodes', 'contentnodes']);
@@ -39,16 +46,26 @@ function assertNodeEndpoint(endpoint) {
   }
 }
 
+export class RestApiError extends Error {
+  /** @param {number} status */
+  constructor(status) {
+    super(
+      status === 401 || status === 403
+        ? `Access denied (HTTP ${status}).`
+        : `REST API error (HTTP ${status}).`
+    );
+    this.name = 'RestApiError';
+    this.status = status;
+  }
+}
+
 /**
  * Throws a concise error for an unsuccessful REST API response.
  * @param {{ ok: boolean, status: number }} response
  */
 function assertOk(response) {
   if (response.ok) return;
-  if (response.status === 401 || response.status === 403) {
-    throw new Error(`Access denied (HTTP ${response.status}).`);
-  }
-  throw new Error(`REST API error (HTTP ${response.status}).`);
+  throw new RestApiError(response.status);
 }
 
 /**
@@ -122,4 +139,24 @@ export async function fetchNodeNodes(
 
   const data = await fetchJson(tabId, url);
   return Array.isArray(data) ? /** @type {NodeNode[]} */ (data) : [];
+}
+
+/**
+ * Fetches a search index's results using a Solr query.
+ * @param {number} tabId
+ * @param {string} origin
+ * @param {string} indexId
+ * @param {SearchOptions & { modelVersion: ModelVersion }} options
+ * @returns {Promise<unknown>}
+ */
+export async function searchIndex(
+  tabId,
+  origin,
+  indexId,
+  { modelVersion, query, filterQuery, limit, fields }
+) {
+  const url = new URL(`/rest-api/1/${modelVersion}/${encodeURIComponent(indexId)}/search`, origin);
+  url.searchParams.set('format', 'json');
+  url.searchParams.set('json', JSON.stringify({ query, filterQuery, limit, fields }));
+  return fetchJson(tabId, url);
 }

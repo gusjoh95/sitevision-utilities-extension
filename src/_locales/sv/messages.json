@@ -13,6 +13,75 @@
   "popup_reindexNodeTree": {
     "message": "Indexera om nodträd"
   },
+  "search_open": {
+    "message": "Öppna REST Search Console"
+  },
+  "search_title": {
+    "message": "REST Search Console"
+  },
+  "search_query": {
+    "message": "Sökfråga"
+  },
+  "search_index": {
+    "message": "Index"
+  },
+  "search_selectIndex": {
+    "message": "Välj ett index"
+  },
+  "search_submit": {
+    "message": "Sök"
+  },
+  "search_loadingIndexes": {
+    "message": "Hämtar index..."
+  },
+  "search_searching": {
+    "message": "Söker..."
+  },
+  "search_filterQuery": {
+    "message": "Filter Query (valfritt)"
+  },
+  "search_fields": {
+    "message": "Fält"
+  },
+  "search_fieldsHelp": {
+    "message": "Kommaseparerade indexfält. Lämna tomt för att använda API:ts standardvärden."
+  },
+  "search_limit": {
+    "message": "Max antal träffar"
+  },
+  "search_invalidLimit": {
+    "message": "Välj max 10, 25, 50 eller 100 träffar."
+  },
+  "search_invalidResults": {
+    "message": "Sökendpointen returnerade ett oväntat svar; en array med träffar förväntades."
+  },
+  "search_results": {
+    "message": "Visar $1 träffar - $2 ms."
+  },
+  "search_resultsAtLimit": {
+    "message": "Visar $1 träffar - $2 ms. Gränsen nådd; fler träffar kan finnas."
+  },
+  "search_queryRequired": {
+    "message": "Ange en sökfråga."
+  },
+  "search_missingContext": {
+    "message": "Webbplatskontext eller målflik saknas. Öppna konsolen från en Sitevision-sida med ett site-ID."
+  },
+  "search_invalidIndexes": {
+    "message": "Index-repositoryt returnerade ett oväntat svar."
+  },
+  "search_noIndexes": {
+    "message": "Inga sökbara index hittades."
+  },
+  "search_badRequest": {
+    "message": "Ogiltig begäran. Kontrollera sökfrågan och indexet."
+  },
+  "search_accessDenied": {
+    "message": "Åtkomst nekad. Kontrollera din session, dina behörigheter och REST API-inställningarna."
+  },
+  "search_notFound": {
+    "message": "Indexet eller REST API-endpointen hittades inte. Kontrollera REST API-inställningarna."
+  },
   "popup_openUserGuide": {
     "message": "Öppna användarguiden"
   },
